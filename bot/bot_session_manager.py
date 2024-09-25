@@ -5,16 +5,15 @@ from utils.crypto_utils import encrypt_data, decrypt_data
 import logging
 from datetime import datetime
 import uuid
+from config import DEFAULT_SECRET_KEY
 
 LOGGER = logging.getLogger(__name__)
 
 try:
     SECRET_KEY = st.secrets['SECRET_KEY']
     LOGGER.info("成功从 .secrets 文件读取 SECRET_KEY")
-except FileNotFoundError:
-    SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'  # 默认值
-except KeyError:
-    SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'  # 默认值
+except Exception as e:
+    SECRET_KEY = DEFAULT_SECRET_KEY # 默认值
     
 class BotSessionManager:
     def __init__(self, username):
@@ -53,7 +52,7 @@ class BotSessionManager:
             if not os.path.exists(file_path):
                 LOGGER.info(f"欢迎新用户: {self._filename}")
                 self.bots = []
-                self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}, 'name': '新话题'}]
+                self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}}]
                 self.current_history_version = 0
                 return
 
@@ -62,7 +61,7 @@ class BotSessionManager:
             decrypted_data = decrypt_data(encrypted_data)
             data = json.loads(decrypted_data)
             self.bots = data.get('bots', [])
-            self.history_versions = data.get('history_versions', [{'timestamp': datetime.now().isoformat(), 'histories': {}, 'name': '新话题'}])
+            self.history_versions = data.get('history_versions', [{'timestamp': datetime.now().isoformat(), 'histories': {}}])
             self.current_history_version = data.get('current_history_version', 0)
             self.bot_id_map = data.get('bot_id_map', {})
             # st.info(dict(data))
@@ -71,27 +70,34 @@ class BotSessionManager:
         except Exception as e:
             LOGGER.error(f"加载配置文件时出错：{str(e)}")
             self.bots = []
-            self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}, 'name': '新话题'}]
+            self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}}]
             self.current_history_version = 0
 
     def ensure_valid_history_version(self):
         if not self.history_versions:
-            self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}, 'name': '新话题'}]
+            self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}}]
             self.current_history_version = 0
         elif self.current_history_version >= len(self.history_versions):
             self.current_history_version = len(self.history_versions) - 1
 
-    def update_history_names(self):
-        for idx, version in enumerate(self.history_versions):
+    def update_history_names(self, specific_index=None):
+        versions_to_update = [self.history_versions[specific_index]] if specific_index is not None else self.history_versions
+        
+        for idx, version in enumerate(versions_to_update):
+            if specific_index is not None:
+                idx = specific_index
+            
             if 'name' not in version or version['name'] == '新话题':
                 first_prompt = self.get_first_prompt(version['histories'])
                 if first_prompt:
-                    content = first_prompt
+                    content = first_prompt.replace('\n', ' ').replace('\r', '')
                     if len(content) > 20:
                         content = f"{content[:20]}..."
                     version['name'] = f"{idx+1}. {content}"
                 else:
-                    version['name'] = '新话题'
+                    version['name'] = f"新话题"
+        
+        self.save_data_to_file()
 
     def get_first_prompt(self, histories):
         for history in histories.values():
@@ -193,24 +199,6 @@ class BotSessionManager:
         
         self.save_data_to_file()
 
-    def fix_history_names(self):
-        for idx, version in enumerate(self.history_versions):
-            if version['name'] == '新话题':
-                for bot_id, messages in version['histories'].items():
-                    for message in messages:
-                        if message['role'] == 'user':
-                            content = message['content']
-                            if len(content) > 20:
-                                content = f"{content[:20]}..."
-                            version['name'] = f"{idx+1}. {content}"
-                            break
-                    if version['name'] != '新话题':
-                        break
-            if version['name'] == '新话题':
-                version['name'] = f"{idx+1}. 未命名话题"
-        
-        self.save_data_to_file()
-
     def create_new_history_version(self):
         if self.is_current_history_empty():
             return False
@@ -222,7 +210,6 @@ class BotSessionManager:
         self.history_versions.append(new_version)
         self.current_history_version = len(self.history_versions) - 1
         self.save_data_to_file()
-        self.fix_history_names()
         return True
 
     def is_current_history_empty(self):
@@ -246,13 +233,9 @@ class BotSessionManager:
         if bot_id and self.current_history_version < len(self.history_versions):
             current_version = self.history_versions[self.current_history_version]
             current_version['histories'].setdefault(bot_id, []).append(message)
-            if current_version['name'] == '新话题' and message['role'] == 'user':
-                idx = self.current_history_version
-                content = message['content']
-                if len(content) > 20:
-                    content = f"{content[:20]}..."
-                current_version['name'] = f"{idx+1}. {content}"
+            self.update_history_names(specific_index=self.current_history_version)
             self.save_data_to_file()
+        self.update_history_names()
 
     def get_default_bot(self, engine):
         if 'default_bots' not in st.session_state:
@@ -301,10 +284,10 @@ class BotSessionManager:
         return []
 
     def clear_all_histories(self):
-        self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}, 'name': '新话题'}]
+        self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}}]
         self.current_history_version = 0
         self.save_data_to_file()
-        self.fix_history_names()
+        self.update_history_names()
 
     def get_current_history(self, bot_name):
         bot_id = self.bot_id_map.get(bot_name)
@@ -315,16 +298,3 @@ class BotSessionManager:
 
     def get_currently_enabled_bots(self):
         return set(bot['name'] for bot in self.bots if bot.get('enable', False))
-
-    def fix_history_names(self):
-        for idx, version in enumerate(self.history_versions):
-            if 'name' not in version or version['name'] == '新话题':
-                first_prompt = self.get_first_prompt(version['histories'])
-                if first_prompt:
-                    content = first_prompt.replace('\n', ' ').replace('\r', '')
-                    if len(content) > 20:
-                        content = f"{content[:20]}..."
-                    version['name'] = f"{idx+1}. {content}"
-                else:
-                    version['name'] = f"{idx+1}. 新话题"
-        self.save_data_to_file()

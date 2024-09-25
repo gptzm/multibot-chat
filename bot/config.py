@@ -1,4 +1,4 @@
-engines = {
+ENGINE_CONFIG = {
   "engines": {
     "AzureOpenAI": {
       "fields": [
