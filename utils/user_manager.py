@@ -8,8 +8,7 @@ import logging
 import time
 
 from config import (
-    AUTO_LOGIN, TOKEN_EXPIRATION, TOKEN_DIR, SECRET_KEY, 
-    USER_DATA_FILE, LOG_LEVEL
+    TOKEN_EXPIRATION, USER_DATA_FILE, LOG_LEVEL, TOKEN_DIR, SECRET_KEY
 )
 
 logging.basicConfig(level=LOG_LEVEL)

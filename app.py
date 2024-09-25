@@ -5,17 +5,10 @@ import json
 import utils.logging_utils as logging_utils
 import importlib
 import utils.user_manager as user_manager
-from config import DEFAULT_SECRET_KEY, AUTO_LOGIN, SECRET_KEY
 
 st.set_page_config(page_title="多Bot聊天", page_icon="🤖", layout="wide")
 
 LOGGER = logging_utils.setup_logging()
-
-try:
-    SECRET_KEY = st.secrets['SECRET_KEY']
-    LOGGER.info("成功从 .secrets 文件读取 SECRET_KEY")
-except (FileNotFoundError, KeyError):
-    SECRET_KEY = DEFAULT_SECRET_KEY  # 默认值
 
 def load_page(page_name):
     module = importlib.import_module(f"custom_pages.{page_name}")

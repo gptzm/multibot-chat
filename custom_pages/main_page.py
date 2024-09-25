@@ -6,18 +6,11 @@ from utils.chat_utils import get_response_from_bot, delete_bot, display_chat
 from bot.bot_session_manager import BotSessionManager
 import utils.user_manager as user_manager
 from bot.config import ENGINE_CONFIG
-from config import DEFAULT_SECRET_KEY
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
 
 EMOJI_OPTIONS = ["🤖", "🦾", "🧠", "💡", "🔮", "🎭", "🦄", "🐼", "🦊", "🐶", "🐱", "🦁", "🐯", "🐻", "🐨", "😄", "🤡", "👻", "😈", "🤠", "🙊", "😽", "👽", "🧑‍🎓", "🧑‍💼", "🧑‍🎨", "🧑‍✈️", "🥷"]
-
-try:
-    SECRET_KEY = st.secrets['SECRET_KEY']
-    LOGGER.info("成功从 .secrets 文件读取 SECRET_KEY")
-except Exception as e:
-    SECRET_KEY = DEFAULT_SECRET_KEY  # 默认值
 
 ENGINE_OPTIONS = list(ENGINE_CONFIG.get('engines', {}).keys())
 
