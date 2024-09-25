@@ -1,10 +1,11 @@
 # *-* coding:utf-8 *-*
 import streamlit as st
 import os
+import json
 import utils.logging_utils as logging_utils
 import importlib
 import utils.user_manager as user_manager
-from bot.config import CONFIG
+from config import DEFAULT_SECRET_KEY, AUTO_LOGIN, SECRET_KEY
 
 st.set_page_config(page_title="多Bot聊天", page_icon="🤖", layout="wide")
 
@@ -13,10 +14,8 @@ LOGGER = logging_utils.setup_logging()
 try:
     SECRET_KEY = st.secrets['SECRET_KEY']
     LOGGER.info("成功从 .secrets 文件读取 SECRET_KEY")
-except FileNotFoundError:
-    SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'  # 默认值
-except KeyError:
-    SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'  # 默认值
+except (FileNotFoundError, KeyError):
+    SECRET_KEY = DEFAULT_SECRET_KEY  # 默认值
 
 def load_page(page_name):
     module = importlib.import_module(f"custom_pages.{page_name}")
@@ -32,9 +31,9 @@ if __name__ == "__main__":
         if user_manager.verify_token(token):
             st.session_state.logged_in = True
             st.session_state.username = user_manager.get_username_from_token(token)
-            LOGGER.info(f"Logged in with token. Username: {st.session_state.username}")
+            LOGGER.info(f"使用token登录. Username: {st.session_state.username}")
         else:
-            LOGGER.warning("Invalid token")
+            LOGGER.warning("无效的token")
             st.session_state.logged_in = False
             st.session_state.username = ''
     else:

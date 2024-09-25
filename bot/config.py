@@ -1,5 +1,5 @@
-CONFIG = {
-  "models": {
+engines = {
+  "engines": {
     "AzureOpenAI": {
       "fields": [
         {
