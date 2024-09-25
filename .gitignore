@@ -1,0 +1,38 @@
+# Python 虚拟环境
+venv/
+*.pyc
+__pycache__/
+
+# Streamlit 相关
+.streamlit/secrets.toml
+
+# 用户数据和配置文件
+users.json
+user_config/
+*.token
+
+# 日志文件
+*.log
+
+# 环境变量文件
+.env
+
+# IDE 相关文件
+.vscode/
+.idea/
+
+# 操作系统生成的文件
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.bak
+*.swp
+
+# 个人配置文件（可能包含 API 密钥）
+config.json
+
+# 其他可能包含敏感信息的文件
+*.pem
+*.key

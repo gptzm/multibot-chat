@@ -1,0 +1,12 @@
+
+streamlit==1.38.0
+streamlit-authenticator==0.3.3
+extra-streamlit-components==0.1.71
+itsdangerous==2.2.0
+requests==2.32.3
+Markdown==3.7
+markdown-it-py==3.0.0
+MarkupSafe==2.1.5
+openai==1.27.0
+zhipuai==2.1.5.20230904
+cryptography==43.0.1
