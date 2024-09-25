@@ -291,3 +291,4 @@ class BotSessionManager:
 
     def get_currently_enabled_bots(self):
         return set(bot['name'] for bot in self.bots if bot.get('enable', False))
+

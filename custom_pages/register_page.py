@@ -28,3 +28,4 @@ def register_page():
     if st.button("登录", use_container_width=True):
         st.session_state.page = "login_page"
         st.rerun()
+        

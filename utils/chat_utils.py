@@ -55,3 +55,4 @@ def display_chat(bot, history):
     </script>
     """
     components.html(bot_html, height=400)
+    

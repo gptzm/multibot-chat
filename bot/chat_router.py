@@ -367,3 +367,4 @@ class ChatRouter:
         清空历史记录。
         """
         self.history = []
+        
