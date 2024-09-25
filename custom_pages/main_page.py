@@ -2,27 +2,24 @@
 import streamlit as st
 import logging
 import random
-import json
 from utils.chat_utils import get_response_from_bot, delete_bot, display_chat
 from bot.bot_session_manager import BotSessionManager
 import utils.user_manager as user_manager
-from bot.config import CONFIG
+from bot.config import ENGINE_CONFIG
+from config import DEFAULT_SECRET_KEY
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
 
-TEMPERATURE_OPTIONS = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
 EMOJI_OPTIONS = ["🤖", "🦾", "🧠", "💡", "🔮", "🎭", "🦄", "🐼", "🦊", "🐶", "🐱", "🦁", "🐯", "🐻", "🐨", "😄", "🤡", "👻", "😈", "🤠", "🙊", "😽", "👽", "🧑‍🎓", "🧑‍💼", "🧑‍🎨", "🧑‍✈️", "🥷"]
 
 try:
     SECRET_KEY = st.secrets['SECRET_KEY']
     LOGGER.info("成功从 .secrets 文件读取 SECRET_KEY")
-except FileNotFoundError:
-    SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'  # 默认值
-except KeyError:
-    SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'  # 默认值
+except Exception as e:
+    SECRET_KEY = DEFAULT_SECRET_KEY  # 默认值
 
-ENGINE_OPTIONS = list(CONFIG.get('models', {}).keys())
+ENGINE_OPTIONS = list(ENGINE_CONFIG.get('engines', {}).keys())
 
 bot_manager = None
 
@@ -50,7 +47,7 @@ def edit_bot(bot):
             st.markdown(f"**engine:** {bot.get('engine', '')}")
             
             # 根据配置动态生成输入字段
-            for field in CONFIG['models'][bot['engine']]['fields']:
+            for field in ENGINE_CONFIG['engines'][bot['engine']]['fields']:
                 if field['type'] == 'text':
                     bot[field['name']] = st.text_input(field['label'], value=bot.get(field['name'], ''))
                 elif field['type'] == 'password':
@@ -117,7 +114,7 @@ def add_new_bot():
             LOGGER.info(f"Selected name: {new_bot['name']}")
 
             # 根据配置动态生成输入字段
-            for field in CONFIG['models'][engine]['fields']:
+            for field in ENGINE_CONFIG['engines'][engine]['fields']:
                 if field['type'] == 'text':
                     new_bot[field['name']] = st.text_input(field['label'], key=f"__new_bot_{field['name']}", value=default_bot.get(field['name'], None))
                 elif field['type'] == 'password':
@@ -135,7 +132,7 @@ def add_new_bot():
 
             if st.form_submit_button("保存", use_container_width=True):
                 # 验证必填字段
-                missing_fields = [field['label'] for field in CONFIG['models'][engine]['fields'] 
+                missing_fields = [field['label'] for field in ENGINE_CONFIG['engines'][engine]['fields'] 
                                     if field['required'] and not new_bot.get(field['name'])]
                 if missing_fields:
                     st.error(f"以下字段为必填项: {', '.join(missing_fields)}")
@@ -145,7 +142,7 @@ def add_new_bot():
                     st.rerun()
 
 def main_page():
-    st.toast(f'main_{random.random()}')
+    # st.toast(f'main_{random.random()}')
     global bot_manager
     LOGGER.info(f"Entering main_page. Username: {st.session_state.get('username')}")
     if 'username' not in st.session_state or not st.session_state['username']:
@@ -178,7 +175,7 @@ def main_page():
                 st.rerun()
 
         with st.expander("聊天设置"):
-            st.session_state.chat_config['history_length'] = st.slider("多轮对话轮次", min_value=1, max_value=20, value=st.session_state.chat_config.get('history_length', 10))
+            st.session_state.chat_config['history_length'] = st.slider("携带对话条数", min_value=1, max_value=20, value=st.session_state.chat_config.get('history_length', 10))
 
         with st.expander("历史话题", expanded=True):
             history_options = [f"{v['name']}" for i, v in enumerate(st.session_state.history_versions)]
@@ -293,6 +290,7 @@ def main_page():
                 response_content = get_response_from_bot(prompt, bot, st.session_state.chat_config)
                 bot_manager.add_message_to_history(bot['name'], {"role": "user", "content": prompt})
                 bot_manager.add_message_to_history(bot['name'], {"role": "assistant", "content": response_content})
+                bot_manager.update_history_names(specific_index=bot_manager.current_history_version)
                     
             col = cols[i % num_cols]
 
@@ -322,4 +320,5 @@ def main_page():
                                 st.markdown("---")
 
     # LOGGER.info(st.session_state.bots)
+    bot_manager.save_data_to_file()
     bot_manager.save_data_to_file()

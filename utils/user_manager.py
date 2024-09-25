@@ -2,28 +2,17 @@ import json
 import hashlib
 import os
 import streamlit as st
-from itsdangerous import URLSafeTimedSerializer
-import tempfile
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from utils.crypto_utils import encrypt_data, decrypt_data
 import logging
+import time
 
-logging.basicConfig(level=logging.INFO)
-LOGGER = logging.getLogger(__name__)
+from config import (
+    AUTO_LOGIN, TOKEN_EXPIRATION, TOKEN_DIR, SECRET_KEY, 
+    USER_DATA_FILE, LOG_LEVEL
+)
 
-USER_DATA_FILE = 'users.json'
-
-try:
-    SECRET_KEY = st.secrets['SECRET_KEY']
-    LOGGER.info("成功从 .secrets 文件读取 SECRET_KEY")
-except FileNotFoundError:
-    SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'  # 默认值
-except KeyError:
-    SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'  # 默认值
-
-TOKEN_EXPIRATION = 86400  # 1天的秒数
-TOKEN_DIR = os.path.join(tempfile.gettempdir(), 'streamlit_tokens')
-
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=LOG_LEVEL)
 LOGGER = logging.getLogger(__name__)
 
 def hash_password(password):
@@ -89,21 +78,33 @@ def destroy_token(token):
 
 def generate_token(username):
     serializer = URLSafeTimedSerializer(SECRET_KEY)
-    token = serializer.dumps(username, salt=SECRET_KEY)
+    token = serializer.dumps({'username': username, 'created_at': time.time()}, salt=SECRET_KEY)
     save_session_state_to_file(token)
     return token
 
 def verify_token(token):
     try:
-        data = load_token_from_file(token)
-        if data:
-            session_data = json.loads(data)
+        serializer = URLSafeTimedSerializer(SECRET_KEY)
+        data = serializer.loads(token, salt=SECRET_KEY, max_age=TOKEN_EXPIRATION)
+        username = data['username']
+        created_at = data['created_at']
+        
+        if time.time() - created_at > TOKEN_EXPIRATION:
+            LOGGER.warning(f"Token expired for user: {username}")
+            destroy_token(token)
+            return False
+        
+        session_data = load_token_from_file(token)
+        if session_data:
+            session_data = json.loads(session_data)
             for key, value in session_data.items():
                 if not hasattr(st.session_state, key):
                     setattr(st.session_state, key, value)
             return True
-    except Exception:
-        pass
+    except (SignatureExpired, BadSignature):
+        LOGGER.warning("Invalid or expired token")
+    except Exception as e:
+        LOGGER.error(f"Error verifying token: {str(e)}")
     return False
 
 def save_session_state_to_file(token):

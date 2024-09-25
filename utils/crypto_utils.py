@@ -3,9 +3,10 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 import base64
 import os
+from config import DEFAULT_SECRET_KEY
 
 # 使用环境变量或默认值设置密钥和IV
-CRYPTO_KEY = os.environ.get('CRYPTO_KEY', 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S').encode()[:32]
+CRYPTO_KEY = os.environ.get('CRYPTO_KEY', DEFAULT_SECRET_KEY).encode()[:32]
 CRYPTO_IV = os.environ.get('CRYPTO_IV', 'JPY0IbolqwiPFpKC').encode()[:16]
 
 def encrypt_data(data):
