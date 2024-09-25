@@ -315,3 +315,4 @@ def main_page():
     # LOGGER.info(st.session_state.bots)
     bot_manager.save_data_to_file()
     bot_manager.save_data_to_file()
+    

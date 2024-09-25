@@ -18,3 +18,5 @@ def login_page():
     if st.button("注册", use_container_width=True):
         st.session_state.page = "register_page"
         st.rerun()
+
+        
