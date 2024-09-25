@@ -10,10 +10,15 @@ st.set_page_config(page_title="多Bot聊天", page_icon="🤖", layout="wide")
 
 LOGGER = logging_utils.setup_logging()
 
-if 'SECRET_KEY' in st.secrets:
-    SECRET_KEY = st.secrets['SECRET_KEY'] # 安全的密钥
-else:
-    SECRET_KEY = 'd0GiE5r03cy66SP'  # 拿不到就用默认值
+try:
+    SECRET_KEY = st.secrets['SECRET_KEY']
+    LOGGER.info("成功从 .secrets 文件读取 SECRET_KEY")
+except FileNotFoundError:
+    SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'  # 默认值
+    LOGGER.warning("未找到 .secrets 文件，使用默认 SECRET_KEY")
+except KeyError:
+    SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'  # 默认值
+    LOGGER.warning("在 .secrets 文件中未找到 SECRET_KEY，使用默认值")
 
 def load_page(page_name):
     module = importlib.import_module(f"custom_pages.{page_name}")
