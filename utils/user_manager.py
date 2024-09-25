@@ -7,6 +7,9 @@ import tempfile
 from utils.crypto_utils import encrypt_data, decrypt_data
 import logging
 
+logging.basicConfig(level=logging.INFO)
+LOGGER = logging.getLogger(__name__)
+
 USER_DATA_FILE = 'users.json'
 
 try:
@@ -14,10 +17,8 @@ try:
     LOGGER.info("成功从 .secrets 文件读取 SECRET_KEY")
 except FileNotFoundError:
     SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'  # 默认值
-    LOGGER.warning("未找到 .secrets 文件，使用默认 SECRET_KEY")
 except KeyError:
     SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'  # 默认值
-    LOGGER.warning("在 .secrets 文件中未找到 SECRET_KEY，使用默认值")
 
 TOKEN_EXPIRATION = 86400  # 1天的秒数
 TOKEN_DIR = os.path.join(tempfile.gettempdir(), 'streamlit_tokens')

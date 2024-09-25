@@ -13,10 +13,9 @@ try:
     LOGGER.info("成功从 .secrets 文件读取 SECRET_KEY")
 except FileNotFoundError:
     SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'  # 默认值
-    LOGGER.warning("未找到 .secrets 文件，使用默认 SECRET_KEY")
 except KeyError:
     SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'  # 默认值
-    LOGGER.warning("在 .secrets 文件中未找到 SECRET_KEY，使用默认值")
+    
 class BotSessionManager:
     def __init__(self, username):
         self._filename = username
