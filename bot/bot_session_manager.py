@@ -5,15 +5,8 @@ from utils.crypto_utils import encrypt_data, decrypt_data
 import logging
 from datetime import datetime
 import uuid
-from config import DEFAULT_SECRET_KEY
 
 LOGGER = logging.getLogger(__name__)
-
-try:
-    SECRET_KEY = st.secrets['SECRET_KEY']
-    LOGGER.info("成功从 .secrets 文件读取 SECRET_KEY")
-except Exception as e:
-    SECRET_KEY = DEFAULT_SECRET_KEY # 默认值
     
 class BotSessionManager:
     def __init__(self, username):
