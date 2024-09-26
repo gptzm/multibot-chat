@@ -76,7 +76,6 @@ class BotSessionManager:
 
     def fix_history_names(self, specific_index=None):
         versions_to_update = [self.history_versions[specific_index]] if specific_index is not None else self.history_versions
-        LOGGER.info(f"正在更新历史记录名称...{versions_to_update}")
         for idx, version in enumerate(versions_to_update):
             if specific_index is not None:
                 idx = specific_index
