@@ -61,3 +61,9 @@ if __name__ == "__main__":
     # 每次加载完页面后将当前的session_state保存到对应的文件中
     if st.session_state.logged_in and 'bot_manager' in globals():
         user_manager.save_session_state_to_file(st.session_state.token)
+
+    st.markdown("""
+                <p style="text-align: center; color: gray; padding-top:5rem">
+                    <a href="https://gitee.com/gptzm/multibot-chat" style="color: gray;">MultiBot-Chat开源项目 by zm</a>
+                </p>"""
+            , unsafe_allow_html=True)

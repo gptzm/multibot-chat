@@ -16,7 +16,7 @@ ENGINE_CONFIG = {
         },
         {
           "name": "api_key",
-          "label": "API 密钥",
+          "label": "API Key",
           "type": "password",
           "required": True
         },
@@ -41,7 +41,7 @@ ENGINE_CONFIG = {
         },
         {
           "name": "api_key",
-          "label": "API 密钥",
+          "label": "API Key",
           "type": "password",
           "required": True
         },
@@ -66,7 +66,7 @@ ENGINE_CONFIG = {
         },
         {
           "name": "api_key",
-          "label": "API 密钥",
+          "label": "API Key",
           "type": "password",
           "required": True
         }
@@ -82,7 +82,7 @@ ENGINE_CONFIG = {
         },
         {
           "name": "api_key",
-          "label": "API 密钥",
+          "label": "API Key",
           "type": "password",
           "required": True
         },
@@ -113,6 +113,31 @@ ENGINE_CONFIG = {
         }
       ]
     },
+    "XingHuo": {
+      "fields": [
+        {
+          "name": "model",
+          "label": "Model",
+          "type": "text",
+          "required": True
+        },
+        {
+          "name": "api_password",
+          "label": "API Password",
+          "type": "password",
+          "required": True
+        },
+        {
+          "name": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 0.0,
+          "max": 2.0,
+          "step": 0.1,
+          "required": True
+        }
+      ]
+    },
     "DeepSeek": {
       "fields": [
         {
@@ -123,7 +148,7 @@ ENGINE_CONFIG = {
         },
         {
           "name": "api_key",
-          "label": "API 密钥",
+          "label": "API Key",
           "type": "password",
           "required": True
         },
@@ -148,7 +173,7 @@ ENGINE_CONFIG = {
         },
         {
           "name": "api_key",
-          "label": "API 密钥",
+          "label": "API Key",
           "type": "password",
           "required": True
         },
@@ -173,7 +198,7 @@ ENGINE_CONFIG = {
         },
         {
           "name": "api_key",
-          "label": "API 密钥",
+          "label": "API Key",
           "type": "password",
           "required": True
         },

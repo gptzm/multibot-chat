@@ -35,7 +35,7 @@ def edit_bot(bot):
             else:
                 bot['name'] = new_name
 
-            bot['enable'] = st.toggle('启用', value=bot.get('enable', False))
+            bot['enable'] = st.toggle('启用', value=bot.get('enable', True))
             
             st.markdown(f"**engine:** {bot.get('engine', '')}")
             
@@ -109,11 +109,11 @@ def add_new_bot():
             # 根据配置动态生成输入字段
             for field in ENGINE_CONFIG['engines'][engine]['fields']:
                 if field['type'] == 'text':
-                    new_bot[field['name']] = st.text_input(field['label'], key=f"__new_bot_{field['name']}", value=default_bot.get(field['name'], None))
+                    new_bot[field['name']] = st.text_input(field['label'], key=f"__new_bot_{field['name']}", value=default_bot.get(field['name'], field['default']))
                 elif field['type'] == 'password':
-                    new_bot[field['name']] = st.text_input(field['label'], type="password", key=f"__new_bot_{field['name']}", value=default_bot.get(field['name'], None))
+                    new_bot[field['name']] = st.text_input(field['label'], type="password", key=f"__new_bot_{field['name']}", value=default_bot.get(field['name'], field['default']))
                 elif field['type'] == 'slider':
-                    new_bot[field['name']] = st.slider(field['label'], min_value=field['min'], max_value=field['max'], step=field['step'], key=f"__new_bot_{field['name']}", value=default_bot.get(field['name'], None))
+                    new_bot[field['name']] = st.slider(field['label'], min_value=field['min'], max_value=field['max'], step=field['step'], key=f"__new_bot_{field['name']}", value=default_bot.get(field['name'], field['default']))
             
         with col2:
             new_bot['system_prompt'] = st.text_area("系统提示", value=default_bot.get('system_prompt', ''), height=400, help="请输入系统提示信息", key="__new_bot_system_prompt")
@@ -241,7 +241,7 @@ def main_page():
         col1, col2 = st.columns([9, 1], gap="small")
         
         with col1:
-            prompt = st.chat_input("输入消息...")
+            prompt = st.chat_input("按Enter键发送消息，按Shift+Enter键可换行")
 
         with col2:
             if st.button("新话题", use_container_width=True):
@@ -258,9 +258,11 @@ def main_page():
             
             with col1:
                 st.markdown("## 快速开始")
-                if st.button("创建第一个Bot并开始聊天", type="primary"):
+                if st.button("创建一个Bot并开始聊天", type="primary"):
                     st.session_state.avatar = random.choice(EMOJI_OPTIONS)
                     add_new_bot()
+                st.markdown("您可以添加很多Bot，他们都会以相同的方式响应您的输入")
+                st.markdown("了解更多请访问[MultiBot-Chat开源项目主页](https://gitee.com/gptzm/multibot-chat)")
 
             with col2:
                 st.markdown("## 主要功能")
@@ -309,10 +311,8 @@ def main_page():
                         for i, history in enumerate(reversed(non_empty_histories)):
                             st.markdown(f"**{history['name']}** - {history['timestamp']}")
                             display_chat(bot, history['history'])
-                            if i < len(non_empty_histories) - 1:
+                            if i < len(non_empty_histories) - 2:
                                 st.markdown("---")
 
-    # LOGGER.info(st.session_state.bots)
-    bot_manager.save_data_to_file()
     bot_manager.save_data_to_file()
     
