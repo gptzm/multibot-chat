@@ -6,19 +6,21 @@ ENGINE_CONFIG = {
           "name": "model",
           "label": "模型",
           "type": "text",
-          "required": True
+          "required": True,
+          "default": "gpt-4o",
         },
         {
           "name": "api_endpoint",
           "label": "API 端点",
           "type": "text",
-          "required": True
+          "required": True,
+          "default": "https://**请更新成你的endpoint信息**.openai.azure.com/",
         },
         {
           "name": "api_key",
           "label": "API Key",
           "type": "password",
-          "required": True
+          "required": True,
         },
         {
           "name": "temperature",
@@ -27,7 +29,7 @@ ENGINE_CONFIG = {
           "min": 0.0,
           "max": 2.0,
           "step": 0.1,
-          "required": True
+          "required": True,
         }
       ]
     },
@@ -37,13 +39,14 @@ ENGINE_CONFIG = {
           "name": "model",
           "label": "模型",
           "type": "text",
-          "required": True
+          "required": True,
+          "default": "glm-4-air",
         },
         {
           "name": "api_key",
           "label": "API Key",
           "type": "password",
-          "required": True
+          "required": True,
         },
         {
           "name": "temperature",
@@ -52,7 +55,7 @@ ENGINE_CONFIG = {
           "min": 0.0,
           "max": 2.0,
           "step": 0.1,
-          "required": True
+          "required": True,
         }
       ]
     },
@@ -62,13 +65,14 @@ ENGINE_CONFIG = {
           "name": "bot_id",
           "label": "Bot ID",
           "type": "text",
-          "required": True
+          "required": True,
+          "default": "**从coze的链接上获取你的botid**",
         },
         {
           "name": "api_key",
           "label": "API Key",
           "type": "password",
-          "required": True
+          "required": True,
         }
       ]
     },
@@ -78,13 +82,14 @@ ENGINE_CONFIG = {
           "name": "model",
           "label": "模型",
           "type": "text",
-          "required": True
+          "required": True,
+          "default": "qwen-turbo",
         },
         {
           "name": "api_key",
           "label": "API Key",
           "type": "password",
-          "required": True
+          "required": True,
         },
         {
           "name": "temperature",
@@ -93,7 +98,7 @@ ENGINE_CONFIG = {
           "min": 0.0,
           "max": 2.0,
           "step": 0.1,
-          "required": True
+          "required": True,
         }
       ]
     },
@@ -103,13 +108,15 @@ ENGINE_CONFIG = {
           "name": "model",
           "label": "Model",
           "type": "text",
-          "required": True
+          "required": True,
+          "default": "qwen2.5",
         },
         {
           "name": "api_endpoint",
           "label": "API 端点",
           "type": "text",
-          "required": True
+          "required": True,
+          "default": "http://127.0.0.11434/v1",
         }
       ]
     },
@@ -119,13 +126,14 @@ ENGINE_CONFIG = {
           "name": "model",
           "label": "Model",
           "type": "text",
-          "required": True
+          "required": True,
+          "default": "generalv3.5",
         },
         {
           "name": "api_password",
           "label": "API Password",
           "type": "password",
-          "required": True
+          "required": True,
         },
         {
           "name": "temperature",
@@ -134,7 +142,7 @@ ENGINE_CONFIG = {
           "min": 0.0,
           "max": 2.0,
           "step": 0.1,
-          "required": True
+          "required": True,
         }
       ]
     },
@@ -144,13 +152,14 @@ ENGINE_CONFIG = {
           "name": "model",
           "label": "Model",
           "type": "text",
-          "required": True
+          "required": True,
+          "default": "deepseek-chat",
         },
         {
           "name": "api_key",
           "label": "API Key",
           "type": "password",
-          "required": True
+          "required": True,
         },
         {
           "name": "temperature",
@@ -159,7 +168,7 @@ ENGINE_CONFIG = {
           "min": 0.0,
           "max": 2.0,
           "step": 0.1,
-          "required": True
+          "required": True,
         }
       ]
     },
@@ -169,13 +178,14 @@ ENGINE_CONFIG = {
           "name": "model",
           "label": "Model",
           "type": "text",
-          "required": True
+          "required": True,
+          "default": "moonshot-v1-8k",
         },
         {
           "name": "api_key",
           "label": "API Key",
           "type": "password",
-          "required": True
+          "required": True,
         },
         {
           "name": "temperature",
@@ -184,7 +194,7 @@ ENGINE_CONFIG = {
           "min": 0.0,
           "max": 2.0,
           "step": 0.1,
-          "required": True
+          "required": True,
         }
       ]
     },
@@ -194,13 +204,14 @@ ENGINE_CONFIG = {
           "name": "model",
           "label": "Model",
           "type": "text",
-          "required": True
+          "required": True,
+          "default": "yi-medium",
         },
         {
           "name": "api_key",
           "label": "API Key",
           "type": "password",
-          "required": True
+          "required": True,
         },
         {
           "name": "temperature",
@@ -209,7 +220,33 @@ ENGINE_CONFIG = {
           "min": 0.0,
           "max": 2.0,
           "step": 0.1,
-          "required": True
+          "required": True,
+        }
+      ]
+    },
+    "Groq": {
+      "fields": [
+        {
+          "name": "model",
+          "label": "Model",
+          "type": "text",
+          "required": True,
+          "default": "mixtral-8x7b-32768",
+        },
+        {
+          "name": "api_key",
+          "label": "API Key",
+          "type": "password",
+          "required": True,
+        },
+        {
+          "name": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 0.0,
+          "max": 2.0,
+          "step": 0.1,
+          "required": True,
         }
       ]
     }

@@ -60,6 +60,8 @@ class ChatRouter:
             return self._moonshot_chat(prompt)
         elif self.engine == 'Yi':
             return self._yi_chat(prompt)
+        elif self.engine == 'Groq':
+            return self._groq_chat(prompt)
         else:
             return "不支持的引擎。"
 
@@ -311,6 +313,44 @@ class ChatRouter:
             client = OpenAI(
                 api_key=self.api_key,
                 base_url="https://api.lingyiwanwu.com/v1",
+            )
+
+            if self.system_prompt:
+                messages = [
+                    {"role": "system", "content": self.system_prompt},
+                    *self.history[-self.history_length:],
+                    {"role": "user", "content": prompt},
+                ]
+            else:
+                messages = [
+                    *self.history[-self.history_length:],
+                    {"role": "user", "content": prompt},
+                ]
+
+            LOGGER.info(f'  messages:\n\n\n {messages}')
+
+            completion = client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+            )
+
+            LOGGER.info(f'  response:\n\n\n {completion.model_dump_json()}')
+
+            if completion.choices and len(completion.choices) > 0:
+                return completion.choices[0].message.content
+            else:
+                return f"[Yi] Error:{completion.error.message}"
+        except Exception as e:
+            LOGGER.error(f"Yi API 调用出错: {str(e)}")
+            return f"错误: {str(e)}"
+        
+    def _groq_chat(self, prompt):
+        # 实现与Qwen的交互
+        try:
+            client = OpenAI(
+                api_key=self.api_key,
+                base_url="https://api.groq.com/openai/v1",
             )
 
             if self.system_prompt:

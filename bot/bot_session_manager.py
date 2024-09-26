@@ -219,14 +219,18 @@ class BotSessionManager:
         
         if engine not in st.session_state.default_bots:
             default_bot = {
-                'engine': engine,
-                'system_prompt': '',
+                'model': '',
+                'system_prompt': '用中文回答问题',
+                'temperature': 1.0, 
                 'enable': True,
             }
             
             # 使用 ENGINE_CONFIG 中的默认值
             for field in ENGINE_CONFIG['engines'][engine]['fields']:
-                default_bot[field['name']] = field.get('default', '')
+                field_default_value = field.get('default', '')
+                LOGGER.info(f'{field["name"]} = {field_default_value}')
+                if field_default_value:
+                    default_bot[field['name']] = field_default_value
 
             st.session_state.default_bots[engine] = default_bot
 
