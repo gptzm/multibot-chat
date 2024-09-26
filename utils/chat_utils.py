@@ -32,7 +32,7 @@ def display_chat(bot, history):
         # LOGGER.warn(entry)
         content_markdown = markdown.markdown(str(entry['content']))
         if entry['role'] == 'user':
-            bot_html += f"""<div style='display: flex; justify-content: flex-end; margin-bottom: 10px;'>
+            bot_html += f"""<div class='message-user' style='display: flex; justify-content: flex-end; margin-bottom: 10px;'>
                                 <div style='background-color: #e0ffe0; border-radius: 10px; padding: 10px; max-width: 70%;'>
                                     {content_markdown}
                                 </div>
@@ -40,7 +40,7 @@ def display_chat(bot, history):
                             </div>"""
             
         if entry['role'] == 'assistant':
-            bot_html += f"""<div style='display: flex; margin-bottom: 10px;'>
+            bot_html += f"""<div class='message-assistant' style='display: flex; margin-bottom: 10px;'>
                             <div style='background-color: #eee; width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; display: flex; justify-content: center; align-items: center; font-size: 32px;'>{bot.get('avatar', '🤖')}</div>
                             <div style='background-color: #f0f0f0; border-radius: 10px; padding: 10px; max-width: 70%;'>
                                 {content_markdown}
@@ -51,8 +51,13 @@ def display_chat(bot, history):
     </div>
     <script>
         var chatContainer = document.getElementById('chat-container-{bot['id']}');
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        var lastAssistantMessage = chatContainer.querySelector('.message-assistant:last-of-type');
+        if (lastAssistantMessage) {{
+            chatContainer.scrollTop = Math.max(0, lastAssistantMessage.offsetTop - 100);
+        }} else {{
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }}
+        
     </script>
     """
     components.html(bot_html, height=400)
-    
