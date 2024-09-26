@@ -2,7 +2,7 @@
 import streamlit as st
 import logging
 import random
-from utils.chat_utils import get_response_from_bot, delete_bot, display_chat
+from utils.chat_utils import get_response_from_bot, display_chat
 from bot.bot_session_manager import BotSessionManager
 from utils.user_manager import user_manager
 from bot.config import ENGINE_CONFIG
@@ -18,8 +18,6 @@ bot_manager = None
 
 @st.dialog('编辑Bot', width='large')
 def edit_bot(bot):
-    idx = bot_manager.get_bot_idx(bot)
-    
     with st.form('edit_bot_form') as form:
         col1, col2 = st.columns(2, gap="small")
         
@@ -35,7 +33,7 @@ def edit_bot(bot):
             else:
                 bot['name'] = new_name
 
-            bot['enable'] = st.toggle('启用', value=bot.get('enable', True))
+            bot['enable'] = st.toggle('启用 / 禁用', value=bot.get('enable', True))
             
             st.markdown(f"**engine:** {bot.get('engine', '')}")
             
@@ -60,7 +58,7 @@ def edit_bot(bot):
 
             with col1:
                 if st.form_submit_button("删除", use_container_width=True):
-                    bot_manager.delete_bot(bot['name'])
+                    bot_manager.delete_bot(bot)
                     st.rerun()
 
             with col2:
@@ -70,7 +68,7 @@ def edit_bot(bot):
 
             with col3:
                 if st.form_submit_button("保存", use_container_width=True, type="primary"):
-                    bot_manager.update_bot(bot, idx)
+                    bot_manager.update_bot(bot)
                     st.rerun()
 
 @st.dialog('新增机器人', width='large')
@@ -102,7 +100,7 @@ def add_new_bot():
 
                     new_bot['name'] = st.text_input("机器人名称", value=new_bot['name'], help="请输入机器人的名称", key=f"__new_bot_name_{engine}")
                     
-                    new_bot['enable'] = st.toggle('启用', value=default_bot.get('enable', True), key=f"__new_bot_enable_{engine}")
+                    new_bot['enable'] = st.toggle('启用 / 禁用', value=default_bot.get('enable', True), key=f"__new_bot_enable_{engine}")
                     
                     st.markdown(f"**engine:** {engine}")
 
@@ -137,10 +135,9 @@ def add_new_bot():
                             st.rerun()
 
 def main_page():
-    # st.toast(f'main_{random.random()}')
     global bot_manager
     LOGGER.info(f"Entering main_page. Username: {st.session_state.get('username')}")
-    if not user_manager.validate_token(st.session_state.get('token')):
+    if not user_manager.verify_token(st.session_state.get('token')):
         st.error("用户未登录或会话已过期，请重新登录")
         st.session_state.page = "login_page"
         st.rerun()
@@ -182,7 +179,6 @@ def main_page():
                 st.session_state.current_history_version = len(history_options) - 1 if history_options else 0
             
             def on_history_change():
-                st.toast(st.session_state.history_version_selector)
                 new_version_index = history_options.index(st.session_state.history_version_selector)
                 participating_bots = bot_manager.get_participating_bots(new_version_index)
                 
@@ -194,13 +190,10 @@ def main_page():
                 
                 # 更新机器人状态：启用所有参与聊天的机器人
                 for bot in st.session_state.bots:
-                    bot['enable'] = bot['id'] in participating_bots
+                    bot['enable'] = bot['id'] in participating_bots and bot_manager.get_current_history_by_bot(bot)
                 
                 # 保存更新后的数据
                 bot_manager.save_data_to_file()
-                
-                # 更新 session_state 中的机器人数据
-                st.session_state.bots = bot_manager.bots
 
                 # 设置一个标志来触发重新渲染
                 st.session_state.history_changed = True
@@ -234,17 +227,15 @@ def main_page():
                     st.session_state.avatar = random.choice(EMOJI_OPTIONS)
                     add_new_bot()
 
-                # 添加编辑机器人状态的按钮
-                if st.button("批量启停用", use_container_width=True):
-                    edit_bot_status()
-
     input_box = st.container()
     st.markdown("---")
     output_box = st.container()
 
+    is_current_history_empty = bot_manager.is_current_history_empty()
+    enabled_bots = [bot for bot in st.session_state.bots if bot['enable']]
+
     with input_box:
-        enabled_bots = [bot for bot in st.session_state.bots if bot['enable']]
-        if not any(bot_manager.get_current_history(bot['name']) for bot in enabled_bots):
+        if not any(bot_manager.get_current_history_by_bot(bot) for bot in enabled_bots):
             st.markdown("# 开始对话吧\n发送消息后，可以同时和已启用的多个Bot聊天。")
         
         col1, col2 = st.columns([9, 1], gap="small")
@@ -259,17 +250,23 @@ def main_page():
                     st.rerun()
 
     with output_box:
-        enabled_bots = [bot for bot in st.session_state.bots if bot['enable']]
-        if not enabled_bots:
+        if bot_manager.is_current_history_empty() and not prompt:
             if prompt:
                 st.warning("请至少启用一个机器人，才能进行对话")
             col1, col2 = st.columns(2)
             
             with col1:
                 st.markdown("## 快速开始")
-                if st.button("创建一个Bot并开始聊天", type="primary"):
-                    st.session_state.avatar = random.choice(EMOJI_OPTIONS)
-                    add_new_bot()
+                if st.session_state.bots:
+                    if st.button("反选所有Bot"):
+                        for bot in st.session_state.bots:
+                            bot['enable'] = not bot['enable']
+                            bot_manager.update_bot(bot)
+                        st.rerun()
+                else:
+                    if st.button("创建一个Bot并开始聊天", type="primary"):
+                        st.session_state.avatar = random.choice(EMOJI_OPTIONS)
+                        add_new_bot()
                 st.markdown("您可以添加很多Bot，他们都会以相同的方式响应您的输入")
                 st.markdown("了解更多请访问[MultiBot-Chat开源项目主页](https://gitee.com/gptzm/multibot-chat)")
 
@@ -282,76 +279,80 @@ def main_page():
                 - 自定义Bot的个性和能力，测试各种参数设置
                 """)
 
-            return
+            if is_current_history_empty and not prompt:
+                st.markdown("---")
 
-        num_bots = len(enabled_bots)
-        num_cols = min(2, num_bots)
-        
-        cols = st.columns(num_cols)
+        show_bots = st.session_state.bots if is_current_history_empty and not prompt else enabled_bots
 
-        for i, bot in enumerate(enabled_bots):
-            if prompt:
-                response_content = get_response_from_bot(prompt, bot, st.session_state.chat_config)
-                bot_manager.add_message_to_history(bot['name'], {"role": "user", "content": prompt})
-                bot_manager.add_message_to_history(bot['name'], {"role": "assistant", "content": response_content})
-                bot_manager.fix_history_names(st.session_state.current_history_version)
+        if show_bots:
+            num_bots = len(show_bots)
+            num_cols = min(2, num_bots)
+            
+            cols = st.columns(num_cols)
+
+            for i, bot in enumerate(show_bots):
+                if prompt and bot['enable']:
+                    response_content = get_response_from_bot(prompt, bot, st.session_state.chat_config)
+                    bot_manager.add_message_to_history(bot['name'], {"role": "user", "content": prompt})
+                    bot_manager.add_message_to_history(bot['name'], {"role": "assistant", "content": response_content})
+                    bot_manager.fix_history_names(st.session_state.current_history_version)
+                        
+                col = cols[i % num_cols]
+                with col:
+                    button_box, title_box = st.columns([1, 10], gap="small")
+                    # 显示当前对话
+                    current_history = bot_manager.get_current_history_by_bot(bot)
+                    if current_history:
+                        display_chat(bot, current_history)
+
+                    with button_box:
+                        if st.button(bot.get('avatar', '') or '🤖', key=f"__edit_enabled_bot_{i}"):
+                            edit_bot(bot)
+                    with title_box:
+                        st.markdown(f"<h3 style='padding:0;'>{bot['name']}</h3> {bot['engine']} {bot.get('model', '')}", unsafe_allow_html=True)
                     
-            col = cols[i % num_cols]
+                        # 如果当前话题没有聊天记录，显示快速启用/禁用按钮
+                        if is_current_history_empty and not prompt:
+                            def make_update_bot_enable(bot_id):
+                                def update_bot_enable():
+                                    bot = next((b for b in st.session_state.bots if b['id'] == bot_id), None)
+                                    if bot:
+                                        bot['enable'] = not bot['enable']
+                                        bot_manager.update_bot(bot)
+                                        st.session_state[f"toggle_{bot['id']}"] = bot['enable']
+                                return update_bot_enable
 
-            with col:
-                button_box, title_box = st.columns([1, 10], gap="small")
-                with title_box:
-                    st.markdown(f"<h3 style='padding:0;'>{bot['name']}</h3> {bot['engine']} {bot.get('model', '')}", unsafe_allow_html=True)
-                with button_box:
-                    if st.button(bot.get('avatar', '') or '🤖', key=f"__edit_enabled_bot_{i}"):
-                        edit_bot(bot)
-                
-                # 显示当前对话
-                current_history = bot_manager.get_current_history(bot['name'])
-                if current_history:
-                    display_chat(bot, current_history)
-                
-                # 显示历史对话
-                all_histories = bot_manager.get_all_histories(bot['name'])
-                non_empty_histories = [h for h in all_histories[:-1] if h['history']]  # 跳过当前对话，只保留非空历史
-                if non_empty_histories:  # 如果有非空的历史版本
-                    num_topics = len(non_empty_histories)
-                    with st.expander(f"其他{num_topics}个话题"):
-                        for i, history in enumerate(reversed(non_empty_histories)):
-                            from datetime import datetime, date
+                            st.toggle("启用 / 禁用", value=bot['enable'], key=f"toggle_{bot['id']}", on_change=make_update_bot_enable(bot['id']))
+                            
+                            # 显示历史对话
+                            all_histories = bot_manager.get_all_histories(bot)
+                            non_empty_histories = [h for h in all_histories[:-1] if h['history']]  # 跳过当前对话，只保留非空历史
 
-                            try:
-                                timestamp = datetime.fromisoformat(history['timestamp'])
-                            except ValueError:
-                                # 如果fromisoformat失败，尝试使用strptime
-                                timestamp = datetime.strptime(history['timestamp'], "%Y-%m-%d %H:%M:%S")
-                            
-                            today = date.today()
-                            if timestamp.date() == today:
-                                formatted_time = f"今天 {timestamp.strftime('%H:%M')}"
-                            else:
-                                formatted_time = timestamp.strftime("%Y年%m月%d日 %H:%M")
-                            
-                            st.markdown(f"**{history['name']}** - {formatted_time}")
-                            display_chat(bot, history['history'])
-                            if i < len(non_empty_histories) - 2:
-                                st.markdown("---")
+                            if non_empty_histories:  # 如果有非空的历史版本
+                                num_topics = len(non_empty_histories)
+                                with st.expander(f"查看 {num_topics} 个历史话题"):
+                                    for i, history in enumerate(reversed(non_empty_histories)):
+                                        from datetime import datetime, date
+
+                                        try:
+                                            timestamp = datetime.fromisoformat(history['timestamp'])
+                                        except ValueError:
+                                            # 如果fromisoformat失败，尝试使用strptime
+                                            timestamp = datetime.strptime(history['timestamp'], "%Y-%m-%d %H:%M:%S")
+                                        
+                                        today = date.today()
+                                        if timestamp.date() == today:
+                                            formatted_time = f"今天 {timestamp.strftime('%H:%M')}"
+                                        else:
+                                            formatted_time = timestamp.strftime("%Y年%m月%d日 %H:%M")
+                                        
+                                        st.markdown(f"**{history['name']}** - {formatted_time}")
+                                        display_chat(bot, history['history'])
+                                        if i < len(non_empty_histories) - 2:
+                                            st.markdown("---")
+
+    # 每次加载完页面后将当前的session_state保存到对应的文件中
     bot_manager.save_data_to_file()
-    user_manager.save_session_state_to_file(st.session_state)
 
-@st.dialog('批量启停用', width='large')
-def edit_bot_status():
-    bots = st.session_state.bots
-
-    with st.form("批量启停用"):
-        cols = st.columns(4)
-        for idx, bot in enumerate(bots):
-            with cols[idx % 4]:
-                bot['enable'] = st.toggle(f"{bot['name']}", value=bot.get('enable', True))
-        
-        col_empty, col_center, col_empty = st.columns(3)
-        with col_center:
-            if st.form_submit_button("保存", use_container_width=True):
-                user_manager.update_bots(bots)
-                st.success("机器人状态已更新")
-                st.experimental_rerun()
+    # 每次加载完页面后将当前的session_state保存到对应的文件中
+    user_manager.save_session_state_to_file()

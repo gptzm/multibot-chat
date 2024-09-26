@@ -17,9 +17,6 @@ class NewlinePreprocessor(Preprocessor):
 
 LOGGER = logging.getLogger(__name__)
 
-def delete_bot(bots, bot_name):
-    return [bot for bot in bots if bot['name'] != bot_name]
-
 def get_response_from_bot(prompt, bot, chat_config):
     results = []
 
@@ -39,10 +36,11 @@ def display_chat(bot, history):
     bot_html = f"""
     <style>
         .copy-button {{
-            margin: 0 10px;
+            font-size: 1.2em;
+            margin: 0 8px;
             border: none;
             border-radius: 5px;
-            padding: 5px;
+            padding: 2px;
             cursor: pointer;
             transition: all 0.3s;
             background-color: #f8f8f800;
@@ -118,12 +116,6 @@ def display_chat(bot, history):
         )
         content_markdown_json = json.dumps(entry['content']).replace("'",'\\x27')
         random_id = str(random.randint(100000000000, 999999999999))
-
-
-        if bot['enable']:
-            LOGGER.info(f'\n\n\n[{entry["role"]}]:\n')
-            LOGGER.info(str(entry['content']))
-            LOGGER.info(content_markdown)
 
         if entry['role'] == 'user':
             bot_html += f"""<div class='message-user'>

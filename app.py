@@ -58,10 +58,6 @@ if __name__ == "__main__":
             with col_center:
                 login_page()
 
-    # 每次加载完页面后将当前的session_state保存到对应的文件中
-    if st.session_state.logged_in:
-        user_manager.save_session_state_to_file(st.session_state)
-
     st.markdown("""
                     <p style="text-align: center; color: gray; padding-top:5rem">
                         <a href="https://gitee.com/gptzm/multibot-chat" style="color: gray;">MultiBot-Chat by zm</a>
