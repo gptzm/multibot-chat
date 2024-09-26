@@ -1,5 +1,5 @@
 import streamlit as st
-import utils.user_manager as user_manager
+from utils.user_manager import user_manager  # 确保这行导入存在
 
 def change_password_page():
     st.title("修改密码")

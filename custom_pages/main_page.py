@@ -4,7 +4,7 @@ import logging
 import random
 from utils.chat_utils import get_response_from_bot, delete_bot, display_chat
 from bot.bot_session_manager import BotSessionManager
-import utils.user_manager as user_manager
+from utils.user_manager import user_manager
 from bot.config import ENGINE_CONFIG
 
 logging.basicConfig(level=logging.INFO)
@@ -140,12 +140,13 @@ def main_page():
     # st.toast(f'main_{random.random()}')
     global bot_manager
     LOGGER.info(f"Entering main_page. Username: {st.session_state.get('username')}")
-    if 'username' not in st.session_state or not st.session_state['username']:
-        st.error("用户名未设置，请重新登录")
-        st.session_state.logged_in = False
+    if not user_manager.validate_token(st.session_state.get('token')):
+        st.error("用户未登录或会话已过期，请重新登录")
+        st.session_state.page = "login_page"
         st.rerun()
     
     bot_manager = BotSessionManager(st.session_state.username)
+    bot_manager.fix_history_names()
     
     # 使用 bot_manager 的属性更新 st.session_state
     st.session_state.bots = bot_manager.bots
@@ -164,7 +165,7 @@ def main_page():
                 st.session_state.page = "change_password_page"
                 st.rerun()
             if st.button("退出登录", use_container_width=True):
-                user_manager.destroy_token(st.session_state.token)
+                user_manager.destroy_token()
                 st.session_state.page = "login_page"
                 st.session_state.logged_in = False
                 st.rerun()
@@ -244,8 +245,6 @@ def main_page():
         
         with col1:
             prompt = st.chat_input("按Enter键发送消息，按Shift+Enter键可换行")
-            if prompt:
-                bot_manager.update_history_names(specific_index=bot_manager.current_history_version)
 
         with col2:
             if st.button("新话题", use_container_width=True):
@@ -289,7 +288,7 @@ def main_page():
                 response_content = get_response_from_bot(prompt, bot, st.session_state.chat_config)
                 bot_manager.add_message_to_history(bot['name'], {"role": "user", "content": prompt})
                 bot_manager.add_message_to_history(bot['name'], {"role": "assistant", "content": response_content})
-                bot_manager.update_history_names(specific_index=bot_manager.current_history_version)
+                bot_manager.fix_history_names(st.session_state.current_history_version)
                     
             col = cols[i % num_cols]
 
@@ -313,10 +312,24 @@ def main_page():
                     num_topics = len(non_empty_histories)
                     with st.expander(f"其他{num_topics}个话题"):
                         for i, history in enumerate(reversed(non_empty_histories)):
-                            st.markdown(f"**{history['name']}** - {history['timestamp']}")
+                            from datetime import datetime, date
+
+                            try:
+                                timestamp = datetime.fromisoformat(history['timestamp'])
+                            except ValueError:
+                                # 如果fromisoformat失败，尝试使用strptime
+                                timestamp = datetime.strptime(history['timestamp'], "%Y-%m-%d %H:%M:%S")
+                            
+                            today = date.today()
+                            if timestamp.date() == today:
+                                formatted_time = f"今天 {timestamp.strftime('%H:%M')}"
+                            else:
+                                formatted_time = timestamp.strftime("%Y年%m月%d日 %H:%M")
+                            
+                            st.markdown(f"**{history['name']}** - {formatted_time}")
                             display_chat(bot, history['history'])
                             if i < len(non_empty_histories) - 2:
                                 st.markdown("---")
-
     bot_manager.save_data_to_file()
+    user_manager.save_session_state_to_file(st.session_state)
     

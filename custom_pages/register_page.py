@@ -1,5 +1,5 @@
 import streamlit as st
-import utils.user_manager as user_manager
+from utils.user_manager import user_manager  # 确保这行导入存在
 
 def register_page():
     st.title("注册")
@@ -28,4 +28,3 @@ def register_page():
     if st.button("登录", use_container_width=True):
         st.session_state.page = "login_page"
         st.rerun()
-        
