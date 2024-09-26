@@ -6,6 +6,7 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from utils.crypto_utils import encrypt_data, decrypt_data
 import logging
 import time
+import re
 from config import (
     TOKEN_EXPIRATION, USER_DATA_FILE, LOG_LEVEL, TOKEN_DIR, SECRET_KEY
 )
@@ -32,13 +33,15 @@ class UserManager:
             json.dump(users, file, ensure_ascii=False, indent=4)
 
     def register(self, username, password):
+        if not re.match(r'^[a-zA-Z0-9@\._]{1,32}$', username):
+            return False
         users = self.load_users()
         if username in users:
             return False
         users[username] = self.hash_password(password)
         self.save_users(users)
         return True
-
+    
     def login(self, username, password):
         users = self.load_users()
         if username not in users or users[username] != self.hash_password(password):

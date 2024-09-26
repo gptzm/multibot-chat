@@ -22,7 +22,10 @@ class ChatRouter:
         self.api_key = bot_config.get('api_key', '')
         self.api_password = bot_config.get('api_password', '')
         self.model = bot_config.get('model')
-        self.system_prompt = bot_config.get('system_prompt', '')
+        if chat_config.get('force_system_prompt', ''):
+            self.system_prompt = chat_config.get('force_system_prompt', '')
+        else:
+            self.system_prompt = bot_config.get('system_prompt', '')
         self.history = bot_config.get('history', [])
         self.bot_id = bot_config.get('bot_id', '')
         self.user_id = bot_config.get('user_id', random.randint(100000,999999))

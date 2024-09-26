@@ -1,5 +1,6 @@
 import streamlit as st
 from utils.user_manager import user_manager  # 确保这行导入存在
+import re
 
 def register_page():
     st.title("注册")
@@ -8,7 +9,9 @@ def register_page():
     confirm_password = st.text_input("确认密码", type="password")
     
     if st.button("注册", type='primary', use_container_width=True):
-        if new_password != confirm_password:
+        if not re.match(r'^[a-zA-Z0-9@\._]{1,32}$', new_user):
+            st.error("用户名只能包含字母、数字、@、.和_，长度不能超过32个字符")
+        elif new_password != confirm_password:
             st.error("密码和确认密码不匹配")
         elif user_manager.register(new_user, new_password):
             st.success("账户创建成功")
