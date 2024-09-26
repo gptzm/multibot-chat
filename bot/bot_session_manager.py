@@ -5,6 +5,7 @@ from utils.crypto_utils import encrypt_data, decrypt_data
 import logging
 from datetime import datetime
 import uuid
+from bot.config import ENGINE_CONFIG
 
 LOGGER = logging.getLogger(__name__)
     
@@ -100,11 +101,6 @@ class BotSessionManager:
         return None
 
     def fix_bot_setting(self):
-        # 确保至少有一个机器人启用
-        if not any(bot.get('enable', False) for bot in self.bots):
-            if self.bots:
-                self.bots[0]['enable'] = True
-        
         # 确保每个机器人都有一个唯一的ID
         existing_ids = set()
         for bot in self.bots:
@@ -162,6 +158,11 @@ class BotSessionManager:
         self.bot_id_map[bot['name']] = old_id
         if old_name != bot['name']:
             del self.bot_id_map[old_name]
+        
+        # 如果所有机器人都被禁用，给出警告
+        if not any(b['enable'] for b in self.bots):
+            st.warning("所有机器人都已被禁用。请至少启用一个机器人以进行对话。")
+        
         self.save_data_to_file()
 
     def delete_bot(self, bot_name):
@@ -172,24 +173,6 @@ class BotSessionManager:
                 version['histories'].pop(bot_id, None)
             del self.bot_id_map[bot_name]
         self.fix_bot_setting()
-        self.save_data_to_file()
-
-    def fix_bot_setting(self):
-        # 确保至少有一个机器人启用
-        if not any(bot.get('enable', False) for bot in self.bots):
-            if self.bots:
-                self.bots[0]['enable'] = True
-        
-        # 确保每个机器人都有一个唯一的ID
-        existing_ids = set()
-        for bot in self.bots:
-            if 'id' not in bot or bot['id'] in existing_ids:
-                bot['id'] = str(uuid.uuid4())
-            existing_ids.add(bot['id'])
-        
-        # 更新bot_id_map
-        self.bot_id_map = {bot['name']: bot['id'] for bot in self.bots}
-        
         self.save_data_to_file()
 
     def create_new_history_version(self):
@@ -236,14 +219,15 @@ class BotSessionManager:
         
         if engine not in st.session_state.default_bots:
             default_bot = {
-                'model': '',
+                'engine': engine,
                 'system_prompt': '',
-                'api_endpoint': os.getenv(f'{engine.upper()}_API_ENDPOINT', ''),
-                'api_key': os.getenv(f'{engine.upper()}_API_KEY', ''),
-                'bot_id': '',
-                'temperature': 1.0, 
                 'enable': True,
             }
+            
+            # 使用 ENGINE_CONFIG 中的默认值
+            for field in ENGINE_CONFIG['engines'][engine]['fields']:
+                default_bot[field['name']] = field.get('default', '')
+
             st.session_state.default_bots[engine] = default_bot
 
         return st.session_state.default_bots[engine]

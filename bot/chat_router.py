@@ -17,9 +17,10 @@ class ChatRouter:
         参数:
             bot_config (dict): 机器人配置，包括engine, api_endpoint, api_key, model等。
         """
-        self.engine = bot_config.get('engine')
-        self.api_endpoint = bot_config.get('api_endpoint')
-        self.api_key = bot_config.get('api_key')
+        self.engine = bot_config.get('engine', '')
+        self.api_endpoint = bot_config.get('api_endpoint', '')
+        self.api_key = bot_config.get('api_key', '')
+        self.api_password = bot_config.get('api_password', '')
         self.model = bot_config.get('model')
         self.system_prompt = bot_config.get('system_prompt', '')
         self.history = bot_config.get('history', [])
@@ -51,6 +52,8 @@ class ChatRouter:
             return self._qwen_chat(prompt)
         elif self.engine == 'Ollama':
             return self._ollama_chat(prompt)
+        elif self.engine == 'XingHuo':
+            return self._xinghuo_chat(prompt)
         elif self.engine == 'DeepSeek':
             return self._deepseek_chat(prompt)
         elif self.engine == 'Moonshot':
@@ -154,7 +157,7 @@ class ChatRouter:
         # 实现与Qwen的交互
         try:
             client = OpenAI(
-                api_key=self.api_key,  # 如果您没有配置环境变量，请在此处用您的API Key进行替换
+                api_key=self.api_key,
                 base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
             )
 
@@ -188,11 +191,49 @@ class ChatRouter:
             LOGGER.error(f"Qwen API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
     
-    def _deepseek_chat(self, prompt):
-        # 实现与Qwen的交互
+    def _xinghuo_chat(self, prompt):
+        # 实现与星火的交互
         try:
             client = OpenAI(
-                api_key=self.api_key,  # 如果您没有配置环境变量，请在此处用您的API Key进行替换
+                api_key=self.api_password, # 控制台获取的APIPassword
+                base_url="https://spark-api-open.xf-yun.com/v1",
+            )
+
+            if self.system_prompt:
+                messages = [
+                    {"role": "system", "content": self.system_prompt},
+                    *self.history[-self.history_length:],
+                    {"role": "user", "content": prompt},
+                ]
+            else:
+                messages = [
+                    *self.history[-self.history_length:],
+                    {"role": "user", "content": prompt},
+                ]
+
+            LOGGER.info(f'  messages:\n\n\n {messages}')
+
+            completion = client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+            )
+
+            LOGGER.info(f'  response:\n\n\n {completion.model_dump_json()}')
+
+            if completion.choices and len(completion.choices) > 0:
+                return completion.choices[0].message.content
+            else:
+                return f"[Xinghuo] Error:{completion.error.message}"
+        except Exception as e:
+            LOGGER.error(f"Xinghuo API 调用出错: {str(e)}")
+            return f"错误: {str(e)}"
+        
+    def _deepseek_chat(self, prompt):
+        # 实现与DeepSeek的交互
+        try:
+            client = OpenAI(
+                api_key=self.api_key,
                 base_url="https://api.deepseek.com",
             )
 
@@ -227,10 +268,10 @@ class ChatRouter:
             return f"错误: {str(e)}"
         
     def _moonshot_chat(self, prompt):
-        # 实现与Qwen的交互
+        # 实现与Moonshot的交互
         try:
             client = OpenAI(
-                api_key=self.api_key,  # 如果您没有配置环境变量，请在此处用您的API Key进行替换
+                api_key=self.api_key,
                 base_url="https://api.moonshot.cn/v1",
             )
 
@@ -268,7 +309,7 @@ class ChatRouter:
         # 实现与Qwen的交互
         try:
             client = OpenAI(
-                api_key=self.api_key,  # 如果您没有配置环境变量，请在此处用您的API Key进行替换
+                api_key=self.api_key,
                 base_url="https://api.lingyiwanwu.com/v1",
             )
 
@@ -306,7 +347,7 @@ class ChatRouter:
         # 实现与Ollama的交互
         try:
             client = OpenAI(
-                api_key= 'ollama',  # 如果您没有配置环境变量，请在此处用您的API Key进行替换
+                api_key= 'ollama',
                 base_url= self.api_endpoint,
             )
 
@@ -367,4 +408,3 @@ class ChatRouter:
         清空历史记录。
         """
         self.history = []
-        
