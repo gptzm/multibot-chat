@@ -244,6 +244,8 @@ def main_page():
         
         with col1:
             prompt = st.chat_input("按Enter键发送消息，按Shift+Enter键可换行")
+            if prompt:
+                bot_manager.update_history_names(specific_index=bot_manager.current_history_version)
 
         with col2:
             if st.button("新话题", use_container_width=True):

@@ -116,7 +116,7 @@ ENGINE_CONFIG = {
           "label": "API 端点",
           "type": "text",
           "required": True,
-          "default": "http://127.0.0.11434/v1",
+          "default": "http://127.0.0.1:11434/v1",
         }
       ]
     },
