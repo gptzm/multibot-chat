@@ -21,7 +21,7 @@ class BotSessionManager:
         self.bot_id_map = {}  # 用于存储 bot_name 到 bot_id 的映射
         
         self.load_data_from_file()
-        self.update_history_names()
+        self.fix_history_names()
 
     def save_data_to_file(self):
         self.ensure_valid_history_version()
@@ -74,9 +74,9 @@ class BotSessionManager:
         elif self.current_history_version >= len(self.history_versions):
             self.current_history_version = len(self.history_versions) - 1
 
-    def update_history_names(self, specific_index=None):
+    def fix_history_names(self, specific_index=None):
         versions_to_update = [self.history_versions[specific_index]] if specific_index is not None else self.history_versions
-        
+        LOGGER.info(f"正在更新历史记录名称...{versions_to_update}")
         for idx, version in enumerate(versions_to_update):
             if specific_index is not None:
                 idx = specific_index
@@ -194,11 +194,6 @@ class BotSessionManager:
             return all(len(history) == 0 for history in current_history.values())
         return True
 
-    def update_history_name(self, version_index, new_name):
-        if 0 <= version_index < len(self.history_versions):
-            self.history_versions[version_index]['name'] = new_name
-            self.save_data_to_file()
-
     def get_participating_bots(self, version_index):
         if 0 <= version_index < len(self.history_versions):
             return set(self.history_versions[version_index]['histories'].keys())
@@ -209,9 +204,7 @@ class BotSessionManager:
         if bot_id and self.current_history_version < len(self.history_versions):
             current_version = self.history_versions[self.current_history_version]
             current_version['histories'].setdefault(bot_id, []).append(message)
-            self.update_history_names(specific_index=self.current_history_version)
             self.save_data_to_file()
-        self.update_history_names()
 
     def get_default_bot(self, engine):
         if 'default_bots' not in st.session_state:
@@ -268,7 +261,7 @@ class BotSessionManager:
         self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}}]
         self.current_history_version = 0
         self.save_data_to_file()
-        self.update_history_names()
+        self.fix_history_names()
 
     def get_current_history(self, bot_name):
         bot_id = self.bot_id_map.get(bot_name)

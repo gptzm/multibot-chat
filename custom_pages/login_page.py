@@ -1,5 +1,5 @@
 import streamlit as st
-import utils.user_manager as user_manager
+from utils.user_manager import user_manager  # 确保这行导入存在
 
 def login_page():
     st.title("登录")
@@ -19,4 +19,3 @@ def login_page():
         st.session_state.page = "register_page"
         st.rerun()
 
-        

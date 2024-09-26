@@ -3,7 +3,7 @@ import streamlit as st
 import os
 import utils.logging_utils as logging_utils
 import importlib
-import utils.user_manager as user_manager
+from utils.user_manager import user_manager  # 确保这行导入存在
 
 st.set_page_config(page_title="多Bot聊天", page_icon="🤖", layout="wide")
 
@@ -22,7 +22,7 @@ if __name__ == "__main__":
         st.session_state['token'] = token
         if user_manager.verify_token(token):
             st.session_state.logged_in = True
-            st.session_state.username = user_manager.get_username_from_token(token)
+            st.session_state.username = user_manager.get_logged_in_username()
             LOGGER.info(f"使用token登录. Username: {st.session_state.username}")
         else:
             LOGGER.warning("无效的token")
@@ -59,11 +59,12 @@ if __name__ == "__main__":
                 login_page()
 
     # 每次加载完页面后将当前的session_state保存到对应的文件中
-    if st.session_state.logged_in and 'bot_manager' in globals():
-        user_manager.save_session_state_to_file(st.session_state.token)
+    if st.session_state.logged_in:
+        user_manager.save_session_state_to_file(st.session_state)
 
     st.markdown("""
-                <p style="text-align: center; color: gray; padding-top:5rem">
-                    <a href="https://gitee.com/gptzm/multibot-chat" style="color: gray;">MultiBot-Chat开源项目 by zm</a>
-                </p>"""
-            , unsafe_allow_html=True)
+                    <p style="text-align: center; color: gray; padding-top:5rem">
+                        <a href="https://gitee.com/gptzm/multibot-chat" style="color: gray;">MultiBot-Chat by zm</a>
+                    </p>
+                """, unsafe_allow_html=True)
+
