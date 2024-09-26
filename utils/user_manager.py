@@ -61,16 +61,16 @@ class UserManager:
     def get_logged_in_username(self):
         return self._username
 
-    def save_token_to_file(self, token, data):
+    def save_token_to_file(self, data):
         if not os.path.exists(TOKEN_DIR):
             os.makedirs(TOKEN_DIR)
-        token_file = os.path.join(TOKEN_DIR, f"{token}.token")
+        token_file = os.path.join(TOKEN_DIR, f"{self._token}.token")
         encrypted_data = encrypt_data(data)
         with open(token_file, 'w') as f:
             f.write(encrypted_data)
 
-    def load_token_from_file(self, token):
-        token_file = os.path.join(TOKEN_DIR, f"{token}.token")
+    def load_token_from_file(self):
+        token_file = os.path.join(TOKEN_DIR, f"{self._token}.token")
         if os.path.exists(token_file):
             with open(token_file, 'r') as f:
                 encrypted_data = f.read()
@@ -90,7 +90,7 @@ class UserManager:
         token = serializer.dumps({'username': username, 'created_at': time.time()}, salt=SECRET_KEY)
         self._token = token
         self._username = username
-        self.save_session_state_to_file(st.session_state)  # 使用 st.session_state 而不是 token
+        self.save_session_state_to_file()  # 使用 st.session_state 而不是 token
         return token
 
     def verify_token(self, token=None):
@@ -109,7 +109,7 @@ class UserManager:
                 self.destroy_token()
                 return False
             
-            session_data = self.load_token_from_file(self._token)
+            session_data = self.load_token_from_file()
             if session_data:
                 session_data = json.loads(session_data)
                 for key, value in session_data.items():
@@ -123,14 +123,11 @@ class UserManager:
             LOGGER.error(f"Error verifying token: {str(e)}")
         return False
 
-    def validate_token(self, token):
-        return self.verify_token(token)
-
-    def save_session_state_to_file(self, session_state):
+    def save_session_state_to_file(self):
         if not self._token:
             return
         
-        session_data = dict(session_state)
+        session_data = dict(st.session_state)
 
         # 只保留特定属性
         for key in list(session_data.keys()):
@@ -139,12 +136,12 @@ class UserManager:
         
         LOGGER.info(f"Saving session state. Username: {session_data.get('username')}")
         data = json.dumps(session_data)
-        self.save_token_to_file(self._token, data)
+        self.save_token_to_file(data)
 
     def get_username_from_token(self):
         if not self._token:
             return None
-        data = self.load_token_from_file(self._token)
+        data = self.load_token_from_file()
         if data:
             session_data = json.loads(data)
             return session_data.get('username')

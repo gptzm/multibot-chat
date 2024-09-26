@@ -19,7 +19,6 @@ class BotSessionManager:
         self.history_versions = []
         self.current_history_version = 0
         self.bot_id_map = {}  # 用于存储 bot_name 到 bot_id 的映射
-        
         self.load_data_from_file()
         self.fix_history_names()
 
@@ -27,6 +26,7 @@ class BotSessionManager:
         self.ensure_valid_history_version()
         if not self._filename:
             return
+        LOGGER.info(f'保存bots\n\n{self.bots}')
         data = {
             'bots': self.bots,
             'history_versions': self.history_versions,
@@ -89,8 +89,6 @@ class BotSessionManager:
                     version['name'] = f"{idx+1}. {content}"
                 else:
                     version['name'] = f"新话题"
-        
-        self.save_data_to_file()
 
     def get_first_prompt(self, histories):
         for history in histories.values():
@@ -102,15 +100,13 @@ class BotSessionManager:
     def fix_bot_setting(self):
         # 确保每个机器人都有一个唯一的ID
         existing_ids = set()
-        for bot in self.bots:
+        for bot in reversed(self.bots):
             if 'id' not in bot or bot['id'] in existing_ids:
                 bot['id'] = str(uuid.uuid4())
             existing_ids.add(bot['id'])
         
         # 更新bot_id_map
         self.bot_id_map = {bot['name']: bot['id'] for bot in self.bots}
-        
-        self.save_data_to_file()
 
     def load_bots_from_session(self):
         self.fix_bot_setting()
@@ -136,13 +132,20 @@ class BotSessionManager:
         self.fix_bot_setting()
         self.save_data_to_file()
 
-    def update_bot(self, bot, idx):
-        if idx == -1:
-            st.error(f"机器人设置可能已被更新")
+    def update_bot(self, bot):
+        if 'id' not in bot:
+            st.error("机器人缺少ID")
             return
         
         if bot['name'].strip() == '':
-            st.error(f"机器人名称不能为空")
+            st.error("机器人名称不能为空")
+            return
+        
+        # 找到要更新的机器人索引
+        idx = next((i for i, b in enumerate(self.bots) if b['id'] == bot['id']), -1)
+        
+        if idx == -1:
+            st.error("找不到要更新的机器人")
             return
         
         if bot['name'] in [b['name'] for i, b in enumerate(self.bots) if i != idx]:
@@ -153,6 +156,11 @@ class BotSessionManager:
         old_id = self.bots[idx]['id']
         if 'avatar' not in bot:
             bot['avatar'] = '🤖'  # 确保有头像字段
+        
+        # 保存bot的enable状态
+        if 'enable' not in bot:
+            bot['enable'] = self.bots[idx].get('enable', True)  # 如果原来没有enable字段，默认为True
+        
         self.bots[idx] = bot
         self.bot_id_map[bot['name']] = old_id
         if old_name != bot['name']:
@@ -161,16 +169,19 @@ class BotSessionManager:
         # 如果所有机器人都被禁用，给出警告
         if not any(b['enable'] for b in self.bots):
             st.warning("所有机器人都已被禁用。请至少启用一个机器人以进行对话。")
+
+        # 更新session_state中的bots
+        if 'bots' in st.session_state:
+            st.session_state.bots[idx] = bot
         
         self.save_data_to_file()
 
-    def delete_bot(self, bot_name):
-        bot_id = self.bot_id_map.get(bot_name)
-        if bot_id:
-            self.bots = [bot for bot in self.bots if bot['id'] != bot_id]
-            for version in self.history_versions:
-                version['histories'].pop(bot_id, None)
-            del self.bot_id_map[bot_name]
+    def delete_bot(self, bot):
+        bot_id = bot['id']
+        self.bots = [b for b in self.bots if b['id'] != bot_id]
+        for version in self.history_versions:
+            version['histories'].pop(bot_id, None)
+        self.bot_id_map.pop(bot['name'], None)
         self.fix_bot_setting()
         self.save_data_to_file()
 
@@ -203,7 +214,6 @@ class BotSessionManager:
         if bot_id and self.current_history_version < len(self.history_versions):
             current_version = self.history_versions[self.current_history_version]
             current_version['histories'].setdefault(bot_id, []).append(message)
-            self.save_data_to_file()
 
     def get_default_bot(self, engine):
         if 'default_bots' not in st.session_state:
@@ -235,35 +245,29 @@ class BotSessionManager:
             if key in default_bot:
                 default_bot[key] = bot[key]
         st.session_state.default_bots[engine] = default_bot
+        self.save_data_to_file()
 
     def create_bot_copy(self, bot):
         bot_copy = json.loads(json.dumps(bot))
         bot_copy['name'] = f"{bot['name']} 副本"
         bot_copy['history'] = []
+        bot_copy['id'] = str(uuid.uuid4())  # 生成唯一ID
         self.add_bot(bot_copy)
+        self.save_data_to_file()
         return bot_copy
-    
-    def get_bot_idx(self, bot):
-        for idx, b in enumerate(self.bots):
-            if b['name'] == bot['name'] and b.get('id') == bot.get('id'):
-                return idx
-        return -1
 
-    def get_all_histories(self, bot_name):
-        bot_id = self.bot_id_map.get(bot_name)
-        if bot_id:
-            return [{'name': version['name'], 'timestamp': version['timestamp'], 'history': version['histories'].get(bot_id, [])} 
-                    for version in self.history_versions]
-        return []
+    def get_all_histories(self, bot):
+        bot_id = bot['id']
+        return [{'name': version['name'], 'timestamp': version['timestamp'], 'history': version['histories'].get(bot_id, [])} 
+                for version in self.history_versions]
 
     def clear_all_histories(self):
         self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}}]
         self.current_history_version = 0
-        self.save_data_to_file()
         self.fix_history_names()
 
-    def get_current_history(self, bot_name):
-        bot_id = self.bot_id_map.get(bot_name)
+    def get_current_history_by_bot(self, bot):
+        bot_id = bot['id']
         if bot_id and self.current_history_version < len(self.history_versions):
             current_version = self.history_versions[self.current_history_version]
             return current_version['histories'].get(bot_id, [])
@@ -271,4 +275,7 @@ class BotSessionManager:
 
     def get_currently_enabled_bots(self):
         return set(bot['name'] for bot in self.bots if bot.get('enable', False))
+
+    def is_all_current_histories_empty(self):
+        return all(not self.get_current_history_by_bot(bot) for bot in st.session_state.bots)
 
