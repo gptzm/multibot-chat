@@ -171,6 +171,7 @@ def main_page():
                 st.rerun()
 
         with st.expander("聊天设置"):
+            st.session_state.chat_config['force_system_prompt'] = st.text_area("强制覆盖系统提示词", height=200, placeholder='不填写则使用每个Bot设置中的系统提示词')
             st.session_state.chat_config['history_length'] = st.slider("携带对话条数", min_value=1, max_value=20, value=st.session_state.chat_config.get('history_length', 10))
 
         with st.expander("历史话题", expanded=True):
@@ -181,6 +182,7 @@ def main_page():
                 st.session_state.current_history_version = len(history_options) - 1 if history_options else 0
             
             def on_history_change():
+                st.toast(st.session_state.history_version_selector)
                 new_version_index = history_options.index(st.session_state.history_version_selector)
                 participating_bots = bot_manager.get_participating_bots(new_version_index)
                 
@@ -231,6 +233,10 @@ def main_page():
                 if st.button("新增Bot", type="primary", use_container_width=True):
                     st.session_state.avatar = random.choice(EMOJI_OPTIONS)
                     add_new_bot()
+
+                # 添加编辑机器人状态的按钮
+                if st.button("批量启停用", use_container_width=True):
+                    edit_bot_status()
 
     input_box = st.container()
     st.markdown("---")
@@ -332,4 +338,20 @@ def main_page():
                                 st.markdown("---")
     bot_manager.save_data_to_file()
     user_manager.save_session_state_to_file(st.session_state)
-    
+
+@st.dialog('批量启停用', width='large')
+def edit_bot_status():
+    bots = st.session_state.bots
+
+    with st.form("批量启停用"):
+        cols = st.columns(4)
+        for idx, bot in enumerate(bots):
+            with cols[idx % 4]:
+                bot['enable'] = st.toggle(f"{bot['name']}", value=bot.get('enable', True))
+        
+        col_empty, col_center, col_empty = st.columns(3)
+        with col_center:
+            if st.form_submit_button("保存", use_container_width=True):
+                user_manager.update_bots(bots)
+                st.success("机器人状态已更新")
+                st.experimental_rerun()
