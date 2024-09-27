@@ -116,7 +116,7 @@ class BotSessionManager:
                     content = first_prompt.replace('\n', ' ').replace('\r', '')
                     if len(content) > 20:
                         content = f"{content[:20]}..."
-                    version['name'] = f"{idx+1}. {content}"
+                    version['name'] = f"对话{idx+1}. {content}"
                 else:
                     version['name'] = f"新话题"
 

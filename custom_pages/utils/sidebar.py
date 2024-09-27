@@ -108,7 +108,7 @@ def render_sidebar():
         
 
         if st.session_state.page == "group_page":
-            if st.button("返回单聊模式",use_container_width=True):
+            if st.button("返回对话模式",use_container_width=True):
                 st.session_state.page = "main_page"
                 st.rerun()
         else:
