@@ -165,7 +165,7 @@ def display_chat(bot, history):
         
         bot_html += f"""<script>
                             function copy_{random_id}(element){{
-                                navigator.clipboard.writeText(JSON.parse({content_markdown_json})).then(() => {{
+                                navigator.clipboard.writeText({content_markdown_json}).then(() => {{
                                     const lastInnerHTML = element.innerHTML;
                                     element.innerHTML = '✅';
                                     setTimeout(() => {{
@@ -236,7 +236,7 @@ def display_group_chat(bots, history):
         
         bot_html += f"""<script>
                             function copy_{random_id}(element){{
-                                navigator.clipboard.writeText(JSON.parse({content_markdown_json})).then(() => {{
+                                navigator.clipboard.writeText({content_markdown_json}).then(() => {{
                                     const lastInnerHTML = element.innerHTML;
                                     element.innerHTML = '✅';
                                     setTimeout(() => {{
