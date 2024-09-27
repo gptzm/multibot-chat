@@ -27,11 +27,11 @@ class ChatRouter:
             self.system_prompt = chat_config['force_system_prompt']
         else:
             self.system_prompt = bot_config.get('system_prompt', '')
-        self.group_user_prompt = chat_config.get('group_user_prompt', '继续')
+        self.group_user_prompt = chat_config.get('group_user_prompt') or '继续'
+        self.history_length = chat_config.get('history_length', 10)
         self.group_history_length = chat_config.get('group_history_length', 20)
         self.bot_id = bot_config.get('id', '')
-        self.user_id = bot_config.get('user_id', random.randint(100000,999999))
-        self.history_length = chat_config.get('history_length', 10)
+        self.user_id = bot_config.get('user_id', random.randint(1000000000,9999999999))
         self.temperature = bot_config.get('temperature', 1.0)
     
     def send_message(self, prompt, history, input_type='text', image=None, tools=None):
