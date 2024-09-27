@@ -31,6 +31,10 @@ EMOJI_OPTIONS = ["🤖", "🦾", "🧠", "💡", "🔮", "🎭", "🦄", "🐼",
 # 引擎选项
 ENGINE_OPTIONS = list(ENGINE_CONFIG.get('engines', {}).keys())
 
+# 定义群聊和私聊的emoji表情
+GROUP_CHAT_EMOJI = "👥"
+PRIVATE_CHAT_EMOJI = "👤"
+
 # 日志设置
 LOG_LEVEL = 'INFO'
 logging.basicConfig(level=LOG_LEVEL)

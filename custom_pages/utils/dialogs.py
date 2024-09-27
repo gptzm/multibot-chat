@@ -9,10 +9,10 @@ from config import EMOJI_OPTIONS, ENGINE_OPTIONS, LOGGER
 import json
 
 
-bot_manager = st.session_state.bot_manager
-
 @st.dialog('编辑Bot', width='large')
 def edit_bot(bot):
+    bot_manager = st.session_state.bot_manager
+
     with st.form('edit_bot_form') as form:
         col1, col2 = st.columns(2, gap="small")
         
@@ -68,6 +68,8 @@ def edit_bot(bot):
 
 @st.dialog('新增机器人', width='large')
 def add_new_bot():
+    bot_manager = st.session_state.bot_manager
+    
     tabs = st.tabs(ENGINE_OPTIONS)
     for i, engine in enumerate(ENGINE_OPTIONS):
         with tabs[i]:
@@ -132,6 +134,8 @@ def add_new_bot():
 
 @st.dialog('编辑Bot配置', width='large')
 def edit_bot_config():
+    bot_manager = st.session_state.bot_manager
+    
     config_json = json.dumps(bot_manager.get_bot_config(), indent=2)
     st.markdown("<font color='red'><strong>复制以下内容可快速粘贴导入其他账号。注意：其中含有大模型密钥，请妥善保管</strong></font>", unsafe_allow_html=True)
     new_config = st.text_area("Bot配置", value=config_json, height=300)

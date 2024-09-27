@@ -19,36 +19,39 @@ class NewlinePreprocessor(Preprocessor):
 
 LOGGER = logging.getLogger(__name__)
 
-def get_response_from_bot(prompt, bot, chat_config):
+def get_response_from_bot(prompt, bot, history):
     bot_manager = st.session_state.bot_manager
-    chat_router = ChatRouter(bot, chat_config)
-    current_history = bot_manager.get_current_history_by_bot(bot)
-    response_content = chat_router.send_message(prompt, current_history)
-    bot_manager.add_message_to_history(bot['id'], {"role": "user", "content": prompt})
-    bot_manager.add_message_to_history(bot['id'], {"role": "assistant", "content": response_content})
+    # 每次调用时获取最新的chat_config
+    latest_chat_config = bot_manager.get_chat_config()
+    LOGGER.info(f"Latest chat_config: {latest_chat_config}")
+    chat_router = ChatRouter(bot, latest_chat_config)
+    response_content = chat_router.send_message(prompt, history)
     return response_content
 
-def get_response_from_bot_group(prompt, bot, chat_config, group_history):
+def get_response_from_bot_group(prompt, bot, group_history):
     bot_manager = st.session_state.bot_manager
-    chat_router = ChatRouter(bot, chat_config)
+    # 每次调用时获取最新的chat_config
+    latest_chat_config = bot_manager.get_chat_config()
+    LOGGER.info(f"Latest chat_config for group chat: {latest_chat_config}")
+    chat_router = ChatRouter(bot, latest_chat_config)
     response_content = chat_router.send_message_group(prompt, group_history)
     return response_content
+
 
 def get_chat_container_style():
     return f"""
     <style>
         .message:hover .copy-button {{
-            display: inline-block;
+            visibility: visible;
         }}
         .copy-button {{
-            display: none;
+            visibility: hidden;
             font-size: 1.2em;
             margin: 0 8px;
             border: none;
             border-radius: 5px;
             padding: 2px;
             cursor: pointer;
-            transition: all 0.3s;
             background-color: #f8f8f800;
             user-select: none;
             -webkit-user-select: none;
@@ -57,9 +60,11 @@ def get_chat_container_style():
         }}
         .copy-button:hover {{
             background-color: #f0f0f0;
+            transition: all 0.3s;
         }}
         .copy-button:active {{
             background-color: #e0e0e0;
+            transition: all 0.3s;
         }}
         .chat-container {{
             border: 1px solid #ccc;
@@ -67,7 +72,6 @@ def get_chat_container_style():
             border-radius: 10px;
             padding: 10px;
             background-color: #f9f9f9;
-            height: 360px;
             overflow-y: scroll;
         }}
         .message-user {{
@@ -120,7 +124,7 @@ def display_chat(bot, history):
 
     bot_html = f"""
         {get_chat_container_style()}
-        <div id='chat-container-{bot['id']}' class='chat-container'>
+        <div id='chat-container-{bot['id']}' class='chat-container' style='height: 360px;'>
     """
 
     for entry in history:
@@ -183,7 +187,7 @@ def display_chat(bot, history):
 def display_group_chat(bots, history):
     bot_html = f"""
         {get_chat_container_style()}
-        <div id='group-chat-container' class='chat-container'>
+        <div id='group-chat-container' class='chat-container' style='height: 560px;'>
     """
 
     for entry in history:
@@ -241,4 +245,4 @@ def display_group_chat(bots, history):
             chatContainer.scrollTop = chatContainer.scrollHeight;
         </script>
     """
-    components.html(bot_html, height=400)
+    components.html(bot_html, height=600)
