@@ -138,7 +138,7 @@ def display_chat(bot, history):
             str(entry['content']),
             extensions=[NewlineExtension(), "codehilite", "tables", "admonition", "sane_lists", "attr_list","meta", "toc"]
         )
-        content_markdown_json = json.dumps(entry['content']).replace("'",'\\x27')
+        content_markdown_repr = repr(entry['content'])
         random_id = str(random.randint(100000000000, 999999999999))
 
         if entry['role'] == 'user':
@@ -165,7 +165,7 @@ def display_chat(bot, history):
         
         bot_html += f"""<script>
                             function copy_{random_id}(element){{
-                                navigator.clipboard.writeText({content_markdown_json}).then(() => {{
+                                navigator.clipboard.writeText({content_markdown_repr}).then(() => {{
                                     const lastInnerHTML = element.innerHTML;
                                     element.innerHTML = '✅';
                                     setTimeout(() => {{
@@ -204,7 +204,7 @@ def display_group_chat(bots, history):
             str(content),
             extensions=[NewlineExtension(), "codehilite", "tables", "admonition", "sane_lists", "attr_list","meta", "toc"]
         )
-        content_markdown_json = json.dumps(repr(content)).replace("'",'\\x27')
+        content_markdown_repr = repr(content)
         random_id = str(random.randint(100000000000, 999999999999))
 
         if role == 'user':
@@ -236,7 +236,7 @@ def display_group_chat(bots, history):
         
         bot_html += f"""<script>
                             function copy_{random_id}(element){{
-                                navigator.clipboard.writeText({content_markdown_json}).then(() => {{
+                                navigator.clipboard.writeText({content_markdown_repr}).then(() => {{
                                     const lastInnerHTML = element.innerHTML;
                                     element.innerHTML = '✅';
                                     setTimeout(() => {{

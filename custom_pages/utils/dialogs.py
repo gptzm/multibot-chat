@@ -148,3 +148,10 @@ def edit_bot_config():
                 st.error("无效的配置格式")
         except json.JSONDecodeError:
             st.error("无效的JSON格式")
+
+@st.dialog('确认操作', width='large')
+def confirm_action(message):
+    st.warning(message, icon="⚠️")
+    col_empty, col_center, col_empty = st.columns(3, gap="small")
+    with col_center:
+        return st.button("确认操作", use_container_width=True)

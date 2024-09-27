@@ -2,7 +2,7 @@ import streamlit as st
 import random
 from config import EMOJI_OPTIONS
 from utils.user_manager import user_manager
-from custom_pages.utils.dialogs import edit_bot, add_new_bot, edit_bot_config
+from custom_pages.utils.dialogs import edit_bot, add_new_bot, edit_bot_config, confirm_action
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -18,10 +18,11 @@ def render_sidebar():
                 st.session_state.page = "change_password_page"
                 st.rerun()
             if st.button("退出登录", use_container_width=True):
-                user_manager.destroy_token()
-                st.session_state.page = "login_page"
-                st.session_state.logged_in = False
-                st.rerun()
+                if confirm_action("确定要退出登录吗？"):
+                    user_manager.destroy_token()
+                    st.session_state.page = "login_page"
+                    st.session_state.logged_in = False
+                    st.rerun()
             if st.button("编辑配置", use_container_width=True):
                 edit_bot_config()
 
@@ -60,8 +61,9 @@ def render_sidebar():
                     st.rerun()
 
                 if st.button("清理所有历史话题", use_container_width=True):
-                    bot_manager.clear_all_group_histories()
-                    st.rerun()
+                    if confirm_action("确定要清理所有群聊历史话题吗？此操作不可撤销。"):
+                        bot_manager.clear_all_group_histories()
+                        st.rerun()
 
         else:
             if st.session_state.page != "group_page":
@@ -96,8 +98,9 @@ def render_sidebar():
                     )
 
                     if st.button("清理所有历史话题", use_container_width=True):
-                        bot_manager.clear_all_histories()
-                        st.rerun()
+                        if confirm_action("确定要清理所有历史话题吗？此操作不可撤销。"):
+                            bot_manager.clear_all_histories()
+                            st.rerun()
 
         if len(st.session_state.bots) > 0:
             with st.expander("Bot管理"):

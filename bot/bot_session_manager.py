@@ -71,8 +71,16 @@ class BotSessionManager:
         if not self._filename:
             return
         
+        # 创建一个不包含历史记录的 bots 副本
+        bots_without_history = []
+        for bot in self.bots:
+            bot_copy = bot.copy()
+            bot_copy.pop('history', None)
+            bot_copy.pop('group_history', None)
+            bots_without_history.append(bot_copy)
+        
         data = {
-            'bots': self.bots,
+            'bots': bots_without_history,
             'history_versions': self.history_versions,
             'group_history_versions': self.group_history_versions,
             'current_history_version': self.current_history_version,
@@ -444,4 +452,11 @@ class BotSessionManager:
                 'content': message
             })
         self.save_data_to_file()
+
+    def remove_last_group_message(self):
+        if self.current_group_history_version < len(self.group_history_versions):
+            current_version = self.group_history_versions[self.current_group_history_version]
+            if current_version['group_history']:
+                current_version['group_history'].pop()
+                self.save_data_to_file()
 
