@@ -3,7 +3,7 @@ from utils.chat_utils import get_response_from_bot, get_response_from_bot_group,
 from custom_pages.utils.dialogs import edit_bot, add_new_bot
 from datetime import datetime, date
 import random
-from config import EMOJI_OPTIONS
+from config import EMOJI_OPTIONS, ENGINE_OPTIONS
 
 def display_active_bots(bot_manager, prompt, show_bots):
     num_bots = len(show_bots)
@@ -36,7 +36,7 @@ def display_active_bots(bot_manager, prompt, show_bots):
                     show_bot_title(bot)
 
 def display_inactive_bots(bot_manager, show_bots):
-    show_bots = show_bots + [{'id': 'new_bot', 'avatar': '⚡', 'name': '新增一个Bot', 'engine': '支持{len(ENGINE_OPTIONS)}种API引擎'}]
+    show_bots = show_bots + [{'id': 'new_bot', 'avatar': '⚡', 'name': '新增一个Bot', 'engine': f'支持{len(ENGINE_OPTIONS)}种API引擎'}]
 
     num_bots = len(show_bots)
     

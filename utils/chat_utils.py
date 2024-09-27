@@ -26,6 +26,7 @@ def get_response_from_bot(prompt, bot, history):
     LOGGER.info(f"Latest chat_config: {latest_chat_config}")
     chat_router = ChatRouter(bot, latest_chat_config)
     response_content = chat_router.send_message(prompt, history)
+    LOGGER.info(f"Response content: {response_content}")
     return response_content
 
 def get_response_from_bot_group(prompt, bot, group_history):
@@ -35,6 +36,7 @@ def get_response_from_bot_group(prompt, bot, group_history):
     LOGGER.info(f"Latest chat_config for group chat: {latest_chat_config}")
     chat_router = ChatRouter(bot, latest_chat_config)
     response_content = chat_router.send_message_group(prompt, group_history)
+    LOGGER.info(f"Response content: {response_content}")
     return response_content
 
 
@@ -82,7 +84,7 @@ def get_chat_container_style():
         .message-user-content {{
             background-color: #e0ffe0;
             border-radius: 10px;
-            padding: 10px;
+            padding: 0 15px;
         }}
         .user-avatar {{
             background-color: #eee;
@@ -97,7 +99,7 @@ def get_chat_container_style():
         }}
         .message-assistant {{
             display: flex;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }}
         .bot-avatar {{
             background-color: #eee;
@@ -113,7 +115,11 @@ def get_chat_container_style():
         .message-assistant-content {{
             background-color: #f0f0f0;
             border-radius: 10px;
-            padding: 10px;
+            padding: 0 15px;
+        }}
+        .bot-name {{
+            margin-top: 5px;
+            margin-bottom: 10px;
         }}
     </style>
     """
@@ -137,7 +143,7 @@ def display_chat(bot, history):
 
         if entry['role'] == 'user':
             bot_html += f"""<div class='message message-user'>
-                                <div style='display: flex; align-items: flex-end; max-width: 70%;'>
+                                <div style='display: flex; align-items: flex-end; max-width: 80%;'>
                                     <button onclick="copy_{random_id}(this)" class="copy-button">📋</button>
                                     <div class='message-user-content'>
                                         {content_markdown}
@@ -149,7 +155,7 @@ def display_chat(bot, history):
         if entry['role'] == 'assistant':
             bot_html += f"""<div class='message message-assistant'>
                             <div class='bot-avatar'>{bot.get('avatar', '🤖')}</div>
-                            <div style='display: flex; align-items: flex-end; max-width: 70%;'>
+                            <div style='display: flex; align-items: flex-end; max-width: 80%;'>
                                 <div class='message-assistant-content'>
                                     {content_markdown}
                                 </div>
@@ -159,7 +165,7 @@ def display_chat(bot, history):
         
         bot_html += f"""<script>
                             function copy_{random_id}(element){{
-                                navigator.clipboard.writeText({content_markdown_json}).then(() => {{
+                                navigator.clipboard.writeText(JSON.parse({content_markdown_json})).then(() => {{
                                     const lastInnerHTML = element.innerHTML;
                                     element.innerHTML = '✅';
                                     setTimeout(() => {{
@@ -203,7 +209,7 @@ def display_group_chat(bots, history):
 
         if role == 'user':
             bot_html += f"""<div class='message message-user'>
-                                <div style='display: flex; align-items: flex-end; max-width: 70%;'>
+                                <div style='display: flex; align-items: flex-end; max-width: 80%;'>
                                     <button onclick="copy_{random_id}(this)" class="copy-button">📋</button>
                                     <div class='message-user-content'>
                                         {content_markdown}
@@ -217,18 +223,20 @@ def display_group_chat(bots, history):
                 avatar = bot.get('avatar', '🤖')
                 bot_html += f"""<div class='message message-assistant'>
                                 <div class='bot-avatar'>{avatar}</div>
-                                <div style='display: flex; align-items: flex-end; max-width: 70%;'>
-                                    <div class='message-assistant-content'>
-                                        <strong>{bot.get('name')}:</strong><br>
-                                        {content_markdown}
+                                <div style='display: flex; flex-direction: column; max-width: 80%;'>
+                                    <div class='bot-name'>{bot.get('name')}</div>
+                                    <div style='display: flex; align-items: flex-end;'>
+                                        <div class='message-assistant-content'>
+                                            {content_markdown}
+                                        </div>
+                                        <button onclick="copy_{random_id}(this)" class="copy-button">📋</button>
                                     </div>
-                                    <button onclick="copy_{random_id}(this)" class="copy-button">📋</button>
                                 </div>
                             </div>"""
         
         bot_html += f"""<script>
                             function copy_{random_id}(element){{
-                                navigator.clipboard.writeText({content_markdown_json}).then(() => {{
+                                navigator.clipboard.writeText(JSON.parse({content_markdown_json})).then(() => {{
                                     const lastInnerHTML = element.innerHTML;
                                     element.innerHTML = '✅';
                                     setTimeout(() => {{
