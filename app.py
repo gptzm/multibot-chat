@@ -13,6 +13,8 @@ def load_page(page_name):
     return getattr(module, page_name)
 
 if __name__ == "__main__":
+    bot_manager = None
+    
     if not os.path.exists("user_config"):
         os.makedirs("user_config")
     
@@ -33,8 +35,6 @@ if __name__ == "__main__":
             st.session_state.logged_in = True
             st.session_state.username = user_manager.get_logged_in_username()
             bot_manager = BotSessionManager(st.session_state.username)
-            bot_manager.fix_history_names()
-            bot_manager.fix_group_history_names()
             st.session_state.bot_manager = bot_manager
             st.session_state.bots = bot_manager.bots
             st.session_state.group_history_versions = bot_manager.group_history_versions
@@ -80,3 +80,6 @@ if __name__ == "__main__":
                     </p>
                 """, unsafe_allow_html=True)
 
+    if st.session_state.logged_in and bot_manager:
+        bot_manager.update_chat_config(st.session_state.chat_config)
+        bot_manager.save_data_to_file()

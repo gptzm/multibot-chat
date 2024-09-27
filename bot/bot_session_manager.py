@@ -15,21 +15,55 @@ class BotSessionManager:
         LOGGER.info(f"初始化 BotSessionManager，用户名: {username}")
         if not username:
             raise ValueError("用户名未设置")
+        
+        # 设置所有值的默认值
         self.bots = []
-        self.history_versions = []
-        self.group_history_versions = []
+        self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}, 'name': '新话题'}]
+        self.group_history_versions = [{'timestamp': datetime.now().isoformat(), 'group_history': [], 'name': '新群聊话题'}]
         self.current_history_version = 0
         self.current_group_history_version = 0
-        self.bot_id_map = {}  # 用于存储 bot_name 到 bot_id 的映射
+        self.bot_id_map = {}
+        self.auto_speak = True
         self.chat_config = {
             'history_length': 10,
             'group_history_length': 20,
             'force_system_prompt': '',
             'group_user_prompt': "请你在上面的基础上进一步推导"
         }
+
+        # 加载数据并更新相应的属性
         self.load_data_from_file()
+        self.fix_bot_setting()
         self.fix_history_names()
         self.fix_group_history_names()
+
+    def load_data_from_file(self):
+        if not self._filename:
+            LOGGER.error("无法加载：用户名未设置")
+            return
+        try:
+            file_path = f"user_config/{self._filename}.encrypt"
+            if not os.path.exists(file_path):
+                LOGGER.info(f"欢迎新用户: {self._filename}")
+                return  # 使用默认值
+
+            with open(file_path, 'r') as f:
+                encrypted_data = f.read()
+            decrypted_data = decrypt_data(encrypted_data)
+            data = json.loads(decrypted_data)
+            
+            # 自动更新从文件读取到的参数
+            for key, value in data.items():
+                if hasattr(self, key):
+                    setattr(self, key, value)
+            
+            # 更新 chat_config，保留默认值
+            if 'chat_config' in data:
+                self.chat_config.update(data['chat_config'])
+
+        except Exception as e:
+            LOGGER.error(f"加载配置文件时出错：{str(e)}")
+            # 出错时保留默认值
 
     def save_data_to_file(self):
         self.ensure_valid_history_version()
@@ -44,62 +78,23 @@ class BotSessionManager:
             'current_history_version': self.current_history_version,
             'current_group_history_version': self.current_group_history_version,
             'bot_id_map': self.bot_id_map,
-            'chat_config': self.chat_config
+            'chat_config': self.chat_config,
+            'auto_speak': self.auto_speak
         }
         encrypted_data = encrypt_data(json.dumps(data))
         with open(f"user_config/{self._filename}.encrypt", 'w') as f:
             f.write(encrypted_data)
 
-    def load_data_from_file(self):
-        if not self._filename:
-            LOGGER.error("无法加载：用户名未设置")
-            return
-        try:
-            file_path = f"user_config/{self._filename}.encrypt"
-            if not os.path.exists(file_path):
-                LOGGER.info(f"欢迎新用户: {self._filename}")
-                self.bots = []
-                self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}}]
-                self.group_history_versions = [{'timestamp': datetime.now().isoformat(), 'group_history': []}]
-                self.current_history_version = 0
-                self.current_group_history_version = 0
-                return
-
-            with open(file_path, 'r') as f:
-                encrypted_data = f.read()
-            decrypted_data = decrypt_data(encrypted_data)
-            data = json.loads(decrypted_data)
-            self.bots = data.get('bots', [])
-            self.history_versions = data.get('history_versions', [{'timestamp': datetime.now().isoformat(), 'histories': {}}])
-            self.group_history_versions = data.get('group_history_versions', [{'timestamp': datetime.now().isoformat(), 'group_history': []}])
-            self.current_history_version = data.get('current_history_version', 0)
-            self.current_group_history_version = data.get('current_group_history_version', 0)
-            self.bot_id_map = data.get('bot_id_map', {})
-            self.chat_config = data.get('chat_config', {
-                'history_length': 10,
-                'group_history_length': 20,
-                'force_system_prompt': '',
-                'group_user_prompt': "请你在上面的基础上进一步推导"
-            })
-            self.fix_bot_setting()
-        except Exception as e:
-            LOGGER.error(f"加载配置文件时出错：{str(e)}")
-            self.bots = []
-            self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}}]
-            self.group_history_versions = [{'timestamp': datetime.now().isoformat(), 'group_history': []}]
-            self.current_history_version = 0
-            self.current_group_history_version = 0
-
     def ensure_valid_history_version(self):
         if not self.history_versions:
-            self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}}]
+            self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}, 'name': '新话题'}]
             self.current_history_version = 0
         elif self.current_history_version >= len(self.history_versions):
             self.current_history_version = len(self.history_versions) - 1
 
     def ensure_valid_group_history_version(self):
         if not self.group_history_versions:
-            self.group_history_versions = [{'timestamp': datetime.now().isoformat(), 'group_history': []}]
+            self.group_history_versions = [{'timestamp': datetime.now().isoformat(), 'group_history': [], 'name': '新群聊话题'}]
             self.current_group_history_version = 0
         elif self.current_group_history_version >= len(self.group_history_versions):
             self.current_group_history_version = len(self.group_history_versions) - 1
@@ -335,13 +330,13 @@ class BotSessionManager:
                 for version in self.history_versions]
 
     def clear_all_histories(self):
-        self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}}]
+        self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}, 'name': '新话题'}]
         self.current_history_version = 0
         self.fix_history_names()
         self.save_data_to_file()
 
     def clear_all_group_histories(self):
-        self.group_history_versions = [{'timestamp': datetime.now().isoformat(), 'group_history': []}]
+        self.group_history_versions = [{'timestamp': datetime.now().isoformat(), 'group_history': [], 'name': '新群聊话题'}]
         self.current_group_history_version = 0
         
         # 清理所有机器人的群聊历史

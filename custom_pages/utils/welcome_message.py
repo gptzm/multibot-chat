@@ -17,10 +17,10 @@ def display_welcome_message(bot_manager):
             else:
                 st.markdown("在上方输入框内输入消息，按Enter键即可发送")
         else:
-            if st.button("创建一个Bot并开始聊天", type="primary"):
+            if st.button("创建一个Bot好友并开始聊天", type="primary"):
                 st.session_state.avatar = random.choice(EMOJI_OPTIONS)
                 add_new_bot()
-        st.markdown("您可以添加很多Bot，他们会以接龙的方式和您聊天")
+        st.markdown("您可以添加很多Bot好友，他们会以接龙的方式和您聊天")
         st.markdown("了解更多请访问[MultiBot-Chat开源项目主页](https://gitee.com/gptzm/multibot-chat)")
     with col2:
         if st.session_state.page == "group_page":

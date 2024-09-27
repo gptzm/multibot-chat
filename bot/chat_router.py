@@ -23,11 +23,11 @@ class ChatRouter:
         self.api_key = bot_config.get('api_key', '')
         self.api_password = bot_config.get('api_password', '')
         self.model = bot_config.get('model')
-        if chat_config.get('force_system_prompt', ''):
-            self.system_prompt = chat_config.get('force_system_prompt', '')
+        if chat_config.get('force_system_prompt'):
+            self.system_prompt = chat_config['force_system_prompt']
         else:
             self.system_prompt = bot_config.get('system_prompt', '')
-        self.group_user_prompt = chat_config.get('group_user_prompt', '')
+        self.group_user_prompt = chat_config.get('group_user_prompt', '继续')
         self.group_history_length = chat_config.get('group_history_length', 20)
         self.bot_id = bot_config.get('id', '')
         self.user_id = bot_config.get('user_id', random.randint(100000,999999))
@@ -50,6 +50,8 @@ class ChatRouter:
         """
         
         history = history[-self.history_length:]
+
+        LOGGER.info(f"Sending message with system_prompt: {self.system_prompt}")
 
         if self.engine == 'AzureOpenAI':
             return self._azure_openai_chat(prompt, history)
@@ -116,7 +118,6 @@ class ChatRouter:
 
     def _azure_openai_chat(self, prompt, history):
         try:
-            LOGGER.info("正在执行_azure_openai_chat")
             headers = {
                 "Content-Type": "application/json",
                 "api-key": self.api_key,
@@ -129,7 +130,7 @@ class ChatRouter:
                 ],
                 "temperature": self.temperature,
             }
-
+            
             url = f"{self.api_endpoint}/openai/deployments/{self.model}/chat/completions?api-version=2024-02-01"
             response = requests.post(url, headers=headers, data=json.dumps(data))
 
@@ -145,7 +146,6 @@ class ChatRouter:
     def _chatglm_chat(self, prompt, history):
         try:
             from zhipuai import ZhipuAI
-            LOGGER.info("正在执行_chatglm_chat")
             client = ZhipuAI(api_key=self.api_key)
             
             payload = {

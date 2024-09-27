@@ -33,12 +33,6 @@ class BotManager:
         if bot:
             bot.add_message_to_history(message['role'], message['content'])
 
-    def create_new_history_version(self):
-        for bot in self.bots:
-            bot.clear_history()
-        self.current_history_version += 1
-        # 添加新的历史版本逻辑...
-
     def get_chat_config(self):
         return self.chat_config
 

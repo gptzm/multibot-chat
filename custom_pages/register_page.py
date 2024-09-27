@@ -8,7 +8,7 @@ def register_page():
     new_password = st.text_input("密码", type='password')
     confirm_password = st.text_input("确认密码", type="password")
     
-    if st.button("注册", type='primary', use_container_width=True):
+    if st.button("注 册", type='primary', use_container_width=True):
         if not re.match(r'^[a-zA-Z0-9@\._]{1,32}$', new_user):
             st.error("用户名只能包含字母、数字、@、.和_，长度不能超过32个字符")
         elif new_password != confirm_password:
@@ -28,6 +28,6 @@ def register_page():
         else:
             st.warning("用户名已存在")
     
-    if st.button("登录", use_container_width=True):
+    if st.button("登 录", use_container_width=True):
         st.session_state.page = "login_page"
         st.rerun()

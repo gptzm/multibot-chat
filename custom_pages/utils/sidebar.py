@@ -4,7 +4,9 @@ from bot.bot_session_manager import BotSessionManager
 from config import EMOJI_OPTIONS
 from utils.user_manager import user_manager
 from custom_pages.utils.dialogs import edit_bot, add_new_bot, edit_bot_config
+import logging
 
+LOGGER = logging.getLogger(__name__)
 
 def render_sidebar():
     bot_manager = st.session_state.bot_manager
@@ -26,9 +28,14 @@ def render_sidebar():
 
         with st.expander("聊天设置"):
             new_config = {}
-            new_config['force_system_prompt'] = st.text_area("强制覆盖系统提示词", value=chat_config['force_system_prompt'], height=200, placeholder='不填写则使用每个Bot设置中的系统提示词')
+            force_system_prompt = st.text_area("强制系统提示词", value=chat_config.get('force_system_prompt', ''), key="force_system_prompt", placeholder='强制所有Bot使用此提示词，如果留空则遵循Bot设置')
+            if force_system_prompt != chat_config.get('force_system_prompt'):
+                chat_config['force_system_prompt'] = force_system_prompt
+                bot_manager.update_chat_config(chat_config)
+                bot_manager.save_data_to_file()  # 立即保存到文件
+                LOGGER.info(f"Updated and saved force_system_prompt: {force_system_prompt}")
             if st.session_state.page == "group_page":
-                new_config['group_user_prompt'] = st.text_area("群聊接力提示词", value=chat_config['group_user_prompt'], height=40, placeholder='提示Bot在群聊时应该如何接力，不填写则由每个Bot自由发挥')
+                new_config['group_user_prompt'] = st.text_area("群聊接力提示词", value=chat_config.get('group_user_prompt',''), height=40, placeholder='提示Bot在群聊时应该如何接力，如果留空则让Bot自由发挥')
                 new_config['group_history_length'] = st.slider("群聊携带对话条数", min_value=1, max_value=20, value=chat_config['group_history_length'])
             else:
                 new_config['history_length'] = st.slider("携带对话条数", min_value=1, max_value=20, value=chat_config['history_length'])
@@ -42,7 +49,7 @@ def render_sidebar():
                 current_index = min(bot_manager.current_group_history_version, len(group_history_options) - 1)
                 
                 new_index = st.selectbox(
-                    "切换群聊话题",
+                    "可以回到旧话题继续聊天",
                     options=range(len(group_history_options)),
                     format_func=lambda i: group_history_options[i],
                     index=current_index
@@ -51,6 +58,10 @@ def render_sidebar():
                 if new_index != bot_manager.current_group_history_version:
                     bot_manager.current_group_history_version = new_index
                     bot_manager.save_data_to_file()
+                    st.rerun()
+
+                if st.button("清理所有历史话题", use_container_width=True):
+                    bot_manager.clear_all_group_histories()
                     st.rerun()
 
         else:
@@ -77,7 +88,7 @@ def render_sidebar():
                         bot_manager.save_data_to_file()
 
                     st.selectbox(
-                        "切换话题",
+                        "可以回到旧话题继续聊天",
                         options=range(len(history_options)),
                         format_func=lambda i: history_options[i],
                         index=current_history_version,
@@ -87,11 +98,10 @@ def render_sidebar():
 
                     if st.button("清理所有历史话题", use_container_width=True):
                         bot_manager.clear_all_histories()
-                        st.success("所有历史话题已清理")
                         st.rerun()
 
         if len(st.session_state.bots) > 0:
-            with st.expander("Bot管理", expanded=True):
+            with st.expander("Bot管理"):
                 if not st.session_state.bots:
                     if bot_manager.filename:
                         bot_manager.load_encrypted_bots_from_file()
