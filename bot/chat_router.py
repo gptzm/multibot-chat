@@ -4,6 +4,7 @@ import json
 import logging
 import random
 from openai import OpenAI
+import streamlit as st
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
@@ -26,18 +27,20 @@ class ChatRouter:
             self.system_prompt = chat_config.get('force_system_prompt', '')
         else:
             self.system_prompt = bot_config.get('system_prompt', '')
-        self.history = bot_config.get('history', [])
-        self.bot_id = bot_config.get('bot_id', '')
+        self.group_user_prompt = chat_config.get('group_user_prompt', '')
+        self.group_history_length = chat_config.get('group_history_length', 20)
+        self.bot_id = bot_config.get('id', '')
         self.user_id = bot_config.get('user_id', random.randint(100000,999999))
         self.history_length = chat_config.get('history_length', 10)
         self.temperature = bot_config.get('temperature', 1.0)
     
-    def send_message(self, prompt, input_type='text', image=None, tools=None):
+    def send_message(self, prompt, history, input_type='text', image=None, tools=None):
         """
         发送消息到指定的大模型。
         
         参数:
             prompt (str): 用户输入的文本。
+            history (list): 历史对话记录。
             input_type (str): 输入类型，'text' 或 'image'。
             image (bytes): 如果input_type是'image'，则提供图片的字节数据。
             tools (list): 可选的工具列表，用于增强模型能力。
@@ -45,30 +48,73 @@ class ChatRouter:
         返回:
             response_content (str 或生成器): 模型的回复内容或流式数据。
         """
+        
+        history = history[-self.history_length:]
+
         if self.engine == 'AzureOpenAI':
-            return self._azure_openai_chat(prompt)
+            return self._azure_openai_chat(prompt, history)
         elif self.engine == 'ChatGLM':
-            return self._chatglm_chat(prompt)
+            return self._chatglm_chat(prompt, history)
         elif self.engine == 'CoZe':
-            return self._coze_chat(prompt)
+            return self._coze_chat(prompt, history)
         elif self.engine == 'Qwen':
-            return self._qwen_chat(prompt)
+            return self._qwen_chat(prompt, history)
         elif self.engine == 'Ollama':
-            return self._ollama_chat(prompt)
+            return self._ollama_chat(prompt, history)
         elif self.engine == 'XingHuo':
-            return self._xinghuo_chat(prompt)
+            return self._xinghuo_chat(prompt, history)
         elif self.engine == 'DeepSeek':
-            return self._deepseek_chat(prompt)
+            return self._deepseek_chat(prompt, history)
         elif self.engine == 'Moonshot':
-            return self._moonshot_chat(prompt)
+            return self._moonshot_chat(prompt, history)
         elif self.engine == 'Yi':
-            return self._yi_chat(prompt)
+            return self._yi_chat(prompt, history)
         elif self.engine == 'Groq':
-            return self._groq_chat(prompt)
+            return self._groq_chat(prompt, history)
         else:
             return "不支持的引擎。"
 
-    def _azure_openai_chat(self, prompt,):
+    def send_message_group(self, prompt, group_history, input_type='text', image=None, tools=None):
+        """
+        发送消息到指定的大模型。
+        
+        参数:
+            prompt (str): 用户输入的文本。
+            group_history (list): 群聊历史记录。
+            input_type (str): 输入类型，'text' 或 'image'。
+            image (bytes): 如果input_type是'image'，则提供图片的字节数据。
+            tools (list): 可选的工具列表，用于增强模型能力。
+        
+        返回:
+            response_content (str 或生成器): 模型的回复内容或流式数据。
+        """
+
+        group_history = group_history[-self.group_history_length:]
+
+        if self.engine == 'AzureOpenAI':
+            return self._azure_openai_chat(prompt, group_history)
+        elif self.engine == 'ChatGLM':
+            return self._chatglm_chat(prompt, group_history)
+        elif self.engine == 'CoZe':
+            return self._coze_chat(prompt, group_history)
+        elif self.engine == 'Qwen':
+            return self._qwen_chat(prompt, group_history)
+        elif self.engine == 'Ollama':
+            return self._ollama_chat(prompt, group_history)
+        elif self.engine == 'XingHuo':
+            return self._xinghuo_chat(prompt, group_history)
+        elif self.engine == 'DeepSeek':
+            return self._deepseek_chat(prompt, group_history)
+        elif self.engine == 'Moonshot':
+            return self._moonshot_chat(prompt, group_history)
+        elif self.engine == 'Yi':
+            return self._yi_chat(prompt, group_history)
+        elif self.engine == 'Groq':
+            return self._groq_chat(prompt, group_history)
+        else:
+            return "不支持的引擎。"
+
+    def _azure_openai_chat(self, prompt, history):
         try:
             LOGGER.info("正在执行_azure_openai_chat")
             headers = {
@@ -78,7 +124,7 @@ class ChatRouter:
             data = {
                 "messages": [
                     {"role": "system", "content": self.system_prompt},
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ],
                 "temperature": self.temperature,
@@ -96,7 +142,7 @@ class ChatRouter:
         except Exception as e:
             return "AzureOpenAI API 调用出错: " + str(e)
     
-    def _chatglm_chat(self, prompt):
+    def _chatglm_chat(self, prompt, history):
         try:
             from zhipuai import ZhipuAI
             LOGGER.info("正在执行_chatglm_chat")
@@ -106,7 +152,7 @@ class ChatRouter:
                 "model": self.model or "glm-4",
                 "messages": [
                     {"role": "system", "content": self.system_prompt},
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ],
                 "temperature": self.temperature,
@@ -125,7 +171,7 @@ class ChatRouter:
             LOGGER.error(f"ChatGLM API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
-    def _coze_chat(self, prompt):
+    def _coze_chat(self, prompt, history):
         # 实现与CoZe的交互
         
         try:
@@ -133,7 +179,7 @@ class ChatRouter:
                 "bot_id": str(self.bot_id),
                 "user": str(self.user_id),
                 "query": prompt,
-                "chat_history": self.history[-self.history_length:],
+                "chat_history": history[-self.history_length:],
                 "stream": False,
             }
             headers = {
@@ -158,7 +204,7 @@ class ChatRouter:
         except Exception as e:
             return "错误: " + str(e)
     
-    def _qwen_chat(self, prompt):
+    def _qwen_chat(self, prompt, history):
         # 实现与Qwen的交互
         try:
             client = OpenAI(
@@ -169,12 +215,12 @@ class ChatRouter:
             if self.system_prompt:
                 messages = [
                     {"role": "system", "content": self.system_prompt},
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ]
             else:
                 messages = [
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ]
 
@@ -196,7 +242,7 @@ class ChatRouter:
             LOGGER.error(f"Qwen API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
     
-    def _xinghuo_chat(self, prompt):
+    def _xinghuo_chat(self, prompt, history):
         # 实现与星火的交互
         try:
             client = OpenAI(
@@ -207,12 +253,12 @@ class ChatRouter:
             if self.system_prompt:
                 messages = [
                     {"role": "system", "content": self.system_prompt},
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ]
             else:
                 messages = [
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ]
 
@@ -234,7 +280,7 @@ class ChatRouter:
             LOGGER.error(f"Xinghuo API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
-    def _deepseek_chat(self, prompt):
+    def _deepseek_chat(self, prompt, history):
         # 实现与DeepSeek的交互
         try:
             client = OpenAI(
@@ -245,12 +291,12 @@ class ChatRouter:
             if self.system_prompt:
                 messages = [
                     {"role": "system", "content": self.system_prompt},
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ]
             else:
                 messages = [
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ]
 
@@ -272,7 +318,7 @@ class ChatRouter:
             LOGGER.error(f"DeepSeek API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
-    def _moonshot_chat(self, prompt):
+    def _moonshot_chat(self, prompt, history):
         # 实现与Moonshot的交互
         try:
             client = OpenAI(
@@ -283,12 +329,12 @@ class ChatRouter:
             if self.system_prompt:
                 messages = [
                     {"role": "system", "content": self.system_prompt},
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ]
             else:
                 messages = [
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ]
 
@@ -310,7 +356,7 @@ class ChatRouter:
             LOGGER.error(f"Moonshot API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
-    def _yi_chat(self, prompt):
+    def _yi_chat(self, prompt, history):
         # 实现与Qwen的交互
         try:
             client = OpenAI(
@@ -321,12 +367,12 @@ class ChatRouter:
             if self.system_prompt:
                 messages = [
                     {"role": "system", "content": self.system_prompt},
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ]
             else:
                 messages = [
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ]
 
@@ -348,7 +394,7 @@ class ChatRouter:
             LOGGER.error(f"Yi API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
-    def _groq_chat(self, prompt):
+    def _groq_chat(self, prompt, history):
         # 实现与Qwen的交互
         try:
             client = OpenAI(
@@ -359,12 +405,12 @@ class ChatRouter:
             if self.system_prompt:
                 messages = [
                     {"role": "system", "content": self.system_prompt},
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ]
             else:
                 messages = [
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ]
 
@@ -386,7 +432,7 @@ class ChatRouter:
             LOGGER.error(f"Yi API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
-    def _ollama_chat(self, prompt):
+    def _ollama_chat(self, prompt, history):
         # 实现与Ollama的交互
         try:
             client = OpenAI(
@@ -397,12 +443,12 @@ class ChatRouter:
             if self.system_prompt:
                 messages = [
                     {"role": "system", "content": self.system_prompt},
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ]
             else:
                 messages = [
-                    *self.history[-self.history_length:],
+                    *history,
                     {"role": "user", "content": prompt},
                 ]
 
@@ -445,9 +491,3 @@ class ChatRouter:
             history (list): 历史对话记录。
         """
         return self.history
-
-    def clear_history(self):
-        """
-        清空历史记录。
-        """
-        self.history = []

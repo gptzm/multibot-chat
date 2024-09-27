@@ -1,6 +1,8 @@
 import os
 import tempfile
 import streamlit as st
+import logging
+from bot.config import ENGINE_CONFIG
 
 # token 的过期时间（以秒为单位）
 # 默认为 86400 秒（1天）
@@ -23,5 +25,13 @@ SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'
 # 用户数据文件的路径
 USER_DATA_FILE = 'users.json'
 
-# 日志级别
+# 表情选项
+EMOJI_OPTIONS = ["🤖", "🦾", "🧠", "💡", "🔮", "🎭", "🦄", "🐼", "🦊", "🐶", "🐱", "🦁", "🐯", "🐻", "🐨", "😄", "🤡", "👻", "😈", "🤠", "🙊", "😽", "👽", "🧑‍🎓", "🧑‍💼", "🧑‍🎨", "🧑‍✈️", "🥷"]
+
+# 引擎选项
+ENGINE_OPTIONS = list(ENGINE_CONFIG.get('engines', {}).keys())
+
+# 日志设置
 LOG_LEVEL = 'INFO'
+logging.basicConfig(level=LOG_LEVEL)
+LOGGER = logging.getLogger(__name__)
