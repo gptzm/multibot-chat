@@ -51,14 +51,14 @@ MultiBot Chat 提供了方便的批量管理功能，让用户可以轻松控制
 
 1. 克隆仓库：
 ``` bash
-git clone https://github.com/yourusername/multibot-chat.git
+git clone https://gitee.com/gptzm/multibot-chat.git
 cd multibot-chat
 ```
 
 2. 创建并激活虚拟环境（可选但推荐）：
 ``` bash
-python -m venv venv
-source venv/bin/activate # 在 Windows 上使用 venv\Scripts\activate
+conda create -n multibot-chat python=3.11
+conda activate multibot-chat
 ```
 
 3. 安装依赖：
