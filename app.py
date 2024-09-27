@@ -1,13 +1,12 @@
 # *-* coding:utf-8 *-*
 import streamlit as st
 import os
-import utils.logging_utils as logging_utils
 import importlib
 from utils.user_manager import user_manager  # 确保这行导入存在
+from config import LOGGER
+from bot.bot_session_manager import BotSessionManager
 
 st.set_page_config(page_title="多Bot聊天", page_icon="🤖", layout="wide")
-
-LOGGER = logging_utils.setup_logging()
 
 def load_page(page_name):
     module = importlib.import_module(f"custom_pages.{page_name}")
@@ -16,14 +15,33 @@ def load_page(page_name):
 if __name__ == "__main__":
     if not os.path.exists("user_config"):
         os.makedirs("user_config")
+    
+    # 初始化会话状态
+    if 'logged_in' not in st.session_state:
+        st.session_state.logged_in = False
+    if 'username' not in st.session_state:
+        st.session_state.username = ''
+    if 'page' not in st.session_state:
+        st.session_state.page = "login_page"
+
+    # 处理 URL 参数中的 token
     query_params = st.query_params
     if 'token' in query_params:
         token = query_params['token']
-        st.session_state['token'] = token
         if user_manager.verify_token(token):
+            st.session_state['token'] = token
             st.session_state.logged_in = True
             st.session_state.username = user_manager.get_logged_in_username()
-            LOGGER.info(f"使用token登录. Username: {st.session_state.username}")
+            bot_manager = BotSessionManager(st.session_state.username)
+            bot_manager.fix_history_names()
+            bot_manager.fix_group_history_names()
+            st.session_state.bot_manager = bot_manager
+            st.session_state.bots = bot_manager.bots
+            st.session_state.group_history_versions = bot_manager.group_history_versions
+            st.session_state.current_group_history_version = bot_manager.current_group_history_version
+            st.session_state.chat_config = bot_manager.get_chat_config()
+            st.session_state.current_history_version = bot_manager.current_history_version
+            LOGGER.info(f"使用token登录成功. Username: {st.session_state.username}")
         else:
             LOGGER.warning("无效的token")
             st.session_state.logged_in = False
@@ -33,18 +51,15 @@ if __name__ == "__main__":
         st.session_state.logged_in = False
         st.session_state.username = ''
 
-    if 'page' not in st.session_state:
-        st.session_state['page'] = "login_page"
-    
-    if 'logged_in' not in st.session_state:
-        st.session_state['logged_in'] = False
-
     col_empty, col_center, col_empty = st.columns([1, 1, 1], gap="small")
     if st.session_state.logged_in:
         if st.session_state.page == "change_password_page":
             change_password_page = load_page("change_password_page")
             with col_center:
                 change_password_page()
+        elif st.session_state.page == "group_page":
+            group_page = load_page("group_page")
+            group_page()
         else:
             main_page = load_page("main_page")
             main_page()
@@ -54,6 +69,7 @@ if __name__ == "__main__":
             with col_center:
                 register_page()
         else:
+            st.session_state.page = "login_page"
             login_page = load_page("login_page")
             with col_center:
                 login_page()
