@@ -1,9 +1,6 @@
 # *-* coding:utf-8 *-*
 import streamlit as st
 import random
-from utils.chat_utils import get_response_from_bot, display_chat
-from bot.bot_session_manager import BotSessionManager
-from utils.user_manager import user_manager
 from bot.config import ENGINE_CONFIG
 from config import EMOJI_OPTIONS, ENGINE_OPTIONS, LOGGER
 import json

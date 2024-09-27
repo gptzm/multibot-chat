@@ -1,7 +1,6 @@
 # *-* coding:utf-8 *-*
 import streamlit as st
 import logging
-from bot.bot_session_manager import BotSessionManager
 from utils.user_manager import user_manager
 from config import LOGGER
 from custom_pages.utils.sidebar import render_sidebar

@@ -1,6 +1,5 @@
 import streamlit as st
 import random
-from bot.bot_session_manager import BotSessionManager
 from config import EMOJI_OPTIONS
 from utils.user_manager import user_manager
 from custom_pages.utils.dialogs import edit_bot, add_new_bot, edit_bot_config
