@@ -23,9 +23,8 @@ def display_welcome_message(bot_manager):
         st.markdown("您可以添加很多Bot，他们会以接龙的方式和您聊天")
         st.markdown("了解更多请访问[MultiBot-Chat开源项目主页](https://gitee.com/gptzm/multibot-chat)")
     with col2:
-        st.markdown("## 主要功能")
-
         if st.session_state.page == "group_page":
+            st.markdown("## 群聊模式")
             st.markdown("""
             - 创建多个AI聊天机器人，让它们在群聊中接龙讨论
             - 观察不同Bot如何合作完成一个复杂话题
@@ -33,10 +32,11 @@ def display_welcome_message(bot_manager):
             - 比较不同模型在群聊中的表现和互动方式
             - 自定义Bot的角色和专长，探索多样化的群聊动态
             """)
-            if st.button("返回单聊模式", key="goto_main_page"):
+            if st.button("返回对话模式", key="goto_main_page"):
                 st.session_state.page = "main_page"
                 st.rerun()
         else:
+            st.markdown("## 对话模式")
             st.markdown("""
             - 创建多个AI聊天机器人，对比不同的system prompt
             - 同时与多个Bot进行对话，直观比较不同模型的回答

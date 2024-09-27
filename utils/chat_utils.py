@@ -34,13 +34,14 @@ def get_response_from_bot_group(prompt, bot, chat_config, group_history):
     response_content = chat_router.send_message_group(prompt, group_history)
     return response_content
 
-def display_chat(bot, history):
-    if not bot:
-        return
-
-    bot_html = f"""
+def get_chat_container_style():
+    return f"""
     <style>
+        .message:hover .copy-button {{
+            display: inline-block;
+        }}
         .copy-button {{
+            display: none;
             font-size: 1.2em;
             margin: 0 8px;
             border: none;
@@ -111,7 +112,15 @@ def display_chat(bot, history):
             padding: 10px;
         }}
     </style>
-    <div id='chat-container-{bot['id']}' class='chat-container'>
+    """
+
+def display_chat(bot, history):
+    if not bot:
+        return
+
+    bot_html = f"""
+        {get_chat_container_style()}
+        <div id='chat-container-{bot['id']}' class='chat-container'>
     """
 
     for entry in history:
@@ -123,7 +132,7 @@ def display_chat(bot, history):
         random_id = str(random.randint(100000000000, 999999999999))
 
         if entry['role'] == 'user':
-            bot_html += f"""<div class='message-user'>
+            bot_html += f"""<div class='message message-user'>
                                 <div style='display: flex; align-items: flex-end; max-width: 70%;'>
                                     <button onclick="copy_{random_id}(this)" class="copy-button">📋</button>
                                     <div class='message-user-content'>
@@ -134,7 +143,7 @@ def display_chat(bot, history):
                             </div>"""
             
         if entry['role'] == 'assistant':
-            bot_html += f"""<div class='message-assistant'>
+            bot_html += f"""<div class='message message-assistant'>
                             <div class='bot-avatar'>{bot.get('avatar', '🤖')}</div>
                             <div style='display: flex; align-items: flex-end; max-width: 70%;'>
                                 <div class='message-assistant-content'>
@@ -173,79 +182,8 @@ def display_chat(bot, history):
 
 def display_group_chat(bots, history):
     bot_html = f"""
-    <style>
-        .copy-button {{
-            font-size: 1.2em;
-            margin: 0 8px;
-            border: none;
-            border-radius: 5px;
-            padding: 2px;
-            cursor: pointer;
-            transition: all 0.3s;
-            background-color: #f8f8f800;
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-        }}
-        .copy-button:hover {{
-            background-color: #f0f0f0;
-        }}
-        .copy-button:active {{
-            background-color: #e0e0e0;
-        }}
-        .chat-container {{
-            border: 1px solid #ccc;
-            min-height: 10em;
-            border-radius: 10px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            height: 360px;
-            overflow-y: scroll;
-        }}
-        .message-user {{
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 10px;
-        }}
-        .message-user-content {{
-            background-color: #e0ffe0;
-            border-radius: 10px;
-            padding: 10px;
-        }}
-        .user-avatar {{
-            background-color: #eee;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-left: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 32px;
-        }}
-        .message-assistant {{
-            display: flex;
-            margin-bottom: 10px;
-        }}
-        .bot-avatar {{
-            background-color: #eee;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 32px;
-        }}
-        .message-assistant-content {{
-            background-color: #f0f0f0;
-            border-radius: 10px;
-            padding: 10px;
-        }}
-    </style>
-    <div id='group-chat-container' class='chat-container'>
+        {get_chat_container_style()}
+        <div id='group-chat-container' class='chat-container'>
     """
 
     for entry in history:
@@ -260,7 +198,7 @@ def display_group_chat(bots, history):
         random_id = str(random.randint(100000000000, 999999999999))
 
         if role == 'user':
-            bot_html += f"""<div class='message-user'>
+            bot_html += f"""<div class='message message-user'>
                                 <div style='display: flex; align-items: flex-end; max-width: 70%;'>
                                     <button onclick="copy_{random_id}(this)" class="copy-button">📋</button>
                                     <div class='message-user-content'>
@@ -273,7 +211,7 @@ def display_group_chat(bots, history):
             bot = next((b for b in bots if b['id'] == bot_id), None)
             if bot:
                 avatar = bot.get('avatar', '🤖')
-                bot_html += f"""<div class='message-assistant'>
+                bot_html += f"""<div class='message message-assistant'>
                                 <div class='bot-avatar'>{avatar}</div>
                                 <div style='display: flex; align-items: flex-end; max-width: 70%;'>
                                     <div class='message-assistant-content'>
