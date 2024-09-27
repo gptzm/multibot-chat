@@ -101,7 +101,12 @@ def display_group_chat_area(bot_manager, show_bots, histories):
         if histories:
             participating_bots = bot_manager.get_participating_bots_in_current_group_history()
             display_group_chat(participating_bots, histories)
-    
+            
+            # 添加删除最近回复的按钮
+            if histories:
+                if st.button(f"删除最后一条的回复", key="delete_last_reply"):
+                    bot_manager.remove_last_group_message()
+                    st.rerun()
     with col2:
         enabled_bots = [bot for bot in show_bots if bot['enable']]
         disabled_bots = [bot for bot in show_bots if not bot['enable']]
