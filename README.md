@@ -113,6 +113,8 @@ conda activate multibot-chat
 3. 安装依赖：
 ``` bash
 pip install -r requirements.txt
+# 如果下载慢，可以使用清华源：
+# pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
 ## 配置
