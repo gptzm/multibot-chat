@@ -29,7 +29,7 @@ def main_page():
         col1, col2 = st.columns([9, 1], gap="small")
         
         with col1:
-            prompt = st.chat_input("按Enter键发送消息，按Shift+Enter键可换行")
+            prompt = st.chat_input("按Enter发送消息，按Shift+Enter换行")
             if prompt and not enabled_bots:
                 st.warning("请至少启用一个机器人，才能进行对话")
 
