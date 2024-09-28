@@ -6,6 +6,7 @@ import random
 from config import EMOJI_OPTIONS, ENGINE_OPTIONS
 import importlib
 from tools.tool import get_tools, get_tool
+from collections import OrderedDict
 
 def display_active_bots(bot_manager, prompt, show_bots):
     num_bots = len(show_bots)
@@ -114,7 +115,11 @@ def display_group_chat_area(bot_manager, show_bots, histories):
             # 添加工具箱
             st.markdown("### 工具箱")
             tool_cols = st.columns(4)
-            for i, (tool_folder, tool_info) in enumerate(get_tools().items()):  
+            
+            # 对工具进行排序
+            sorted_tools = OrderedDict(sorted(get_tools().items(), key=lambda x: x[1]["name"]))
+            
+            for i, (tool_folder, tool_info) in enumerate(sorted_tools.items()):  
                 with tool_cols[i % 4]:
                     if st.button(tool_info["name"], use_container_width=True, key=f"use_tool_{i}", help=tool_info["description"]):
                         use_tool(tool_folder)
