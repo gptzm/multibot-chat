@@ -29,14 +29,11 @@ def run(content, group_prompt, group_history):
     if not urls:
         return "未找到有效的URL。"
     
-    url = urls[0]
-    
-    try:
-        response = requests.get(url)
+    for url in urls:
+        try:
+            response = requests.get(url)
+            content = get_html_text(response.content)
+            return content
         
-        content = get_html_text(response.content)
-
-        return content
-    
-    except requests.RequestException as e:
-        return f"提取网页内容时发生错误: {str(e)}"
+        except requests.RequestException as e:
+            return f"提取网页内容时发生错误: {str(e)}"

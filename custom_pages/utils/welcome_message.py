@@ -4,7 +4,7 @@ from config import EMOJI_OPTIONS
 from custom_pages.utils.dialogs import add_new_bot
 
 def display_welcome_message(bot_manager):
-    col1, col2 = st.columns([1,1], gap="small")
+    col1, col2 = st.columns([1,1], gap="large")
     with col1:
         st.markdown("## 快速开始")
         if st.session_state.bots:

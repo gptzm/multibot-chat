@@ -33,8 +33,6 @@ def group_page():
         
         with col1:
             prompt = st.chat_input("按Enter键发送消息，按Shift+Enter键可换行")
-            if prompt and not enabled_bots:
-                st.toast("请先添加 Bot")
 
         with col2:
             if st.button("新群聊", use_container_width=True):
@@ -46,7 +44,7 @@ def group_page():
     with output_box:
         group_history = bot_manager.get_current_group_history()
 
-        if prompt and enabled_bots:
+        if prompt and st.session_state.bots:
             bot_manager.add_message_to_group_history("user", prompt)
             group_history = bot_manager.get_current_group_history()  # 更新群聊历史
             if bot_manager.get_auto_speak():

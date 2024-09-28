@@ -2,7 +2,7 @@ import streamlit as st
 import random
 from config import EMOJI_OPTIONS
 from utils.user_manager import user_manager
-from custom_pages.utils.dialogs import edit_bot, add_new_bot, edit_bot_config, confirm_action
+from custom_pages.utils.dialogs import edit_bot, add_new_bot, edit_bot_config
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -13,16 +13,13 @@ def render_sidebar():
 
     with st.sidebar:
         with st.expander("我的"):
-            st.text(f"当前用户：{st.session_state.username}")
+            st.markdown(f"当前用户：{st.session_state.username}")
+            st.warning("不要把您的密码告诉任何人，以免大模型密钥被盗用！")
             if st.button("修改密码", use_container_width=True):
                 st.session_state.page = "change_password_page"
                 st.rerun()
             if st.button("退出登录", use_container_width=True):
-                if confirm_action("确定要退出登录吗？"):
-                    user_manager.destroy_token()
-                    st.session_state.page = "login_page"
-                    st.session_state.logged_in = False
-                    st.rerun()
+                confirm_action_logout()
             if st.button("编辑配置", use_container_width=True):
                 edit_bot_config()
 
@@ -35,7 +32,7 @@ def render_sidebar():
                 bot_manager.save_data_to_file()  # 立即保存到文件
                 LOGGER.info(f"Updated and saved force_system_prompt: {force_system_prompt}")
             if st.session_state.page == "group_page":
-                new_config['group_user_prompt'] = st.text_area("群聊接力提示词", value=chat_config.get('group_user_prompt','') or '请你发言', height=40, placeholder='提示Bot在群聊时应该如何接力，如果留空则默认为：请你发言')
+                new_config['group_user_prompt'] = st.text_area("群聊接力提示词", value=chat_config.get('group_user_prompt','') or '阅读前面的聊天并发言', height=40, placeholder='提示Bot在群聊时应该如何接力，如果留空则默认为：阅读前面的聊天并发言')
                 new_config['group_history_length'] = st.slider("群聊携带对话条数", min_value=1, max_value=20, value=chat_config['group_history_length'])
             else:
                 new_config['history_length'] = st.slider("携带对话条数", min_value=1, max_value=20, value=chat_config['history_length'])
@@ -61,12 +58,10 @@ def render_sidebar():
                     st.rerun()
 
                 if st.button("清理所有历史话题", use_container_width=True):
-                    if confirm_action("确定要清理所有群聊历史话题吗？此操作不可撤销。"):
-                        bot_manager.clear_all_group_histories()
-                        st.rerun()
+                    confirm_action_clear_grouop_histsorys()
 
         else:
-            if st.session_state.page != "group_page":
+            if st.session_state.page == "main_page":
                 with st.expander("历史话题", expanded=True):
                     history_versions = bot_manager.history_versions
                     history_options = [f"{v['name']}" for v in history_versions]
@@ -98,9 +93,7 @@ def render_sidebar():
                     )
 
                     if st.button("清理所有历史话题", use_container_width=True):
-                        if confirm_action("确定要清理所有历史话题吗？此操作不可撤销。"):
-                            bot_manager.clear_all_histories()
-                            st.rerun()
+                        confirm_action_clear_historys()
 
         if len(st.session_state.bots) > 0:
             with st.expander("Bot管理"):
@@ -129,3 +122,53 @@ def render_sidebar():
                 st.session_state.page = "group_page"
                 bot_manager.set_last_visited_page("group_page")
                 st.rerun()
+
+
+
+@st.dialog('清空所有历史对话', width='small')
+def confirm_action_clear_historys():
+    bot_manager = st.session_state.bot_manager
+    st.markdown('确定要清理所有历史话题吗？')
+    st.warning('此操作不可撤销。', icon="⚠️")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("确认", key="confirm_button", use_container_width=True):
+            bot_manager.clear_all_histories()
+            st.rerun()
+    with col2:
+        if st.button("取消", key="cancel_button", use_container_width=True):
+            st.rerun()
+
+
+@st.dialog('清空所有历史群聊', width='small')
+def confirm_action_clear_grouop_histsorys():
+    bot_manager = st.session_state.bot_manager
+    st.markdown('确定要清理所有群聊历史话题吗？')
+    st.warning('此操作不可撤销。', icon="⚠️")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("确认", key="confirm_button", use_container_width=True):
+            bot_manager.clear_all_group_histories()
+            st.rerun()
+    with col2:
+        if st.button("取消", key="cancel_button", use_container_width=True):
+            st.rerun()
+
+@st.dialog('退出登录', width='small')
+def confirm_action_logout():
+    st.markdown('确定要退出吗？')
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("确认", key="confirm_button", use_container_width=True):
+            # 清除会话状态
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            # 重置必要的状态
+            st.session_state.logged_in = False
+            st.session_state.page = "login_page"
+            # 销毁token
+            user_manager.destroy_token()
+            st.rerun()
+    with col2:
+        if st.button("取消", key="cancel_button", use_container_width=True):
+            st.rerun()

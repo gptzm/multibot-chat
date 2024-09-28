@@ -28,9 +28,9 @@ class BotSessionManager:
             'history_length': 10,
             'group_history_length': 20,
             'force_system_prompt': '',
-            'group_user_prompt': "请你在上面的基础上进一步推导"
+            'group_user_prompt': '',
         }
-        self.last_visited_page = 'main_page'  # 新增参数,默认为main_page
+        self.last_visited_page = 'main_page'
 
         # 加载数据并更新相应的属性
         self.load_data_from_file()
@@ -228,7 +228,7 @@ class BotSessionManager:
         
         # 如果所有机器人都被禁用，给出警告
         if not any(b['enable'] for b in self.bots):
-            st.warning("所有机器人都已被禁用。请至少启用一个机器人以进行对话。")
+            st.warning("所有机器人都已被禁用")
 
         # 更新session_state中的bots
         if 'bots' in st.session_state:

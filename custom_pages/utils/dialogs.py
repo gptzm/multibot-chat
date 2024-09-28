@@ -29,7 +29,7 @@ def edit_bot(bot):
             
             st.markdown(f"**engine:** {bot.get('engine', '')}")
             
-            # 根据配置动态生成输入字段
+            # 根据配置动态生成输字段
             for field in ENGINE_CONFIG['engines'][bot['engine']]['fields']:
                 if field['type'] == 'text':
                     bot[field['name']] = st.text_input(field['label'], value=bot.get(field['name'], ''))
@@ -46,7 +46,7 @@ def edit_bot(bot):
             )
 
         with st.container():
-            col1, col_empty, col2, col3 = st.columns(4, gap="small")
+            col1, col2, col_empty, col3 = st.columns(4, gap="small")
 
             with col1:
                 if st.form_submit_button("保存", use_container_width=True, type="primary"):
@@ -137,21 +137,20 @@ def edit_bot_config():
     st.markdown("<font color='red'><strong>复制以下内容可快速粘贴导入其他账号。注意：其中含有大模型密钥，请妥善保管</strong></font>", unsafe_allow_html=True)
     new_config = st.text_area("Bot配置", value=config_json, height=300)
     
-    if st.button("保存"):
-        try:
-            new_config_dict = json.loads(new_config)
-            if bot_manager.validate_bot_config(new_config_dict):
-                bot_manager.update_bot_config(new_config_dict)
-                st.success("配置已更新")
-                st.rerun()
-            else:
-                st.error("无效的配置格式")
-        except json.JSONDecodeError:
-            st.error("无效的JSON格式")
-
-@st.dialog('确认操作', width='large')
-def confirm_action(message):
-    st.warning(message, icon="⚠️")
-    col_empty, col_center, col_empty = st.columns(3, gap="small")
-    with col_center:
-        return st.button("确认操作", use_container_width=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("保存"):
+            try:
+                new_config_dict = json.loads(new_config)
+                if bot_manager.validate_bot_config(new_config_dict):
+                    bot_manager.update_bot_config(new_config_dict)
+                    st.success("配置已更新")
+                    st.rerun()
+                else:
+                    st.error("无效的配置格式")
+            except json.JSONDecodeError:
+                st.error("无效的JSON格式")
+            st.rerun()
+    with col2:
+        if st.button("取消", key="cancel_button", use_container_width=True):
+            st.rerun()

@@ -23,8 +23,6 @@ if __name__ == "__main__":
         st.session_state.logged_in = False
     if 'username' not in st.session_state:
         st.session_state.username = ''
-    if 'page' not in st.session_state:
-        st.session_state.page = "login_page"
 
     # 处理 URL 参数中的 token
     query_params = st.query_params
@@ -39,6 +37,8 @@ if __name__ == "__main__":
             st.session_state.bots = bot_manager.bots
             st.session_state.group_history_versions = bot_manager.group_history_versions
             st.session_state.current_group_history_version = bot_manager.current_group_history_version
+            if 'page' not in st.session_state:
+                st.session_state.page = bot_manager.get_last_visited_page()
             st.session_state.chat_config = bot_manager.get_chat_config()
             st.session_state.current_history_version = bot_manager.current_history_version
             LOGGER.info(f"使用token登录成功. Username: {st.session_state.username}")
@@ -50,13 +50,12 @@ if __name__ == "__main__":
         st.session_state['token'] = ''
         st.session_state.logged_in = False
         st.session_state.username = ''
+        
+    if 'page' not in st.session_state:
+        st.session_state.page = "login_page"
 
     col_empty, col_center, col_empty = st.columns([1, 1, 1], gap="small")
     if st.session_state.logged_in:
-        if 'page' not in st.session_state:
-            # 使用上次访问的页面作为默认页面
-            st.session_state.page = bot_manager.get_last_visited_page()
-        
         if st.session_state.page == "change_password_page":
             change_password_page = load_page("change_password_page")
             with col_center:
@@ -64,11 +63,16 @@ if __name__ == "__main__":
         elif st.session_state.page == "group_page":
             group_page = load_page("group_page")
             group_page()
-            bot_manager.set_last_visited_page("group_page")
-        else:
+        elif st.session_state.page == "main_page":
             main_page = load_page("main_page")
             main_page()
-            bot_manager.set_last_visited_page("main_page")
+        else:
+            st.session_state.page = "main_page"
+            main_page = load_page("main_page")
+            main_page()
+        
+        # 更新最后访问的页面
+        bot_manager.set_last_visited_page(st.session_state.page)
     else:
         if st.session_state.page == "register_page":
             register_page = load_page("register_page")

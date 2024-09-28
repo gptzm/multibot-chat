@@ -129,10 +129,11 @@ def get_chat_container_style():
         .tips {{
             width: 100%;
             text-align: center;
-            color: gray;
+            color: #bbb;
             user-select: none;
-            margin-top: 5px;
-            margin-bottom: 10px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            margin-bottom: 20px;
         }}
     </style>
     """
@@ -149,7 +150,7 @@ def display_chat(bot, history):
     for entry in history:
         content_markdown = markdown.markdown(
             str(entry['content']),
-            extensions=[NewlineExtension(), "codehilite", "tables", "admonition", "sane_lists", "attr_list","meta", "toc"]
+            extensions=[NewlineExtension(), "codehilite", "tables", "admonition", "sane_lists", "attr_list", "toc"]
         )
         content_markdown_repr = repr(entry['content'])
         random_id = str(random.randint(100000000000, 999999999999))
@@ -283,7 +284,7 @@ def display_group_chat(bots, history):
     if len(group_user_prompt) > 20:
         group_user_prompt = group_user_prompt[:20] + '...'
     if group_user_prompt:
-        bot_html += f'<div class="tips">Bot回复时的提示：{html.escape(group_user_prompt)}</div>'
+        bot_html += f'<div class="tips">Bot接力提示词：{html.escape(group_user_prompt)}</div>'
 
     bot_html += """
         </div>

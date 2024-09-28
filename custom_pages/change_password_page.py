@@ -18,7 +18,6 @@ def change_password_page():
                 st.success("密码修改成功")
             else:
                 st.warning("旧密码错误")
-    with st.sidebar:
         if st.button("返回", use_container_width=True):
             st.session_state.page = "main_page"
             st.rerun()
