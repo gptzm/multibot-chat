@@ -128,7 +128,7 @@ def display_group_chat_area(bot_manager, show_bots, histories):
         disabled_bots = [bot for bot in show_bots if not bot['enable']]
 
         st.markdown("### 幕僚")
-        auto_speak = st.checkbox("幕僚自动发言", value=bot_manager.get_auto_speak())
+        auto_speak = st.toggle("幕僚自动发言", value=bot_manager.get_auto_speak())
         if auto_speak != bot_manager.get_auto_speak():
             bot_manager.set_auto_speak(auto_speak)
             st.rerun()
