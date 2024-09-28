@@ -4,7 +4,7 @@ from bot.chat_router import ChatRouter
 import streamlit.components.v1 as components
 from markdown.extensions import Extension
 from markdown.preprocessors import Preprocessor
-import json
+import html
 import random
 import streamlit as st
 
@@ -121,6 +121,14 @@ def get_chat_container_style():
             margin-top: 5px;
             margin-bottom: 10px;
         }}
+        .tips {{
+            width: 100%;
+            text-align: center;
+            color: gray;
+            user-select: none;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }}
     </style>
     """
 
@@ -224,7 +232,7 @@ def display_group_chat(bots, history):
                 bot_html += f"""<div class='message message-assistant'>
                                 <div class='bot-avatar'>{avatar}</div>
                                 <div style='display: flex; flex-direction: column; max-width: 80%;'>
-                                    <div class='bot-name'>{bot.get('name')}</div>
+                                    <div class='bot-name'>{html.escape(bot.get('name'))}</div>
                                     <div style='display: flex; align-items: flex-end;'>
                                         <div class='message-assistant-content'>
                                             {content_markdown}
@@ -246,6 +254,14 @@ def display_group_chat(bots, history):
                             }}
                         </script>"""
     
+    bot_manager = st.session_state.bot_manager
+    chat_config = bot_manager.get_chat_config()
+    group_user_prompt = chat_config.get('group_user_prompt', '').replace('\n', ' ').replace('\r', ' ')
+    if len(group_user_prompt) > 20:
+        group_user_prompt = group_user_prompt[:20] + '...'
+    if group_user_prompt:
+        bot_html += f'<div class="tips">Bot回复时的提示：{html.escape(group_user_prompt)}</div>'
+
     bot_html += """
         </div>
         <script>
