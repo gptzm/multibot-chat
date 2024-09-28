@@ -27,13 +27,24 @@ def run(content, group_prompt, group_history):
     urls = re.findall(url_pattern, content)
     
     if not urls:
-        return "未找到有效的URL。"
+        return "[ERROR] 未找到有效的URL"
     
-    for url in urls:
+    result_contents = []
+    
+    for idx, url in enumerate(urls):
+        if idx > 10:
+            result_contents.append("[ERROR] 一次最多提取10个链接")
+            
+        if len(result_contents) > 3:
+            result_contents.append("[ERROR] 一次最多解析3个页面")
+
         try:
             response = requests.get(url)
             content = get_html_text(response.content)
-            return content
+            if content:
+                result_contents.append(content)
         
         except requests.RequestException as e:
-            return f"提取网页内容时发生错误: {str(e)}"
+            result_contents.append(f"[ERROR] 提取网页内容时发生错误: {str(e)}")
+        
+    return '\n\n---\n\n'.join(result_contents) or "没有找到可用的内容"
