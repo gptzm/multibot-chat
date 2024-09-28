@@ -42,7 +42,6 @@ def run(parameter, content, group_prompt, group_history):
     
     for idx, url in enumerate(urls):
         if idx > max_url_count:
-            result_contents.append(f"[ERROR] 一次最多提取{max_url_count}个链接")
             break
 
         try:
