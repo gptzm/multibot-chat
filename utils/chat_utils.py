@@ -167,7 +167,7 @@ def display_chat(bot, history):
                                 <div class='message-assistant-content'>
                                     {content_markdown}
                                 </div>
-                                <button onclick="copy_{random_id}(this)" class="copy-button">📋</button>
+                                <button onclick="copy_{random_id}(this)" ontouch="copy_{random_id}(this)" class="copy-button">📋</button>
                             </div>
                         </div>"""
         
@@ -237,7 +237,7 @@ def display_group_chat(bots, history):
                                         <div class='message-assistant-content'>
                                             {content_markdown}
                                         </div>
-                                        <button onclick="copy_{random_id}(this)" class="copy-button">📋</button>
+                                        <button onclick="copy_{random_id}(this)" ontouch="copy_{random_id}(this)" class="copy-button">📋</button>
                                     </div>
                                 </div>
                             </div>"""

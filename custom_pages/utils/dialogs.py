@@ -49,8 +49,8 @@ def edit_bot(bot):
             col1, col_empty, col2, col3 = st.columns(4, gap="small")
 
             with col1:
-                if st.form_submit_button("删除", use_container_width=True):
-                    bot_manager.delete_bot(bot)
+                if st.form_submit_button("保存", use_container_width=True, type="primary"):
+                    bot_manager.update_bot(bot)
                     st.rerun()
 
             with col2:
@@ -59,8 +59,8 @@ def edit_bot(bot):
                     st.rerun()
 
             with col3:
-                if st.form_submit_button("保存", use_container_width=True, type="primary"):
-                    bot_manager.update_bot(bot)
+                if st.form_submit_button("删除", use_container_width=True):
+                    bot_manager.delete_bot(bot)
                     st.rerun()
 
 @st.dialog('新增机器人', width='large')
