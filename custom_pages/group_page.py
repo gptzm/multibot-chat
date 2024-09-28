@@ -49,7 +49,7 @@ def group_page():
         if prompt and enabled_bots:
             bot_manager.add_message_to_group_history("user", prompt)
             group_history = bot_manager.get_current_group_history()  # 更新群聊历史
-            if st.session_state.get('auto_speak',True):
+            if bot_manager.get_auto_speak():
                 for bot in enabled_bots:
                     group_user_prompt = bot_manager.get_chat_config().get('group_user_prompt')
                     response_content = get_response_from_bot_group(group_user_prompt, bot, group_history)

@@ -53,6 +53,10 @@ if __name__ == "__main__":
 
     col_empty, col_center, col_empty = st.columns([1, 1, 1], gap="small")
     if st.session_state.logged_in:
+        if 'page' not in st.session_state:
+            # 使用上次访问的页面作为默认页面
+            st.session_state.page = bot_manager.get_last_visited_page()
+        
         if st.session_state.page == "change_password_page":
             change_password_page = load_page("change_password_page")
             with col_center:
@@ -60,9 +64,11 @@ if __name__ == "__main__":
         elif st.session_state.page == "group_page":
             group_page = load_page("group_page")
             group_page()
+            bot_manager.set_last_visited_page("group_page")
         else:
             main_page = load_page("main_page")
             main_page()
+            bot_manager.set_last_visited_page("main_page")
     else:
         if st.session_state.page == "register_page":
             register_page = load_page("register_page")

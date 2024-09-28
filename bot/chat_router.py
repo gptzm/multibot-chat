@@ -92,6 +92,8 @@ class ChatRouter:
         """
 
         group_history = group_history[-self.group_history_length:]
+        if not self.group_user_prompt:
+            return '请在侧边栏设置Bot接力提示词'
 
         if self.engine == 'AzureOpenAI':
             return self._azure_openai_chat(prompt, group_history)

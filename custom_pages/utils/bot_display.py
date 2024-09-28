@@ -4,6 +4,9 @@ from custom_pages.utils.dialogs import edit_bot, add_new_bot
 from datetime import datetime, date
 import random
 from config import EMOJI_OPTIONS, ENGINE_OPTIONS
+from tools.config import TOOLS
+import importlib
+import json
 
 def display_active_bots(bot_manager, prompt, show_bots):
     num_bots = len(show_bots)
@@ -108,11 +111,24 @@ def display_group_chat_area(bot_manager, show_bots, histories):
                     bot_manager.remove_last_group_message()
                     st.rerun()
     with col2:
+        if TOOLS:
+            # 添加工具箱
+            st.markdown("### 工具箱")
+            tool_cols = st.columns(4)
+            for i, (tool_name, tool_display_name) in enumerate(TOOLS.items()):  
+                with tool_cols[i % 4]:
+                    if st.button(tool_display_name, use_container_width=True, key=f"use_tool_{i}", help=f'tools/{tool_name}'):
+                        use_tool(tool_name)
+
         enabled_bots = [bot for bot in show_bots if bot['enable']]
         disabled_bots = [bot for bot in show_bots if not bot['enable']]
 
         st.markdown("### 幕僚")
-        st.session_state.auto_speak = st.checkbox("幕僚自动发言", value=True)
+        auto_speak = st.checkbox("幕僚自动发言", value=bot_manager.get_auto_speak())
+        if auto_speak != bot_manager.get_auto_speak():
+            bot_manager.set_auto_speak(auto_speak)
+            st.rerun()
+
         if enabled_bots:
             num_bots = len(enabled_bots)
             num_cols = min(2, num_bots)
@@ -122,9 +138,9 @@ def display_group_chat_area(bot_manager, show_bots, histories):
             for i, bot in enumerate(enabled_bots):
                 col = cols[i % num_cols]
                 with col:
-                    if st.button(f"{bot.get('avatar', '🤖')} {bot['name']}\n\n{bot['engine']} {bot['model']}", key=f"group_bot_{bot['id']}", use_container_width=True):
-                        chat_config = bot_manager.get_chat_config()
-                        group_user_prompt = chat_config.get('group_user_prompt')
+                    chat_config = bot_manager.get_chat_config()
+                    group_user_prompt = chat_config.get('group_user_prompt')
+                    if st.button(f"{bot.get('avatar', '🤖')} {bot['name']}\n\n{bot['engine']} {bot['model']}", key=f"group_bot_{bot['id']}", help=bot.get('system_prompt'), use_container_width=True):
                         response_content = get_response_from_bot_group(group_user_prompt, bot, histories)
                         bot_manager.add_message_to_group_history("assistant", response_content, bot=bot)
                         bot_manager.save_data_to_file()
@@ -141,16 +157,15 @@ def display_group_chat_area(bot_manager, show_bots, histories):
             for i, bot in enumerate(disabled_bots):
                 col = cols[i % num_cols]
                 with col:
-                    if st.button(f"{bot.get('avatar', '🤖')} {bot['name']}\n\n{bot['engine']} {bot['model']}", key=f"group_bot_{bot['id']}", use_container_width=True):
-                        chat_config = bot_manager.get_chat_config()
-                        group_user_prompt = chat_config.get('group_user_prompt')
+                    if st.button(f"{bot.get('avatar', '🤖')} {bot['name']}\n\n{bot['engine']} {bot['model']}", key=f"group_bot_{bot['id']}", help=bot.get('system_prompt'), use_container_width=True):
                         response_content = get_response_from_bot_group(group_user_prompt, bot, histories)
                         bot_manager.add_message_to_group_history("assistant", response_content, bot=bot)
                         bot_manager.save_data_to_file()
                         st.rerun()
 # 辅助函数保持不变
 def show_bot_avatar(bot):
-    if st.button(bot.get('avatar', '') or '🤖', key=f"__avatar_edit_bot_{bot['id']}"):
+    bot_manager = st.session_state.bot_manager
+    if st.button(bot.get('avatar', '') or '🤖', key=f"__avatar_edit_bot_{bot['id']}", help=bot.get('system_prompt')):
         edit_bot(bot)
 
 def show_bot_title(bot):
@@ -166,3 +181,27 @@ def show_toggle_bot_enable(bot):
         return update_bot_enable
 
     st.toggle("启用 / 禁用", value=bot['enable'], key=f"toggle_{bot['id']}", on_change=make_update_bot_enable(bot['id']))
+
+
+def use_tool(tool_name):
+    bot_manager = st.session_state.bot_manager
+
+    # 读取工具配置
+    with open(f"tools/{tool_name}/config.json", "r", encoding="utf-8") as f:
+        tool_config = json.load(f)
+    
+    # 动态导入工具模块
+    tool_module = importlib.import_module(f"tools.{tool_name}.{tool_config['main_file'][:-3]}")
+    
+    # 获取最后一条消息内容
+    group_history = bot_manager.get_current_group_history()
+    last_message = group_history[-1]['content'] if group_history else ""
+    
+    # 调用工具
+    result = tool_module.run(last_message, st.session_state.chat_config.get('group_user_prompt', ''), group_history)
+    
+    # 将工具结果添加到群聊历史
+    bot_manager.add_message_to_group_history("assistant", result, tool=tool_config)
+    
+    
+    st.rerun()

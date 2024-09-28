@@ -30,6 +30,7 @@ class BotSessionManager:
             'force_system_prompt': '',
             'group_user_prompt': "请你在上面的基础上进一步推导"
         }
+        self.last_visited_page = 'main_page'  # 新增参数,默认为main_page
 
         # 加载数据并更新相应的属性
         self.load_data_from_file()
@@ -61,6 +62,9 @@ class BotSessionManager:
             if 'chat_config' in data:
                 self.chat_config.update(data['chat_config'])
 
+            if 'last_visited_page' in data:
+                self.last_visited_page = data['last_visited_page']
+
         except Exception as e:
             LOGGER.error(f"加载配置文件时出错：{str(e)}")
             # 出错时保留默认值
@@ -87,7 +91,8 @@ class BotSessionManager:
             'current_group_history_version': self.current_group_history_version,
             'bot_id_map': self.bot_id_map,
             'chat_config': self.chat_config,
-            'auto_speak': self.auto_speak
+            'auto_speak': self.auto_speak,
+            'last_visited_page': self.last_visited_page
         }
         encrypted_data = encrypt_data(json.dumps(data))
         with open(f"user_config/{self._filename}.encrypt", 'w') as f:
@@ -368,14 +373,18 @@ class BotSessionManager:
     def is_all_current_histories_empty(self):
         return all(not self.get_current_history_by_bot(bot) for bot in st.session_state.bots)
 
-    def add_message_to_group_history(self, role, message, bot={}):
-        if self.current_group_history_version < len(self.group_history_versions):
-            current_version = self.group_history_versions[self.current_group_history_version]
-            current_version['group_history'].append({
-                'bot_id': bot.get('id',''),
-                'role': role,
-                'content': message
-            })
+    def add_message_to_group_history(self, role, content, bot=None, tool=None):
+        message = {
+            "role": role,
+            "content": content,
+            "timestamp": datetime.now().isoformat()
+        }
+        if bot:
+            message["bot_id"] = bot["id"]
+            message["bot_name"] = bot["name"]
+        if tool:
+            message["tool_name"] = tool["name"]
+        self.group_history_versions[self.current_group_history_version]['group_history'].append(message)
         self.save_data_to_file()
 
     def get_current_group_history(self):
@@ -387,7 +396,7 @@ class BotSessionManager:
     def get_participating_bots_in_current_group_history(self):
         if self.current_group_history_version < len(self.group_history_versions):
             current_version = self.group_history_versions[self.current_group_history_version]
-            bot_ids = set(message['bot_id'] for message in current_version['group_history'] if message['role'] == 'assistant')
+            bot_ids = set(message['bot_id'] for message in current_version['group_history'] if message['role'] == 'assistant' and 'bot_id' in message)
             return [bot for bot in self.bots if bot['id'] in bot_ids]
         return []
 
@@ -459,4 +468,18 @@ class BotSessionManager:
             if current_version['group_history']:
                 current_version['group_history'].pop()
                 self.save_data_to_file()
+
+    def get_auto_speak(self):
+        return self.auto_speak
+
+    def set_auto_speak(self, value):
+        self.auto_speak = value
+        self.save_data_to_file()
+
+    def set_last_visited_page(self, page):
+        self.last_visited_page = page
+        self.save_data_to_file()
+    
+    def get_last_visited_page(self):
+        return self.last_visited_page
 

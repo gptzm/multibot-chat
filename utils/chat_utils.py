@@ -7,6 +7,7 @@ from markdown.preprocessors import Preprocessor
 import html
 import random
 import streamlit as st
+import re
 
 
 class NewlineExtension(Extension):
@@ -85,6 +86,8 @@ def get_chat_container_style():
             background-color: #e0ffe0;
             border-radius: 10px;
             padding: 0 15px;
+            overflow-wrap: break-word;
+            word-break: break-all;
         }}
         .user-avatar {{
             background-color: #eee;
@@ -116,6 +119,8 @@ def get_chat_container_style():
             background-color: #f0f0f0;
             border-radius: 10px;
             padding: 0 15px;
+            overflow-wrap: break-word;
+            word-break: break-all;
         }}
         .bot-name {{
             margin-top: 5px;
@@ -208,14 +213,32 @@ def display_group_chat(bots, history):
         bot_id = entry.get('bot_id','')
         role = entry.get('role','')
         content = entry['content']
+        
         content_markdown = markdown.markdown(
             str(content),
-            extensions=[NewlineExtension(), "codehilite", "tables", "admonition", "sane_lists", "attr_list","meta", "toc"]
+            extensions=[NewlineExtension(), "codehilite", "tables", "admonition", "sane_lists", "attr_list", "toc"]
         )
+        
+        LOGGER.info(content)
+        LOGGER.info(content_markdown)
         content_markdown_repr = repr(content)
+        LOGGER.info(content_markdown_repr+'\n\n')
         random_id = str(random.randint(100000000000, 999999999999))
 
-        if role == 'user':
+        if 'tool_name' in entry:
+            bot_html += f"""<div class='message message-assistant'>
+                            <div class='bot-avatar'>🛠️</div>
+                            <div style='display: flex; flex-direction: column; max-width: 80%;'>
+                                <div class='bot-name'>{html.escape(entry['tool_name'])}</div>
+                                <div style='display: flex; align-items: flex-end;'>
+                                    <div class='message-assistant-content'>
+                                        {content_markdown}
+                                    </div>
+                                    <button onclick="copy_{random_id}(this)" ontouch="copy_{random_id}(this)" class="copy-button">📋</button>
+                                </div>
+                            </div>
+                        </div>"""
+        elif role == 'user':
             bot_html += f"""<div class='message message-user'>
                                 <div style='display: flex; align-items: flex-end; max-width: 80%;'>
                                     <button onclick="copy_{random_id}(this)" class="copy-button">📋</button>

@@ -35,7 +35,7 @@ def render_sidebar():
                 bot_manager.save_data_to_file()  # 立即保存到文件
                 LOGGER.info(f"Updated and saved force_system_prompt: {force_system_prompt}")
             if st.session_state.page == "group_page":
-                new_config['group_user_prompt'] = st.text_area("群聊接力提示词", value=chat_config.get('group_user_prompt',''), height=40, placeholder='提示Bot在群聊时应该如何接力，如果留空则让Bot自由发挥')
+                new_config['group_user_prompt'] = st.text_area("群聊接力提示词", value=chat_config.get('group_user_prompt','') or '请你发言', height=40, placeholder='提示Bot在群聊时应该如何接力，如果留空则默认为：请你发言')
                 new_config['group_history_length'] = st.slider("群聊携带对话条数", min_value=1, max_value=20, value=chat_config['group_history_length'])
             else:
                 new_config['history_length'] = st.slider("携带对话条数", min_value=1, max_value=20, value=chat_config['history_length'])
@@ -111,7 +111,7 @@ def render_sidebar():
                 with st.container():
                     for i, bot in enumerate(st.session_state.bots):
                         bot_name_display = f"{bot.get('avatar', '') or '🤖'} **{bot['name']}**" if bot['enable'] else f"{bot.get('avatar', '🤖')} ~~{bot['name']}~~"
-                        if st.button(bot_name_display, key=f"__edit_bot_{i}", use_container_width=True):
+                        if st.button(bot_name_display, key=f"__edit_bot_{i}", help=bot.get('system_prompt'), use_container_width=True):
                             edit_bot(bot)
         
                 if st.button("新增Bot", type="primary", use_container_width=True):
@@ -122,8 +122,10 @@ def render_sidebar():
         if st.session_state.page == "group_page":
             if st.button("返回对话模式",use_container_width=True):
                 st.session_state.page = "main_page"
+                bot_manager.set_last_visited_page("main_page")
                 st.rerun()
         else:
             if st.button("切换到群聊模式",use_container_width=True):
                 st.session_state.page = "group_page"
+                bot_manager.set_last_visited_page("group_page")
                 st.rerun()
