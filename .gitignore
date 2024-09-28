@@ -30,9 +30,6 @@ Thumbs.db
 *.bak
 *.swp
 
-# 个人配置文件（可能包含 API 密钥）
-config.json
-
 # 其他可能包含敏感信息的文件
 *.pem
 *.key

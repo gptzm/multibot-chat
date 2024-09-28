@@ -1,0 +1,5 @@
+{
+    "name": "提取网页",
+    "description": "从链接中提取网页标题和正文",
+    "main_file": "web_extractor.py"
+}
