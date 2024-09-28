@@ -1,5 +1,6 @@
 import os
 import json
+from config import LOGGER
 
 class ToolManager:
     def __init__(self):
@@ -20,8 +21,10 @@ class ToolManager:
                         'config': config,
                         'name': config.get('name', folder),
                         'description': config.get('description', ''),
-                        'main_file': config.get('main_file', '')
+                        'main_file': config.get('main_file', ''),
+                        'parameter': config.get('parameter', {})
                     }
+                    LOGGER.info(f'tools:\n{self.tools}\n\n')
 
     def get_tools(self):
         return self.tools

@@ -1,5 +1,10 @@
 {
     "name": "提取网页",
-    "description": "从链接中提取网页标题和正文",
-    "main_file": "web_extractor.py"
+    "description": "从链接中提取网页标题和正文，最多可以返回3个页面",
+    "main_file": "web_extractor.py",
+    "parameter": {
+        "max_url_count": 3,
+        "min_text_length": 100,
+        "retry_length": 250
+    }
 }

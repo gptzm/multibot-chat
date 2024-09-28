@@ -200,10 +200,13 @@ def use_tool(tool_folder):
         last_message = group_history[-1]['content'] if group_history else ""
         
         # 调用工具
-        result = tool_module.run(last_message, st.session_state.chat_config.get('group_user_prompt', ''), group_history)
+        result = tool_module.run(tool_info.get('config',{}), last_message, st.session_state.chat_config.get('group_user_prompt', ''), group_history)
         
-        # 将工具结果添加到群聊历史
-        bot_manager.add_message_to_group_history("assistant", result, tool=tool_info)
+        if type(result) == list:
+            for message in result:
+                bot_manager.add_message_to_group_history("assistant", message, tool=tool_info)
+        else:
+            bot_manager.add_message_to_group_history("assistant", result, tool=tool_info)
     
     except Exception as e:
         st.error(f"执行工具时出错: {e}")

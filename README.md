@@ -53,7 +53,7 @@ MultiBot Chat 提供了方便的批量管理功能，让用户可以轻松控制
 1. **计算器**：可以计算上一条消息的行数字数，对数字行求和、求均值、求中位数，对文本中的算式做计算。
    ![计算器示例](demo_images/demo_group_page_tool_calculator.png)
 
-2. **提取网页**：可以自动提取网页中的标题和正文部分。
+2. **提取网页**：可以自动提取网页中的标题和正文部分，最多可以返回3个页面。
    ![提取网页示例](demo_images/demo_group_page_tool_web_extractor.png)
 
 通过以上步骤，您可以轻松扩展 MultiBot Chat 的功能，满足您的特定需求。
@@ -68,10 +68,11 @@ MultiBot Chat 提供了方便的批量管理功能，让用户可以轻松控制
 
    示例代码：
    ```python
+   # parameter = "本工具配置信息中的 parameter 参数"
    # content = "上一条消息的内容"
    # group_prompt = "群聊提示词"
    # group_history = "群聊历史记录"
-   def run(content, group_prompt, group_history):
+   def run(parameter, content, group_prompt, group_history):
       
       # 您的自定义工具代码
       pass
