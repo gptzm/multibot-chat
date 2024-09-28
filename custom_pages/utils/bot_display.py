@@ -117,7 +117,7 @@ def display_group_chat_area(bot_manager, show_bots, histories):
             tool_cols = st.columns(4)
             
             # 对工具进行排序
-            sorted_tools = OrderedDict(sorted(get_tools().items(), key=lambda x: x[1]["name"]))
+            sorted_tools = dict(sorted(get_tools().items(), key=lambda x: x[1]["name"]))
             
             for i, (tool_folder, tool_info) in enumerate(sorted_tools.items()):  
                 with tool_cols[i % 4]:
