@@ -1,0 +1,6 @@
+{
+    "name": "MD转纯文本",
+    "description": "将Markdown格式的内容转换为纯文本",
+    "main_file": "markdown_converter.py",
+    "parameter": {}
+}

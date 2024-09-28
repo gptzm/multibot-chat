@@ -1,9 +1,4 @@
 import re
-import logging
-import streamlit as st
-
-logging.basicConfig(level=logging.INFO)
-LOGGER = logging.getLogger(__name__)
 
 def run(parameter, content, group_prompt, group_history):
     try:
