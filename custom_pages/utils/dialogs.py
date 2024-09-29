@@ -2,7 +2,7 @@
 import streamlit as st
 import random
 from bot.config import ENGINE_CONFIG
-from config import EMOJI_OPTIONS, ENGINE_OPTIONS, LOGGER
+from config import EMOJI_OPTIONS, ENGINE_OPTIONS, LOGGER, SHOW_SECRET_INFO
 import json
 
 
@@ -31,6 +31,9 @@ def edit_bot(bot):
             
             # 根据配置动态生成输字段
             for field in ENGINE_CONFIG['engines'][bot['engine']]['fields']:
+                if not SHOW_SECRET_INFO and field.get('is_secret', False):
+                    continue
+                
                 if field['type'] == 'text':
                     bot[field['name']] = st.text_input(field['label'], value=bot.get(field['name'], ''))
                 elif field['type'] == 'password':

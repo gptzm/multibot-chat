@@ -1,6 +1,6 @@
 import streamlit as st
 import random
-from config import EMOJI_OPTIONS
+from config import EMOJI_OPTIONS, SHOW_SECRET_INFO
 from utils.user_manager import user_manager
 from custom_pages.utils.dialogs import edit_bot, add_new_bot, edit_bot_config
 import logging
@@ -20,8 +20,6 @@ def render_sidebar():
                 st.rerun()
             if st.button("退出登录", use_container_width=True):
                 confirm_action_logout()
-            if st.button("编辑配置", use_container_width=True):
-                edit_bot_config()
 
         with st.expander("聊天设置"):
             new_config = {}
@@ -110,6 +108,10 @@ def render_sidebar():
                 if st.button("新增Bot", type="primary", use_container_width=True):
                     st.session_state.avatar = random.choice(EMOJI_OPTIONS)
                     add_new_bot()
+
+                if SHOW_SECRET_INFO or not st.session_state.bots:
+                    if st.button("导入配置", use_container_width=True):
+                        edit_bot_config()
         
 
         if st.session_state.page == "group_page":

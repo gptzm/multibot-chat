@@ -35,6 +35,9 @@ ENGINE_OPTIONS = list(ENGINE_CONFIG.get('engines', {}).keys())
 GROUP_CHAT_EMOJI = "👥"
 PRIVATE_CHAT_EMOJI = "👤"
 
+# 是否显示密钥信息
+SHOW_SECRET_INFO = True
+
 # 日志设置
 LOG_LEVEL = 'INFO'
 logging.basicConfig(level=LOG_LEVEL)

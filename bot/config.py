@@ -1,5 +1,40 @@
 ENGINE_CONFIG = {
   "engines": {
+    "OpenAI": {
+      "fields": [
+        {
+          "name": "model",
+          "label": "模型",
+          "type": "text",
+          "required": True,
+          "default": "gpt-4o",
+        },
+        {
+          "name": "base_url",
+          "label": "Base URL",
+          "type": "text",
+          "required": True,
+          "default": "https://**请更新成你的base_url信息**/v1/chat/completions",
+          "is_secret": True,
+        },
+        {
+          "name": "api_key",
+          "label": "API Key",
+          "type": "password",
+          "required": True,
+          "is_secret": True,
+        },
+        {
+          "name": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 0.0,
+          "max": 2.0,
+          "step": 0.1,
+          "required": True,
+        }
+      ]
+    },
     "AzureOpenAI": {
       "fields": [
         {
@@ -11,16 +46,18 @@ ENGINE_CONFIG = {
         },
         {
           "name": "api_endpoint",
-          "label": "API 端点",
+          "label": "API Endpoint",
           "type": "text",
           "required": True,
           "default": "https://**请更新成你的endpoint信息**.openai.azure.com/",
+          "is_secret": True,
         },
         {
           "name": "api_key",
           "label": "API Key",
           "type": "password",
           "required": True,
+          "is_secret": True,
         },
         {
           "name": "temperature",
@@ -47,6 +84,7 @@ ENGINE_CONFIG = {
           "label": "API Key",
           "type": "password",
           "required": True,
+          "is_secret": True,
         },
         {
           "name": "temperature",
@@ -73,6 +111,7 @@ ENGINE_CONFIG = {
           "label": "API Key",
           "type": "password",
           "required": True,
+          "is_secret": True,
         }
       ]
     },
@@ -90,6 +129,7 @@ ENGINE_CONFIG = {
           "label": "API Key",
           "type": "password",
           "required": True,
+          "is_secret": True,
         },
         {
           "name": "temperature",
@@ -112,8 +152,8 @@ ENGINE_CONFIG = {
           "default": "qwen2.5",
         },
         {
-          "name": "api_endpoint",
-          "label": "API 端点",
+          "name": "base_url",
+          "label": "Base URL",
           "type": "text",
           "required": True,
           "default": "http://127.0.0.1:11434/v1",
@@ -134,6 +174,7 @@ ENGINE_CONFIG = {
           "label": "API Password",
           "type": "password",
           "required": True,
+          "is_secret": True,
         },
         {
           "name": "temperature",
@@ -160,6 +201,7 @@ ENGINE_CONFIG = {
           "label": "API Key",
           "type": "password",
           "required": True,
+          "is_secret": True,
         },
         {
           "name": "temperature",
@@ -186,6 +228,7 @@ ENGINE_CONFIG = {
           "label": "API Key",
           "type": "password",
           "required": True,
+          "is_secret": True,
         },
         {
           "name": "temperature",
@@ -212,6 +255,7 @@ ENGINE_CONFIG = {
           "label": "API Key",
           "type": "password",
           "required": True,
+          "is_secret": True,
         },
         {
           "name": "temperature",
@@ -238,6 +282,7 @@ ENGINE_CONFIG = {
           "label": "API Key",
           "type": "password",
           "required": True,
+          "is_secret": True,
         },
         {
           "name": "temperature",

@@ -16,10 +16,11 @@ class ChatRouter:
         初始化路由器。
         
         参数:
-            bot_config (dict): 机器人配置，包括engine, api_endpoint, api_key, model等。
+            bot_config (dict): 机器人配置，包括engine, base_url, api_key, model等。
         """
         self.engine = bot_config.get('engine', '')
         self.api_endpoint = bot_config.get('api_endpoint', '')
+        self.base_url = bot_config.get('base_url', '')
         self.api_key = bot_config.get('api_key', '')
         self.api_password = bot_config.get('api_password', '')
         self.model = bot_config.get('model')
@@ -115,21 +116,36 @@ class ChatRouter:
             return self._yi_chat(prompt, group_history)
         elif self.engine == 'Groq':
             return self._groq_chat(prompt, group_history)
+        elif self.engine == 'OpenAI':
+            return self._openai_chat(prompt, group_history)
         else:
             return "不支持的引擎。"
 
     def _azure_openai_chat(self, prompt, history):
+        if self.system_prompt:
+            messages = [
+                {"role": "system", "content": self.system_prompt},
+                *history,
+                {"role": "user", "content": prompt},
+            ]
+        else:
+            messages = [
+                *history,
+                {"role": "user", "content": prompt},
+            ]
+        
+        messages = [msg for msg in messages if msg['content']]
+
+        if not messages:
+            return
+        
         try:
             headers = {
                 "Content-Type": "application/json",
                 "api-key": self.api_key,
             }
             data = {
-                "messages": [
-                    {"role": "system", "content": self.system_prompt},
-                    *history,
-                    {"role": "user", "content": prompt},
-                ],
+                "messages": messages,
                 "temperature": self.temperature,
             }
             
@@ -149,14 +165,27 @@ class ChatRouter:
         try:
             from zhipuai import ZhipuAI
             client = ZhipuAI(api_key=self.api_key)
-            
-            payload = {
-                "model": self.model or "glm-4",
-                "messages": [
+        
+            if self.system_prompt:
+                messages = [
                     {"role": "system", "content": self.system_prompt},
                     *history,
                     {"role": "user", "content": prompt},
-                ],
+                ]
+            else:
+                messages = [
+                    *history,
+                    {"role": "user", "content": prompt},
+                ]
+            
+            messages = [msg for msg in messages if msg['content']]
+
+            if not messages:
+                return
+            
+            payload = {
+                "model": self.model or "glm-4",
+                "messages": messages,
                 "temperature": self.temperature,
             }
             
@@ -176,12 +205,29 @@ class ChatRouter:
     def _coze_chat(self, prompt, history):
         # 实现与CoZe的交互
         
+        if self.system_prompt:
+            messages = [
+                {"role": "system", "content": self.system_prompt},
+                *history,
+                {"role": "user", "content": prompt},
+            ]
+        else:
+            messages = [
+                *history,
+                {"role": "user", "content": prompt},
+            ]
+        
+        messages = [msg for msg in messages if msg['content']]
+
+        if not messages:
+            return
+        
         try:
             payload = {
                 "bot_id": str(self.bot_id),
                 "user": str(self.user_id),
                 "query": prompt,
-                "chat_history": history[-self.history_length:],
+                "chat_history": messages,
                 "stream": False,
             }
             headers = {
@@ -225,6 +271,11 @@ class ChatRouter:
                     *history,
                     {"role": "user", "content": prompt},
                 ]
+                
+            messages = [msg for msg in messages if msg['content']]
+
+            if not messages:
+                return
 
             LOGGER.info(f'  messages:\n\n\n {messages}')
 
@@ -263,6 +314,11 @@ class ChatRouter:
                     *history,
                     {"role": "user", "content": prompt},
                 ]
+                
+            messages = [msg for msg in messages if msg['content']]
+
+            if not messages:
+                return
 
             LOGGER.info(f'  messages:\n\n\n {messages}')
 
@@ -301,6 +357,11 @@ class ChatRouter:
                     *history,
                     {"role": "user", "content": prompt},
                 ]
+                
+            messages = [msg for msg in messages if msg['content']]
+
+            if not messages:
+                return
 
             LOGGER.info(f'  messages:\n\n\n {messages}')
 
@@ -339,6 +400,11 @@ class ChatRouter:
                     *history,
                     {"role": "user", "content": prompt},
                 ]
+                
+            messages = [msg for msg in messages if msg['content']]
+
+            if not messages:
+                return
 
             LOGGER.info(f'  messages:\n\n\n {messages}')
 
@@ -377,6 +443,11 @@ class ChatRouter:
                     *history,
                     {"role": "user", "content": prompt},
                 ]
+                
+            messages = [msg for msg in messages if msg['content']]
+
+            if not messages:
+                return
 
             LOGGER.info(f'  messages:\n\n\n {messages}')
 
@@ -415,6 +486,11 @@ class ChatRouter:
                     *history,
                     {"role": "user", "content": prompt},
                 ]
+                
+            messages = [msg for msg in messages if msg['content']]
+
+            if not messages:
+                return
 
             LOGGER.info(f'  messages:\n\n\n {messages}')
 
@@ -437,11 +513,11 @@ class ChatRouter:
     def _ollama_chat(self, prompt, history):
         # 实现与Ollama的交互
         try:
+            LOGGER.info([self.api_key, self.base_url])
             client = OpenAI(
-                api_key= 'ollama',
-                base_url= self.api_endpoint,
+                api_key= self.api_key,
+                base_url= self.base_url,
             )
-
             if self.system_prompt:
                 messages = [
                     {"role": "system", "content": self.system_prompt},
@@ -453,6 +529,11 @@ class ChatRouter:
                     *history,
                     {"role": "user", "content": prompt},
                 ]
+                
+            messages = [msg for msg in messages if msg['content']]
+
+            if not messages:
+                return
 
             LOGGER.info(f'  messages:\n\n\n {messages}')
 
@@ -470,6 +551,49 @@ class ChatRouter:
                 return f"[Ollama] Error:{completion.error.message}"
         except Exception as e:
             LOGGER.error(f"Ollama API 调用出错: {str(e)}")
+            return f"错误: {str(e)}"
+        
+    def _openai_chat(self, prompt, history):
+        # 实现与Ollama的交互
+        try:
+            client = OpenAI(
+                api_key= self.api_key,
+                base_url= self.base_url,
+            )
+
+            if self.system_prompt:
+                messages = [
+                    {"role": "system", "content": self.system_prompt},
+                    *history,
+                    {"role": "user", "content": prompt},
+                ]
+            else:
+                messages = [
+                    *history,
+                    {"role": "user", "content": prompt},
+                ]
+                
+            messages = [msg for msg in messages if msg['content']]
+
+            if not messages:
+                return
+
+            LOGGER.info(f'  messages:\n\n\n {messages}')
+
+            completion = client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+            )
+
+            LOGGER.info(f'  response:\n\n\n {completion.model_dump_json()}')
+
+            if completion.choices and len(completion.choices) > 0:
+                return completion.choices[0].message.content
+            else:
+                return f"[OpenAI] Error:{completion.error.message}"
+        except Exception as e:
+            LOGGER.error(f"OpenAI API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
 
     def add_to_history(self, user_message, bot_response):
