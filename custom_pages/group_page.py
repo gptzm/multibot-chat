@@ -49,15 +49,17 @@ def group_page():
             group_history = bot_manager.get_current_group_history()  # 更新群聊历史
             if bot_manager.get_auto_speak():
                 for bot in enabled_bots:
+
                     group_user_prompt = bot_manager.get_chat_config().get('group_user_prompt')
+                    if group_history[-1].get('role') == 'user':
+                        group_user_prompt = ''
+
                     response_content = get_response_from_bot_group(group_user_prompt, bot, group_history)
                     
                     bot_manager.add_message_to_group_history("assistant", response_content, bot=bot)
                     group_history = bot_manager.get_current_group_history()  # 再次更新群聊历史
 
             bot_manager.fix_group_history_names()
-
-            LOGGER.info(f"\n\n\n@@@@@\n\n{response_content}")
 
         if not group_history:
             if st.session_state.bots:

@@ -28,7 +28,7 @@ class ChatRouter:
             self.system_prompt = chat_config['force_system_prompt']
         else:
             self.system_prompt = bot_config.get('system_prompt', '')
-        self.group_user_prompt = chat_config.get('group_user_prompt') or '继续'
+        self.group_user_prompt = chat_config.get('group_user_prompt', '')
         self.history_length = chat_config.get('history_length', 10)
         self.group_history_length = chat_config.get('group_history_length', 20)
         self.bot_id = bot_config.get('id', '')
@@ -54,6 +54,30 @@ class ChatRouter:
 
         LOGGER.info(f"Sending message with system_prompt: {self.system_prompt}")
 
+        return self._call_engine_chat(prompt, history, input_type=input_type, image=image, tools=tools)
+
+    def send_message_group(self, prompt, group_history, input_type='text', image=None, tools=None):
+        """
+        发送消息到指定的大模型。
+        
+        参数:
+            prompt (str): 用户输入的文本。
+            group_history (list): 群聊历史记录。
+            input_type (str): 输入类型，'text' 或 'image'。
+            image (bytes): 如果input_type是'image'，则提供图片的字节数据。
+            tools (list): 可选的工具列表，用于增强模型能力。
+        
+        返回:
+            response_content (str 或生成器): 模型的回复内容或流式数据。
+        """
+
+        group_history = group_history[-self.group_history_length:]
+
+        LOGGER.info(f"Sending message with system_prompt: {self.system_prompt}")
+        
+        return self._call_engine_chat(prompt, group_history, input_type=input_type, image=image, tools=tools)
+        
+    def _call_engine_chat(self, prompt, history, input_type='text', image=None, tools=None):
         if self.engine == 'AzureOpenAI':
             return self._azure_openai_chat(prompt, history)
         elif self.engine == 'ChatGLM':
@@ -79,69 +103,16 @@ class ChatRouter:
         else:
             return "不支持的引擎。"
 
-    def send_message_group(self, prompt, group_history, input_type='text', image=None, tools=None):
-        """
-        发送消息到指定的大模型。
-        
-        参数:
-            prompt (str): 用户输入的文本。
-            group_history (list): 群聊历史记录。
-            input_type (str): 输入类型，'text' 或 'image'。
-            image (bytes): 如果input_type是'image'，则提供图片的字节数据。
-            tools (list): 可选的工具列表，用于增强模型能力。
-        
-        返回:
-            response_content (str 或生成器): 模型的回复内容或流式数据。
-        """
-
-        group_history = group_history[-self.group_history_length:]
-        if not self.group_user_prompt:
-            return '请在侧边栏设置Bot接力提示词'
-
-        if self.engine == 'AzureOpenAI':
-            return self._azure_openai_chat(prompt, group_history)
-        elif self.engine == 'ChatGLM':
-            return self._chatglm_chat(prompt, group_history)
-        elif self.engine == 'CoZe':
-            return self._coze_chat(prompt, group_history)
-        elif self.engine == 'Qwen':
-            return self._qwen_chat(prompt, group_history)
-        elif self.engine == 'Ollama':
-            return self._ollama_chat(prompt, group_history)
-        elif self.engine == 'XingHuo':
-            return self._xinghuo_chat(prompt, group_history)
-        elif self.engine == 'DeepSeek':
-            return self._deepseek_chat(prompt, group_history)
-        elif self.engine == 'Moonshot':
-            return self._moonshot_chat(prompt, group_history)
-        elif self.engine == 'Yi':
-            return self._yi_chat(prompt, group_history)
-        elif self.engine == 'Groq':
-            return self._groq_chat(prompt, group_history)
-        elif self.engine == 'OpenAI':
-            return self._openai_chat(prompt, group_history)
-        else:
-            return "不支持的引擎。"
-
     def _azure_openai_chat(self, prompt, history):
-        if self.system_prompt:
-            messages = [
-                {"role": "system", "content": self.system_prompt},
-                *history,
-                {"role": "user", "content": prompt},
-            ]
-        else:
-            messages = [
-                *history,
-                {"role": "user", "content": prompt},
-            ]
-        
-        messages = self._fix_messages(messages)
-
-        if not messages:
-            return
         
         try:
+
+            messages = self._join_messages(prompt, history)
+            messages = self._fix_messages(messages)
+
+            if not messages:
+                return
+            
             headers = {
                 "Content-Type": "application/json",
                 "api-key": self.api_key,
@@ -168,18 +139,7 @@ class ChatRouter:
             from zhipuai import ZhipuAI
             client = ZhipuAI(api_key=self.api_key)
         
-            if self.system_prompt:
-                messages = [
-                    {"role": "system", "content": self.system_prompt},
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-            else:
-                messages = [
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-            
+            messages = self._join_messages(prompt, history)
             messages = self._fix_messages(messages)
 
             if not messages:
@@ -207,24 +167,13 @@ class ChatRouter:
     def _coze_chat(self, prompt, history):
         # 实现与CoZe的交互
         
-        if self.system_prompt:
-            messages = [
-                {"role": "system", "content": self.system_prompt},
-                *history,
-                {"role": "user", "content": prompt},
-            ]
-        else:
-            messages = [
-                *history,
-                {"role": "user", "content": prompt},
-            ]
-        
-        messages = self._fix_messages(messages)
-
-        if not messages:
-            return
-        
         try:
+            messages = self._join_messages(prompt, history)
+            messages = self._fix_messages(messages)
+
+            if not messages:
+                return
+            
             payload = {
                 "bot_id": str(self.bot_id),
                 "user": str(self.user_id),
@@ -262,18 +211,7 @@ class ChatRouter:
                 base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
             )
 
-            if self.system_prompt:
-                messages = [
-                    {"role": "system", "content": self.system_prompt},
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-            else:
-                messages = [
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-                
+            messages = self._join_messages(prompt, history)
             messages = self._fix_messages(messages)
 
             if not messages:
@@ -305,18 +243,7 @@ class ChatRouter:
                 base_url="https://spark-api-open.xf-yun.com/v1",
             )
 
-            if self.system_prompt:
-                messages = [
-                    {"role": "system", "content": self.system_prompt},
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-            else:
-                messages = [
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-                
+            messages = self._join_messages(prompt, history)
             messages = self._fix_messages(messages)
 
             if not messages:
@@ -348,18 +275,7 @@ class ChatRouter:
                 base_url="https://api.deepseek.com",
             )
 
-            if self.system_prompt:
-                messages = [
-                    {"role": "system", "content": self.system_prompt},
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-            else:
-                messages = [
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-                
+            messages = self._join_messages(prompt, history)
             messages = self._fix_messages(messages)
 
             if not messages:
@@ -391,18 +307,7 @@ class ChatRouter:
                 base_url="https://api.moonshot.cn/v1",
             )
 
-            if self.system_prompt:
-                messages = [
-                    {"role": "system", "content": self.system_prompt},
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-            else:
-                messages = [
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-                
+            messages = self._join_messages(prompt, history)
             messages = self._fix_messages(messages)
 
             if not messages:
@@ -434,18 +339,7 @@ class ChatRouter:
                 base_url="https://api.lingyiwanwu.com/v1",
             )
 
-            if self.system_prompt:
-                messages = [
-                    {"role": "system", "content": self.system_prompt},
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-            else:
-                messages = [
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-                
+            messages = self._join_messages(prompt, history)
             messages = self._fix_messages(messages)
 
             if not messages:
@@ -477,18 +371,7 @@ class ChatRouter:
                 base_url="https://api.groq.com/openai/v1",
             )
 
-            if self.system_prompt:
-                messages = [
-                    {"role": "system", "content": self.system_prompt},
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-            else:
-                messages = [
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-                
+            messages = self._join_messages(prompt, history)
             messages = self._fix_messages(messages)
 
             if not messages:
@@ -520,18 +403,8 @@ class ChatRouter:
                 api_key= self.api_key,
                 base_url= self.base_url,
             )
-            if self.system_prompt:
-                messages = [
-                    {"role": "system", "content": self.system_prompt},
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-            else:
-                messages = [
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-                
+
+            messages = self._join_messages(prompt, history)
             messages = self._fix_messages(messages)
 
             if not messages:
@@ -563,18 +436,7 @@ class ChatRouter:
                 base_url= self.base_url,
             )
 
-            if self.system_prompt:
-                messages = [
-                    {"role": "system", "content": self.system_prompt},
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-            else:
-                messages = [
-                    *history,
-                    {"role": "user", "content": prompt},
-                ]
-                
+            messages = self._join_messages(prompt, history)
             messages = self._fix_messages(messages)
 
             if not messages:
@@ -619,6 +481,21 @@ class ChatRouter:
             history (list): 历史对话记录。
         """
         return self.history
+
+    def _join_messages(self, prompt, history):
+        if self.system_prompt:
+            messages = [
+                {"role": "system", "content": self.system_prompt},
+                *history,
+                {"role": "user", "content": prompt},
+            ]
+        else:
+            messages = [
+                *history,
+                {"role": "user", "content": prompt},
+            ]
+
+        return messages
 
     def _fix_messages(self, messages):
         messages = [{"role": msg.get("role"), "content": msg.get("content")} for msg in messages if msg['content']]

@@ -1,7 +1,8 @@
 import os
 import tempfile
-import streamlit as st
 import logging
+import string
+import random
 from bot.config import ENGINE_CONFIG
 
 # token 的过期时间（以秒为单位）
@@ -17,10 +18,16 @@ if TOKEN_BASEDIR:
 else:
     TOKEN_DIR = os.path.join(tempfile.gettempdir(), 'streamlit_tokens')
 
-# 默认密钥，用于加密和解密 token
-# 在生产环境中，更建议设置在 ~/.streamlit/secrets.toml 中
-# 必须是 32 字节长度的大小写字母数字字符串
-SECRET_KEY = os.getenv('MULTIBOT_SECRET_KEY', 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S')
+secret_key_file = os.getenv('SECRET_KEY_FILE', 'secret.key')
+
+if os.path.exists(secret_key_file):
+    with open(secret_key_file, 'r') as f:
+        SECRET_KEY = f.read().strip()
+else:
+    characters = string.ascii_letters + string.digits
+    SECRET_KEY = ''.join(random.choice(characters) for _ in range(32))
+    with open(secret_key_file, 'w') as f:
+        f.write(SECRET_KEY)
 
 # 用户数据文件的路径
 USER_DATA_FILE = 'users.json'

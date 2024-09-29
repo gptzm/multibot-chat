@@ -148,9 +148,9 @@ streamlit run app.py
    export MULTIBOT_TOKEN_EXPIRATION=86400
    ```
 
-2. `MULTIBOT_SECRET_KEY`：用于加密和解密 token 的密钥。必须是 32 字节长度的大小写字母数字字符串。
+2. `MULTIBOT_SECRET_KEY_FILE`：用于指定加密和解密 token 的密钥放在哪个文件。
    ```bash
-   export MULTIBOT_SECRET_KEY='your_secret_key_here'
+   export MULTIBOT_SECRET_KEY_FILE='secret.key'
    ```
 
 3. `MULTIBOT_SHOW_SECRET_INFO`：是否在前端显示密钥信息。设置为 'true' 显示，其他值或不设置则不显示。
