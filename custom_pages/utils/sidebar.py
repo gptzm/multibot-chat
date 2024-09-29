@@ -102,7 +102,7 @@ def render_sidebar():
                 with st.container():
                     for i, bot in enumerate(st.session_state.bots):
                         bot_name_display = f"{bot.get('avatar', '') or '🤖'} **{bot['name']}**" if bot['enable'] else f"{bot.get('avatar', '🤖')} ~~{bot['name']}~~"
-                        if st.button(bot_name_display, key=f"__edit_bot_{i}", help=bot.get('system_prompt'), use_container_width=True):
+                        if st.button(bot_name_display, key=f"__edit_bot_{i}", help=bot.get('system_prompt','')[0:100], use_container_width=True):
                             edit_bot(bot)
         
                 if st.button("新增Bot", type="primary", use_container_width=True):
