@@ -214,7 +214,6 @@ def display_group_chat(bots, history):
         bot_id = entry.get('bot_id','')
         role = entry.get('role','')
         content = entry['content']
-        
         content_markdown = markdown.markdown(
             str(content),
             extensions=[NewlineExtension(), "codehilite", "tables", "admonition", "sane_lists", "attr_list", "toc"]

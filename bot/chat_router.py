@@ -74,6 +74,8 @@ class ChatRouter:
             return self._yi_chat(prompt, history)
         elif self.engine == 'Groq':
             return self._groq_chat(prompt, history)
+        elif self.engine == 'OpenAI':
+            return self._openai_chat(prompt, history)
         else:
             return "不支持的引擎。"
 
@@ -134,7 +136,7 @@ class ChatRouter:
                 {"role": "user", "content": prompt},
             ]
         
-        messages = [msg for msg in messages if msg['content']]
+        messages = self._fix_messages(messages)
 
         if not messages:
             return
@@ -178,7 +180,7 @@ class ChatRouter:
                     {"role": "user", "content": prompt},
                 ]
             
-            messages = [msg for msg in messages if msg['content']]
+            messages = self._fix_messages(messages)
 
             if not messages:
                 return
@@ -217,7 +219,7 @@ class ChatRouter:
                 {"role": "user", "content": prompt},
             ]
         
-        messages = [msg for msg in messages if msg['content']]
+        messages = self._fix_messages(messages)
 
         if not messages:
             return
@@ -272,7 +274,7 @@ class ChatRouter:
                     {"role": "user", "content": prompt},
                 ]
                 
-            messages = [msg for msg in messages if msg['content']]
+            messages = self._fix_messages(messages)
 
             if not messages:
                 return
@@ -315,7 +317,7 @@ class ChatRouter:
                     {"role": "user", "content": prompt},
                 ]
                 
-            messages = [msg for msg in messages if msg['content']]
+            messages = self._fix_messages(messages)
 
             if not messages:
                 return
@@ -358,7 +360,7 @@ class ChatRouter:
                     {"role": "user", "content": prompt},
                 ]
                 
-            messages = [msg for msg in messages if msg['content']]
+            messages = self._fix_messages(messages)
 
             if not messages:
                 return
@@ -401,7 +403,7 @@ class ChatRouter:
                     {"role": "user", "content": prompt},
                 ]
                 
-            messages = [msg for msg in messages if msg['content']]
+            messages = self._fix_messages(messages)
 
             if not messages:
                 return
@@ -444,7 +446,7 @@ class ChatRouter:
                     {"role": "user", "content": prompt},
                 ]
                 
-            messages = [msg for msg in messages if msg['content']]
+            messages = self._fix_messages(messages)
 
             if not messages:
                 return
@@ -487,7 +489,7 @@ class ChatRouter:
                     {"role": "user", "content": prompt},
                 ]
                 
-            messages = [msg for msg in messages if msg['content']]
+            messages = self._fix_messages(messages)
 
             if not messages:
                 return
@@ -530,7 +532,7 @@ class ChatRouter:
                     {"role": "user", "content": prompt},
                 ]
                 
-            messages = [msg for msg in messages if msg['content']]
+            messages = self._fix_messages(messages)
 
             if not messages:
                 return
@@ -573,7 +575,7 @@ class ChatRouter:
                     {"role": "user", "content": prompt},
                 ]
                 
-            messages = [msg for msg in messages if msg['content']]
+            messages = self._fix_messages(messages)
 
             if not messages:
                 return
@@ -617,3 +619,10 @@ class ChatRouter:
             history (list): 历史对话记录。
         """
         return self.history
+
+    def _fix_messages(self, messages):
+        messages = [{"role": msg.get("role"), "content": msg.get("content")} for msg in messages if msg['content']]
+        if messages and messages[-1]['role'] != 'user':
+            messages[-1]['role'] = 'user'
+
+        return messages
