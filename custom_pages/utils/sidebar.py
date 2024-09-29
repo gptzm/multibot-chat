@@ -15,6 +15,9 @@ def render_sidebar():
         with st.expander("我的"):
             st.markdown(f"当前用户：{st.session_state.username}")
             st.warning("不要把您的密码告诉任何人，以免大模型密钥被盗用！")
+            if SHOW_SECRET_INFO or not st.session_state.bots:
+                if st.button("导入配置", use_container_width=True):
+                    edit_bot_config()
             if st.button("修改密码", use_container_width=True):
                 st.session_state.page = "change_password_page"
                 st.rerun()
@@ -93,27 +96,17 @@ def render_sidebar():
                     if st.button("清理所有历史话题", use_container_width=True):
                         confirm_action_clear_historys()
 
-        if len(st.session_state.bots) > 0:
-            with st.expander("Bot管理"):
-                if not st.session_state.bots:
-                    if bot_manager.filename:
-                        bot_manager.load_encrypted_bots_from_file()
-
-                with st.container():
-                    for i, bot in enumerate(st.session_state.bots):
-                        bot_name_display = f"{bot.get('avatar', '') or '🤖'} **{bot['name']}**" if bot['enable'] else f"{bot.get('avatar', '🤖')} ~~{bot['name']}~~"
-                        if st.button(bot_name_display, key=f"__edit_bot_{i}", help=bot.get('system_prompt','')[0:100], use_container_width=True):
-                            edit_bot(bot)
+        with st.expander("Bot管理"):
+            with st.container():
+                for i, bot in enumerate(st.session_state.bots):
+                    bot_name_display = f"{bot.get('avatar', '') or '🤖'} **{bot['name']}**" if bot['enable'] else f"{bot.get('avatar', '🤖')} ~~{bot['name']}~~"
+                    if st.button(bot_name_display, key=f"__edit_bot_{i}", help=bot.get('system_prompt','')[0:100], use_container_width=True):
+                        edit_bot(bot)
+    
+            if st.button("新增Bot", type="primary", use_container_width=True):
+                st.session_state.avatar = random.choice(EMOJI_OPTIONS)
+                add_new_bot()
         
-                if st.button("新增Bot", type="primary", use_container_width=True):
-                    st.session_state.avatar = random.choice(EMOJI_OPTIONS)
-                    add_new_bot()
-
-                if SHOW_SECRET_INFO or not st.session_state.bots:
-                    if st.button("导入配置", use_container_width=True):
-                        edit_bot_config()
-        
-
         if st.session_state.page == "group_page":
             if st.button("返回对话模式",use_container_width=True):
                 st.session_state.page = "main_page"
