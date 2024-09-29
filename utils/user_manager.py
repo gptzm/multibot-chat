@@ -103,7 +103,7 @@ class UserManager:
             data = serializer.loads(self._token, salt=SECRET_KEY, max_age=TOKEN_EXPIRATION)
             username = data['username']
             created_at = data['created_at']
-            
+
             if time.time() - created_at > TOKEN_EXPIRATION:
                 LOGGER.warning(f"Token expired for user: {username}")
                 self.destroy_token()

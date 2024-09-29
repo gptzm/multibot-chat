@@ -139,13 +139,31 @@ streamlit run app.py
 - 在 Windows 上：双击 `multibot.bat`
 - 在 Linux/Mac 上：运行 `./multibot.sh`
 
-## 使用方法
+## 环境变量
 
-1. 注册新用户或登录现有账户
-2. 在侧边栏中添加新的聊天机器人
-3. 选择要启用的机器人
-4. 在聊天输入框中输入消息，与多个机器人同时对话
-5. 使用侧边栏中的选项管理聊天设置和历史记录
+在使用 MultiBot Chat 之前，您可以设置一些环境变量来配置应用程序的行为。以下是一些关键的环境变量及其用途：
+
+1. `MULTIBOT_TOKEN_EXPIRATION`：设置 token 的过期时间（以秒为单位）。默认为 86400 秒（1天）。
+   ```bash
+   export MULTIBOT_TOKEN_EXPIRATION=86400
+   ```
+
+2. `MULTIBOT_SECRET_KEY`：用于加密和解密 token 的密钥。必须是 32 字节长度的大小写字母数字字符串。
+   ```bash
+   export MULTIBOT_SECRET_KEY='your_secret_key_here'
+   ```
+
+3. `MULTIBOT_SHOW_SECRET_INFO`：是否在前端显示密钥信息。设置为 'true' 显示，其他值或不设置则不显示。
+   ```bash
+   export MULTIBOT_SHOW_SECRET_INFO='true'
+   ```
+
+4. `MULTIBOT_LOG_LEVEL`：设置日志记录的级别。可选值有 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'。默认为 'INFO'。
+   ```bash
+   export MULTIBOT_LOG_LEVEL='INFO'
+   ```
+
+您可以将这些环境变量添加到您的 shell 配置文件（如 `.bashrc` 或 `.zshrc`）中，以便在每次启动 shell 时自动加载这些变量。
 
 ## 许可证
 

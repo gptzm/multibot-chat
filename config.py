@@ -6,7 +6,7 @@ from bot.config import ENGINE_CONFIG
 
 # token 的过期时间（以秒为单位）
 # 默认为 86400 秒（1天）
-TOKEN_EXPIRATION = 86400
+TOKEN_EXPIRATION = int(os.getenv('MULTIBOT_TOKEN_EXPIRATION', 86400))
 
 # token 文件存储的基础目录
 # 如果不设置（即为空字符串），系统会使用系统临时目录：
@@ -20,7 +20,7 @@ else:
 # 默认密钥，用于加密和解密 token
 # 在生产环境中，更建议设置在 ~/.streamlit/secrets.toml 中
 # 必须是 32 字节长度的大小写字母数字字符串
-SECRET_KEY = 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S'
+SECRET_KEY = os.getenv('MULTIBOT_SECRET_KEY', 'fG7g5OlCWEXKzDSPOrt8sccn68ZWtf0S')
 
 # 用户数据文件的路径
 USER_DATA_FILE = 'users.json'
@@ -36,9 +36,9 @@ GROUP_CHAT_EMOJI = "👥"
 PRIVATE_CHAT_EMOJI = "👤"
 
 # 是否显示密钥信息
-SHOW_SECRET_INFO = True
+SHOW_SECRET_INFO = os.getenv('MULTIBOT_SHOW_SECRET_INFO', 'False').lower() == 'true'
 
 # 日志设置
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = os.getenv('MULTIBOT_LOG_LEVEL', 'INFO')
 logging.basicConfig(level=LOG_LEVEL)
 LOGGER = logging.getLogger(__name__)
