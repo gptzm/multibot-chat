@@ -122,7 +122,6 @@ def render_sidebar():
                 st.rerun()
 
 
-
 @st.dialog('清空所有历史对话', width='small')
 def confirm_action_clear_historys():
     bot_manager = st.session_state.bot_manager
