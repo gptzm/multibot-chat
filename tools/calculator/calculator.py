@@ -18,9 +18,8 @@ def run(parameter, content, group_prompt, group_history):
     numbers = []
     for line in lines:
         stripped_line = line.replace(" ", "").replace("\n", "")
-        if stripped_line.isdigit():
-            numbers.append(int(stripped_line))
-
+        if re.match(r'^-?\d+(\.\d+)?$', stripped_line):
+            numbers.append(float(stripped_line))
     if text_statistics_mode:
         calculation_results.append(f"行数: {line_count}，字数: {word_count}")
     
