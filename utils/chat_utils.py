@@ -282,7 +282,7 @@ def display_group_chat(bots, history):
     group_user_prompt = chat_config.get('group_user_prompt', '').replace('\n', ' ').replace('\r', ' ')
     if len(group_user_prompt) > 20:
         group_user_prompt = group_user_prompt[:20] + '...'
-    if group_user_prompt:
+    if group_user_prompt and history[-1].get('role') != 'user':
         bot_html += f'<div class="tips">Bot接力提示词：{html.escape(group_user_prompt)}</div>'
 
     bot_html += """

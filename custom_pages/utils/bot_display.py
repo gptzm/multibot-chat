@@ -6,7 +6,6 @@ import random
 from config import EMOJI_OPTIONS, ENGINE_OPTIONS
 import importlib
 from tools.tool import get_tools, get_tool
-from collections import OrderedDict
 
 def display_active_bots(bot_manager, prompt, show_bots):
     num_bots = len(show_bots)
