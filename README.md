@@ -155,8 +155,11 @@ streamlit run app.py
 | `MULTIBOT_LOG_LEVEL` | 设置日志记录的级别，可选值有 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'，默认为 'INFO'。 | "INFO" |
 | `MULTIBOT_USER_CONFIG_BASEDIR` | 指定用户配置文件的基础目录，每个用户一个加密文件 | "./user_config" |
 | `MULTIBOT_USER_DATA_FILE` | 指定用户数据文件的路径 | "users.json" |
+<<<<<<< HEAD
 | `MULTIBOT_GUEST_USERNAMES` | 访客用户的账号，多个账号用,号连接 | "" |
 | `MULTIBOT_DEVELOPER_USERNAME` | 开发者调试的账号 | "" |
+=======
+>>>>>>> 529fc8171a041191014f52813ba0185ef8aeee32
 
 您可以将这些环境变量添加到您的 shell 配置文件（如 `.bashrc` 或 `.zshrc`）中，以便在每次启动 shell 时自动加载这些变量。
 

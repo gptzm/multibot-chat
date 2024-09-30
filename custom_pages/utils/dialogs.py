@@ -143,7 +143,7 @@ def edit_bot_config():
     
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("保存"):
+        if st.button("保存",use_container_width=True):
             try:
                 new_config_dict = json.loads(new_config)
                 if bot_manager.validate_bot_config(new_config_dict):
