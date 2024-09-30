@@ -116,7 +116,7 @@ def render_sidebar():
                 bot_manager.set_last_visited_page("main_page")
                 st.rerun()
         else:
-            if st.button("切换到群聊模式",use_container_width=True):
+            if st.button("切换到群聊模式",use_container_width=True, type='primary'):
                 st.session_state.page = "group_page"
                 bot_manager.set_last_visited_page("group_page")
                 st.rerun()
