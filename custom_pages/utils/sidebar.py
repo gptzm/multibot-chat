@@ -10,6 +10,17 @@ LOGGER = logging.getLogger(__name__)
 def render_sidebar():
     bot_manager = st.session_state.bot_manager
     chat_config = bot_manager.get_chat_config()
+        
+    if st.session_state.page == "group_page":
+        if st.button("返回对话模式",use_container_width=True):
+            st.session_state.page = "main_page"
+            bot_manager.set_last_visited_page("main_page")
+            st.rerun()
+    else:
+        if st.button("切换到群聊模式",use_container_width=True, type='primary'):
+            st.session_state.page = "group_page"
+            bot_manager.set_last_visited_page("group_page")
+            st.rerun()
 
     with st.sidebar:
         with st.expander("我的"):
@@ -109,17 +120,6 @@ def render_sidebar():
             if st.button("新增Bot", type="primary", use_container_width=True):
                 st.session_state.avatar = random.choice(EMOJI_OPTIONS)
                 add_new_bot()
-        
-        if st.session_state.page == "group_page":
-            if st.button("返回对话模式",use_container_width=True):
-                st.session_state.page = "main_page"
-                bot_manager.set_last_visited_page("main_page")
-                st.rerun()
-        else:
-            if st.button("切换到群聊模式",use_container_width=True, type='primary'):
-                st.session_state.page = "group_page"
-                bot_manager.set_last_visited_page("group_page")
-                st.rerun()
 
 
 @st.dialog('清空所有历史对话', width='small')
