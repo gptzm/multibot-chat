@@ -144,7 +144,7 @@ def display_group_chat_area(bot_manager, show_bots, histories):
                 with col:
                     chat_config = bot_manager.get_chat_config()
                     group_user_prompt = chat_config.get('group_user_prompt')
-                    if st.button(f"{bot.get('avatar', '🤖')} {bot['name']}\n\n{bot['engine']} {bot['model']}", key=f"group_bot_{bot['id']}", help=bot.get('system_prompt','')[0:100], use_container_width=True):
+                    if st.button(f"{bot.get('avatar', '🤖')} {bot['name']}\n\n{bot['engine']} {bot.get('model','')}", key=f"group_bot_{bot['id']}", help=bot.get('system_prompt','')[0:100], use_container_width=True):
                         response_content = get_response_from_bot_group(group_user_prompt, bot, histories)
                         bot_manager.add_message_to_group_history("assistant", response_content, bot=bot)
                         bot_manager.save_data_to_file()
@@ -161,7 +161,7 @@ def display_group_chat_area(bot_manager, show_bots, histories):
             for i, bot in enumerate(disabled_bots):
                 col = cols[i % num_cols]
                 with col:
-                    if st.button(f"{bot.get('avatar', '🤖')} {bot['name']}\n\n{bot['engine']} {bot['model']}", key=f"group_bot_{bot['id']}", help=bot.get('system_prompt','')[0:100], use_container_width=True):
+                    if st.button(f"{bot.get('avatar', '🤖')} {bot['name']}\n\n{bot['engine']} {bot.get('model','')}", key=f"group_bot_{bot['id']}", help=bot.get('system_prompt','')[0:100], use_container_width=True):
                         response_content = get_response_from_bot_group(group_user_prompt, bot, histories)
                         bot_manager.add_message_to_group_history("assistant", response_content, bot=bot)
                         bot_manager.save_data_to_file()
