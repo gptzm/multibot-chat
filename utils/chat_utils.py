@@ -9,7 +9,6 @@ import random
 import streamlit as st
 import re
 
-
 class NewlineExtension(Extension):
     def extendMarkdown(self, md):
         md.preprocessors.register(NewlinePreprocessor(md), 'newline', 175)
@@ -39,7 +38,6 @@ def get_response_from_bot_group(prompt, bot, group_history):
     response_content = chat_router.send_message_group(prompt, group_history)
     LOGGER.info(f"Response content: {response_content}")
     return response_content
-
 
 def get_chat_container_style():
     return f"""
@@ -282,7 +280,7 @@ def display_group_chat(bots, history):
     group_user_prompt = chat_config.get('group_user_prompt', '').replace('\n', ' ').replace('\r', ' ')
     if len(group_user_prompt) > 20:
         group_user_prompt = group_user_prompt[:20] + '...'
-    if group_user_prompt:
+    if group_user_prompt and history[-1].get('role') != 'user':
         bot_html += f'<div class="tips">Bot接力提示词：{html.escape(group_user_prompt)}</div>'
 
     bot_html += """

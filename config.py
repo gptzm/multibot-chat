@@ -18,7 +18,7 @@ if TOKEN_BASEDIR:
 else:
     TOKEN_DIR = os.path.join(tempfile.gettempdir(), 'streamlit_tokens')
 
-secret_key_file = os.getenv('SECRET_KEY_FILE', 'secret.key')
+secret_key_file = os.getenv('MULTIBOT_SECRET_KEY_FILE', 'secret.key')
 
 if os.path.exists(secret_key_file):
     with open(secret_key_file, 'r') as f:
@@ -29,11 +29,14 @@ else:
     with open(secret_key_file, 'w') as f:
         f.write(SECRET_KEY)
 
+# 用户配置文件的存储基础目录
+USER_CONFIG_BASEDIR = os.getenv('MULTIBOT_USER_CONFIG_BASEDIR', './user_config')
+
 # 用户数据文件的路径
-USER_DATA_FILE = 'users.json'
+USER_DATA_FILE = os.getenv('MULTIBOT_USER_DATA_FILE', 'users.json')
 
 # 表情选项
-EMOJI_OPTIONS = ["🤖", "🦾", "🧠", "💡", "🔮", "🎭", "🦄", "🐼", "🦊", "🐶", "🐱", "🦁", "🐯", "🐻", "🐨", "😄", "🤡", "👻", "😈", "🤠", "🙊", "😽", "👽", "🧑‍🎓", "🧑‍💼", "🧑‍🎨", "🧑‍✈️", "🥷"]
+EMOJI_OPTIONS = ["🤖", "🦾", "🧠", "💡", "✏️", "🔭", "🔮", "🎭", "😄", "😘", "🤪", "🧐", "🤠", "🦄", "🐼", "🦊", "🐶", "🐱", "🦁", "🐯", "🐻", "🐨", "🤡", "👻", "😈", "🤠", "🙊", "😽", "🐷", "🐰", "🐼", "🐮", "🐺", "👽", "🧑‍🎓", "🧑‍💼", "🧑‍🎨", "🧑‍✈️", "🥷", "🧙", "🧞‍♂️"]
 
 # 引擎选项
 ENGINE_OPTIONS = list(ENGINE_CONFIG.get('engines', {}).keys())
@@ -41,6 +44,12 @@ ENGINE_OPTIONS = list(ENGINE_CONFIG.get('engines', {}).keys())
 # 定义群聊和私聊的emoji表情
 GROUP_CHAT_EMOJI = "👥"
 PRIVATE_CHAT_EMOJI = "👤"
+
+# 访客账号，用逗号分隔开
+GUEST_USERNAMES = [username.strip() for username in os.getenv('MULTIBOT_GUEST_USERNAMES', 'guest').split(',')]
+
+# 开发者账号，可用于调试
+DEVELOPER_USERNAME = os.getenv('MULTIBOT_DEVELOPER_USERNAME', '')
 
 # 是否显示密钥信息
 SHOW_SECRET_INFO = os.getenv('MULTIBOT_SHOW_SECRET_INFO', 'False').lower() == 'true'

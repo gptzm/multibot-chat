@@ -6,6 +6,7 @@ import logging
 from datetime import datetime
 import uuid
 from bot.config import ENGINE_CONFIG
+from config import USER_CONFIG_BASEDIR
 
 LOGGER = logging.getLogger(__name__)
     
@@ -43,7 +44,7 @@ class BotSessionManager:
             LOGGER.error("无法加载：用户名未设置")
             return
         try:
-            file_path = f"user_config/{self._filename}.encrypt"
+            file_path = f"{USER_CONFIG_BASEDIR}/{self._filename}.encrypt"
             if not os.path.exists(file_path):
                 LOGGER.info(f"欢迎新用户: {self._filename}")
                 return  # 使用默认值
@@ -95,7 +96,7 @@ class BotSessionManager:
             'last_visited_page': self.last_visited_page
         }
         encrypted_data = encrypt_data(json.dumps(data))
-        with open(f"user_config/{self._filename}.encrypt", 'w') as f:
+        with open(f"{USER_CONFIG_BASEDIR}/{self._filename}.encrypt", 'w') as f:
             f.write(encrypted_data)
 
     def ensure_valid_history_version(self):
@@ -482,4 +483,3 @@ class BotSessionManager:
     
     def get_last_visited_page(self):
         return self.last_visited_page
-

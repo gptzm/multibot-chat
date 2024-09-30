@@ -1,6 +1,6 @@
 # MultiBot Chat
 
-MultiBot Chat 是一个基于 Streamlit 的多机器人聊天应用，支持多种大语言模型（LLM）API，包括 AzureOpenAI、ChatGLM、CoZe、Qwen、Ollama、XingHuo、DeepSeek、Moonshot、Yi 和 Groq。这个应用允许用户同时与多个 AI 聊天机器人进行对话，比较不同模型的回答，并进行群聊式的讨论。
+MultiBot Chat 是一个基于 Streamlit 的多机器人聊天应用，支持多种大语言模型（LLM）API，包括 OpenAI、AzureOpenAI、ChatGLM、CoZe、Qwen、Ollama、XingHuo、DeepSeek、Moonshot、Yi 和 Groq。这个应用允许用户同时与多个 AI 聊天机器人进行对话，比较不同模型的回答，并进行群聊式的讨论。
 
 ## 主要特点
 
@@ -10,7 +10,7 @@ MultiBot Chat 是一个基于 Streamlit 的多机器人聊天应用，支持多�
 - 跨平台模型管理：批量操作和控制来自不同厂商的多种AI模型
 - 云端同步设置：轻松在多设备间同步您的个性化配置
 
-其他功能：
+其他特色功能：
 - 自定义系统提示词
 - 支持多种主流大语言模型API
 - 用户账户系统确保数据安全
@@ -29,7 +29,7 @@ MultiBot Chat 是一个基于 Streamlit 的多机器人聊天应用，支持多�
 
 ### 群聊模式
 
-群聊模式下，多个 AI 机器人可以进行接龙式的讨论，例如玩成语接龙游戏或逐层追问。
+群聊模式下，多个 AI 机器人可以进行接龙式的讨论，例如玩成语接龙游戏。
 
 ![群聊模式](demo_images/demo_group_page_chat.png)
 
@@ -145,26 +145,18 @@ streamlit run app.py
 ## 环境变量
 
 在使用 MultiBot Chat 之前，您可以设置一些环境变量来配置应用程序的行为。以下是一些关键的环境变量及其用途：
+以下是 MultiBot Chat 的主要环境变量及其用途：
 
-1. `MULTIBOT_TOKEN_EXPIRATION`：设置 token 的过期时间（以秒为单位）。默认为 86400 秒（1天）。
-   ```bash
-   export MULTIBOT_TOKEN_EXPIRATION=86400
-   ```
-
-2. `MULTIBOT_SECRET_KEY_FILE`：用于指定加密和解密 token 的密钥放在哪个文件。
-   ```bash
-   export MULTIBOT_SECRET_KEY_FILE='secret.key'
-   ```
-
-3. `MULTIBOT_SHOW_SECRET_INFO`：是否在前端显示密钥信息。设置为 'true' 显示，其他值或不设置则不显示。
-   ```bash
-   export MULTIBOT_SHOW_SECRET_INFO='true'
-   ```
-
-4. `MULTIBOT_LOG_LEVEL`：设置日志记录的级别。可选值有 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'。默认为 'INFO'。
-   ```bash
-   export MULTIBOT_LOG_LEVEL='INFO'
-   ```
+| 变量名 | 用途 | 默认值 |
+|--------|------|------|
+| `MULTIBOT_TOKEN_EXPIRATION` | 设置 token 的过期时间（以秒为单位） | "86400" |
+| `MULTIBOT_SECRET_KEY_FILE` | 指定加密和解密 token 的密钥文件路径 | "secret.key" |
+| `MULTIBOT_SHOW_SECRET_INFO` | 控制是否在前端显示密钥信息，设置为 'true' 显示密钥信息，其他值或不设置则不显示。 | "false" |
+| `MULTIBOT_LOG_LEVEL` | 设置日志记录的级别，可选值有 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'，默认为 'INFO'。 | "INFO" |
+| `MULTIBOT_USER_CONFIG_BASEDIR` | 指定用户配置文件的基础目录，每个用户一个加密文件 | "./user_config" |
+| `MULTIBOT_USER_DATA_FILE` | 指定用户数据文件的路径 | "users.json" |
+| `MULTIBOT_GUEST_USERNAMES` | 访客用户的账号，多个账号用,号连接 | "" |
+| `MULTIBOT_DEVELOPER_USERNAME` | 开发者调试的账号 | "" |
 
 您可以将这些环境变量添加到您的 shell 配置文件（如 `.bashrc` 或 `.zshrc`）中，以便在每次启动 shell 时自动加载这些变量。
 
