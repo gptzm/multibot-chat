@@ -21,13 +21,14 @@ def run(parameter, content, group_prompt, group_history):
         if re.match(r'^-?\d+(\.\d+)?$', stripped_line):
             numbers.append(float(stripped_line))
     if text_statistics_mode:
-        calculation_results.append(f"行数: {line_count}，字数: {word_count}")
+        calculation_results.append(f"行数: {line_count}，单词数: {word_count}，字数: {len(content)}")
     
     if numberline_statistics_mode and numbers:
-        total = sum(numbers)
-        average = total / len(numbers)
-        median = sorted(numbers)[len(numbers) // 2] if len(numbers) % 2 != 0 else (sorted(numbers)[len(numbers) // 2 - 1] + sorted(numbers)[len(numbers) // 2]) / 2
-        calculation_results.append(f"发现{len(numbers)}行数字\n\n求和: {total}，均值: {average}，中位数: {median}")
+        total = round(sum(numbers), 10)
+        average = round(total / len(numbers), 10)
+        median = round(sorted(numbers)[len(numbers) // 2] if len(numbers) % 2 != 0 else (sorted(numbers)[len(numbers) // 2 - 1] + sorted(numbers)[len(numbers) // 2]) / 2, 10)
+        calculation_results.append(f"发现{len(numbers)}行数字")
+        calculation_results.append(f"求和: {total}，均值: {average}，中位数: {median}")
     
     if calculate_mode:
         # 提取算式并计算
@@ -42,7 +43,7 @@ def run(parameter, content, group_prompt, group_history):
         for expression in expressions:
             try:
                 expression = expression.replace("×"," * ").replace("÷"," / ")
-                calculation_results.append(f'计算【{expression}】的结果为 {eval(expression)}')
+                calculation_results.append(f'计算【{expression}】的结果为 {round(eval(expression),10)}')
             except Exception as e:
                 calculation_results.append(f"计算 {expression} 时发生错误: {str(e)}")
     
