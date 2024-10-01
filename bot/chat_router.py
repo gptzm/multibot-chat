@@ -497,7 +497,7 @@ class ChatRouter:
         return messages
 
     def _fix_messages(self, messages):
-        messages = [{"role": msg.get("role"), "content": msg.get("content","")} for msg in messages if msg['content']]
+        messages = [{"role": msg.get("role"), "content": str(msg.get("content",""))} for msg in messages if msg['content']]
         if messages and messages[-1]['role'] != 'user':
             messages[-1]['role'] = 'user'
 
