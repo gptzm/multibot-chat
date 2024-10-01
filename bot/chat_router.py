@@ -106,10 +106,10 @@ class ChatRouter:
     def _azure_openai_chat(self, prompt, history):
         
         try:
-
+            st.info(prompt)
             messages = self._join_messages(prompt, history)
             messages = self._fix_messages(messages)
-
+            # st.stop()
             if not messages:
                 return
             
@@ -191,14 +191,14 @@ class ChatRouter:
             response = requests.post('https://api.coze.cn/open_api/v2/chat', json=payload, headers=headers)
             json_response = response.json()
             if json_response['msg'] != 'success':
-                return None, f"[COZE] Error: {json_response['msg']}"
+                return f"[COZE] Error: {json_response['msg']}"
             answer = None
             for message in json_response['messages']:
                 if message.get('type') == 'answer':
                     answer = message.get('content')
                     break
             if not answer:
-                return None, "[COZE] Error: empty answer"
+                return "[COZE] Error: empty answer"
             return answer
         except Exception as e:
             return "错误: " + str(e)
@@ -498,7 +498,7 @@ class ChatRouter:
         return messages
 
     def _fix_messages(self, messages):
-        messages = [{"role": msg.get("role"), "content": msg.get("content")} for msg in messages if msg['content']]
+        messages = [{"role": msg.get("role"), "content": msg.get("content","")} for msg in messages if msg['content']]
         if messages and messages[-1]['role'] != 'user':
             messages[-1]['role'] = 'user'
 
