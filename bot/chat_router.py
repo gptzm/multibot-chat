@@ -106,7 +106,6 @@ class ChatRouter:
     def _azure_openai_chat(self, prompt, history):
         
         try:
-            st.info(prompt)
             messages = self._join_messages(prompt, history)
             messages = self._fix_messages(messages)
             # st.stop()
