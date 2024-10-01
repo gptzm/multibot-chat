@@ -10,19 +10,9 @@ LOGGER = logging.getLogger(__name__)
 def render_sidebar():
     bot_manager = st.session_state.bot_manager
     chat_config = bot_manager.get_chat_config()
-        
-    if st.session_state.page == "group_page":
-        if st.button("返回对话模式",use_container_width=True):
-            st.session_state.page = "main_page"
-            bot_manager.set_last_visited_page("main_page")
-            st.rerun()
-    else:
-        if st.button("切换到群聊模式",use_container_width=True, type='primary'):
-            st.session_state.page = "group_page"
-            bot_manager.set_last_visited_page("group_page")
-            st.rerun()
 
     with st.sidebar:
+
         with st.expander("我的"):
             st.markdown(f"当前用户：{st.session_state.username}")
             st.warning("不要把您的密码告诉任何人，以免大模型密钥被盗用！")
@@ -37,8 +27,20 @@ def render_sidebar():
 
             if st.button("退出登录", use_container_width=True):
                 confirm_action_logout()
+        
+        with st.expander("聊天设置", expanded=True):
 
-        with st.expander("聊天设置"):
+            if st.session_state.page == "group_page":
+                if st.button("返回对话模式",use_container_width=True):
+                    st.session_state.page = "main_page"
+                    bot_manager.set_last_visited_page("main_page")
+                    st.rerun()
+            else:
+                if st.button("切换到群聊模式",use_container_width=True, type='primary'):
+                    st.session_state.page = "group_page"
+                    bot_manager.set_last_visited_page("group_page")
+                    st.rerun()
+
             new_config = {}
             force_system_prompt = st.text_area("强制系统提示词", value=chat_config.get('force_system_prompt', ''), key="force_system_prompt", placeholder='强制所有Bot使用此提示词，如果留空则遵循Bot设置')
             if force_system_prompt != chat_config.get('force_system_prompt'):
@@ -46,6 +48,7 @@ def render_sidebar():
                 bot_manager.update_chat_config(chat_config)
                 bot_manager.save_data_to_file()  # 立即保存到文件
                 LOGGER.info(f"Updated and saved force_system_prompt: {force_system_prompt}")
+                
             if st.session_state.page == "group_page":
                 new_config['group_user_prompt'] = st.text_area("群聊接力提示词", value=chat_config.get('group_user_prompt',''), height=40, placeholder='提示Bot在群聊时应该如何接力，如果留空则由Bot自由发挥')
                 new_config['group_history_length'] = st.slider("群聊携带对话条数", min_value=1, max_value=20, value=chat_config['group_history_length'])
