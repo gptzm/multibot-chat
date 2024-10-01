@@ -48,7 +48,7 @@ def render_sidebar():
                 bot_manager.update_chat_config(chat_config)
                 bot_manager.save_data_to_file()  # 立即保存到文件
                 LOGGER.info(f"Updated and saved force_system_prompt: {force_system_prompt}")
-                
+
             if st.session_state.page == "group_page":
                 new_config['group_user_prompt'] = st.text_area("群聊接力提示词", value=chat_config.get('group_user_prompt',''), height=40, placeholder='提示Bot在群聊时应该如何接力，如果留空则由Bot自由发挥')
                 new_config['group_history_length'] = st.slider("群聊携带对话条数", min_value=1, max_value=20, value=chat_config['group_history_length'])
@@ -172,3 +172,4 @@ def confirm_action_logout():
     with col2:
         if st.button("取消", key="cancel_button", use_container_width=True):
             st.rerun()
+            
