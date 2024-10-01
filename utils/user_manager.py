@@ -8,7 +8,7 @@ import logging
 import time
 import re
 from config import (
-    TOKEN_EXPIRATION, USER_DATA_FILE, LOG_LEVEL, TOKEN_DIR, SECRET_KEY
+    TOKEN_EXPIRATION, USER_DATA_FILE, LOG_LEVEL, TOKEN_DIR, SECRET_KEY, ENABLED_REGISTER
 )
 
 logging.basicConfig(level=LOG_LEVEL)
@@ -33,10 +33,15 @@ class UserManager:
             json.dump(users, file, ensure_ascii=False, indent=4)
 
     def register(self, username, password):
+        if not ENABLED_REGISTER:
+            st.warning("暂未开放注册")
+            return False
+
         if not re.match(r'^[a-zA-Z0-9@\._]{1,32}$', username):
             return False
         users = self.load_users()
         if username in users:
+            st.warning("已存在此账号")
             return False
         users[username] = self.hash_password(password)
         self.save_users(users)

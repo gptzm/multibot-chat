@@ -54,6 +54,9 @@ DEVELOPER_USERNAME = os.getenv('MULTIBOT_DEVELOPER_USERNAME', '')
 # 是否显示密钥信息
 SHOW_SECRET_INFO = os.getenv('MULTIBOT_SHOW_SECRET_INFO', 'False').lower() == 'true'
 
+# 允许注册
+ENABLED_REGISTER = os.getenv('MULTIBOT_ENABLED_REGISTER', 'True').lower() == 'true'
+
 # 日志设置
 LOG_LEVEL = os.getenv('MULTIBOT_LOG_LEVEL', 'INFO')
 logging.basicConfig(level=LOG_LEVEL)

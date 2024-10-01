@@ -151,8 +151,9 @@ streamlit run app.py
 |--------|------|------|
 | `MULTIBOT_TOKEN_EXPIRATION` | 设置 token 的过期时间（以秒为单位） | "86400" |
 | `MULTIBOT_SECRET_KEY_FILE` | 指定加密和解密 token 的密钥文件路径 | "secret.key" |
-| `MULTIBOT_SHOW_SECRET_INFO` | 控制是否在前端显示密钥信息，设置为 'true' 显示密钥信息，其他值或不设置则不显示。 | "false" |
-| `MULTIBOT_LOG_LEVEL` | 设置日志记录的级别，可选值有 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'，默认为 'INFO'。 | "INFO" |
+| `MULTIBOT_ENABLED_REGISTER` | 是否允许注册 | "true" |
+| `MULTIBOT_SHOW_SECRET_INFO` | 控制是否在前端显示密钥信息，设置为 'true' 显示密钥信息，其他值或不设置则不显示 | "false" |
+| `MULTIBOT_LOG_LEVEL` | 设置日志记录的级别，可选值有 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'，默认为 'INFO' | "INFO" |
 | `MULTIBOT_USER_CONFIG_BASEDIR` | 指定用户配置文件的基础目录，每个用户一个加密文件 | "./user_config" |
 | `MULTIBOT_USER_DATA_FILE` | 指定用户数据文件的路径 | "users.json" |
 | `MULTIBOT_GUEST_USERNAMES` | 访客用户的账号，多个账号用,号连接 | "guest" |
