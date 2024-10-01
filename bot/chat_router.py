@@ -54,7 +54,7 @@ class ChatRouter:
 
         LOGGER.info(f"Sending message with system_prompt: {self.system_prompt}")
 
-        return self._call_engine_chat(prompt, history, input_type=input_type, image=image, tools=tools)
+        return str(self._call_engine_chat(prompt, history, input_type=input_type, image=image, tools=tools))
 
     def send_message_group(self, prompt, group_history, input_type='text', image=None, tools=None):
         """
@@ -75,7 +75,7 @@ class ChatRouter:
 
         LOGGER.info(f"Sending message with system_prompt: {self.system_prompt}")
         
-        return self._call_engine_chat(prompt, group_history, input_type=input_type, image=image, tools=tools)
+        return str(self._call_engine_chat(prompt, group_history, input_type=input_type, image=image, tools=tools))
         
     def _call_engine_chat(self, prompt, history, input_type='text', image=None, tools=None):
         if self.engine == 'AzureOpenAI':
