@@ -8,14 +8,8 @@ import html
 import random
 import streamlit as st
 import re
-
-class NewlineExtension(Extension):
-    def extendMarkdown(self, md):
-        md.preprocessors.register(NewlinePreprocessor(md), 'newline', 175)
-
-class NewlinePreprocessor(Preprocessor):
-    def run(self, lines):
-        return [line + '  ' if line.strip() else line for line in lines]
+from bs4 import BeautifulSoup
+import base64
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,11 +33,50 @@ def get_response_from_bot_group(prompt, bot, group_history):
     LOGGER.info(f"Response content: {response_content}")
     return response_content
 
+def process_svg_content(content):
+    def replace_svg_block(match):
+        svg_content = match.group(2)
+        # 使用 BeautifulSoup 解析 SVG 内容
+        try:
+            soup = BeautifulSoup(svg_content, 'html.parser')
+            svg = soup.find('svg')
+        except Exception as e:
+            LOGGER.error(f"错误解析SVG内容: {e}")
+            return match.group(0)
+            
+        if svg:
+            # 移除所有脚本和事件属性
+            for tag in svg.find_all():
+                for attr in list(tag.attrs):
+                    if attr.startswith('on') or attr == 'href':
+                        del tag[attr]
+            # 移除所有 script 标签
+            for script in svg.find_all('script'):
+                script.decompose()
+
+            # 将SVG转换为base64编码
+            svg_string = str(svg)
+            svg_bytes = svg_string.encode('utf-8')
+            base64_svg = base64.b64encode(svg_bytes).decode('utf-8')
+            
+            # 使用Markdown语法引用base64编码的SVG
+            return f'![SVG图片](data:image/svg+xml;base64,{base64_svg})'
+        
+        return match.group(0)
+    
+    # 修改正则表达式以匹配 Markdown 处理后的内容
+    pattern = r'```(svg)\n(.*?)```'
+    return re.sub(pattern, replace_svg_block, content, flags=re.MULTILINE|re.DOTALL|re.IGNORECASE)
+
 def get_chat_container_style():
     return f"""
     <style>
         .message:hover .copy-button {{
             visibility: visible;
+        }}
+        .message img{{
+            max-width: 100%;
+            height: auto;
         }}
         .copy-button {{
             visibility: hidden;
@@ -146,21 +179,21 @@ def display_chat(bot, history):
     """
 
     for entry in history:
-        content = entry.get('content')
-        if content:
-            content_markdown = markdown.markdown(
-                str(content),
-                extensions=[
-                    NewlineExtension(),
-                    "codehilite",
-                    "tables",
-                    "admonition",
-                    "sane_lists",
-                    "attr_list",
-                    "toc",
-                    "fenced_code",
-                ]
-            )
+        content = entry.get('content', '')
+        content_process = process_svg_content(content)
+        content_markdown = markdown.markdown(
+            str(content_process),
+            extensions=[
+                "nl2br",
+                "codehilite",
+                "tables",
+                "admonition",
+                "sane_lists",
+                "attr_list",
+                "toc",
+                "fenced_code",
+            ]
+        )
         
         content_markdown_repr = repr(entry['content'])
         random_id = str(random.randint(100000000000, 999999999999))
@@ -169,7 +202,7 @@ def display_chat(bot, history):
             bot_html += f"""<div class='message message-user'>
                                 <div style='display: flex; align-items: flex-end; max-width: 80%;'>
                                     <button onclick="copy_{random_id}(this)" class="copy-button">📋</button>
-                                    <div class='message-user-content'>
+                                    <div class='message message-user-content'>
                                         {content_markdown}
                                     </div>
                                 </div>
@@ -223,23 +256,26 @@ def display_group_chat(bots, history):
     for entry in history:
         bot_id = entry.get('bot_id','')
         role = entry.get('role','')
-        content = entry.get('content')
-        if content:
-            content_markdown = markdown.markdown(
-                str(content),
-                extensions=[
-                    NewlineExtension(),
-                    "codehilite",
-                    "tables",
-                    "admonition",
-                    "sane_lists",
-                    "attr_list",
-                    "toc",
-                    "fenced_code",
-                ]
-            )
+        content = entry.get('content', '')
+        content_process = process_svg_content(content)
         
-        content_markdown_repr = repr(content)
+        content_markdown = markdown.markdown(
+            str(content_process),
+            extensions=[
+                "nl2br",
+                "codehilite",
+                "tables",
+                "admonition",
+                "sane_lists",
+                "attr_list",
+                "toc",
+                "fenced_code",
+            ]
+        )
+        
+        
+        LOGGER.info(f'替换后：{str(content_markdown)}')
+        content_markdown_repr = repr(content_markdown)
         random_id = str(random.randint(100000000000, 999999999999))
 
         if 'tool_name' in entry:
