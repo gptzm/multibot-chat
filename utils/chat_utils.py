@@ -146,10 +146,22 @@ def display_chat(bot, history):
     """
 
     for entry in history:
-        content_markdown = markdown.markdown(
-            str(entry['content']),
-            extensions=[NewlineExtension(), "codehilite", "tables", "admonition", "sane_lists", "attr_list", "toc"]
-        )
+        content = entry.get('content')
+        if content:
+            content_markdown = markdown.markdown(
+                str(content),
+                extensions=[
+                    NewlineExtension(),
+                    "codehilite",
+                    "tables",
+                    "admonition",
+                    "sane_lists",
+                    "attr_list",
+                    "toc",
+                    "fenced_code",
+                ]
+            )
+        
         content_markdown_repr = repr(entry['content'])
         random_id = str(random.randint(100000000000, 999999999999))
 
@@ -211,16 +223,23 @@ def display_group_chat(bots, history):
     for entry in history:
         bot_id = entry.get('bot_id','')
         role = entry.get('role','')
-        content = entry['content']
-        content_markdown = markdown.markdown(
-            str(content),
-            extensions=[NewlineExtension(), "codehilite", "tables", "admonition", "sane_lists", "attr_list", "toc"]
-        )
+        content = entry.get('content')
+        if content:
+            content_markdown = markdown.markdown(
+                str(content),
+                extensions=[
+                    NewlineExtension(),
+                    "codehilite",
+                    "tables",
+                    "admonition",
+                    "sane_lists",
+                    "attr_list",
+                    "toc",
+                    "fenced_code",
+                ]
+            )
         
-        LOGGER.info(content)
-        LOGGER.info(content_markdown)
         content_markdown_repr = repr(content)
-        LOGGER.info(content_markdown_repr+'\n\n')
         random_id = str(random.randint(100000000000, 999999999999))
 
         if 'tool_name' in entry:
