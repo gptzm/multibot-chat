@@ -139,8 +139,8 @@ streamlit run app.py
 
 或者，您可以使用提供的脚本：
 
-- 在 Windows 上：双击 `run_server.bat`
-- 在 Linux/Mac 上：运行 `./run_server.sh`
+- 在 Windows 上：双击 `start_server.bat`
+- 在 Linux/Mac 上：运行 `./start_server.sh`
 
 ## 环境变量
 
