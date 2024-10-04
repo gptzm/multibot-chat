@@ -1,0 +1,9 @@
+{
+    "name": "统计分析",
+    "description": "进行文本分析和数据统计和对数字行求和",
+    "main_file": "statistics.py",
+    "parameter": {
+        "text_statistics_mode": true,
+        "numberline_statistics_mode": true
+    }
+}

@@ -1,10 +1,8 @@
 {
     "name": "计算器",
-    "description": "进行简单的数学计算、文本分析、数据统计",
+    "description": "进行简单的数学计算",
     "main_file": "calculator.py",
     "parameter": {
-        "text_statistics_mode": true,
-        "numberline_statistics_mode": true,
         "calculate_mode": true
     }
 }
