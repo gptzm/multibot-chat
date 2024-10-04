@@ -39,7 +39,9 @@ def process_svg_content(content):
         # 使用 BeautifulSoup 解析 SVG 内容
         try:
             soup = BeautifulSoup(svg_content, 'html.parser')
-            svg = soup.find('svg')
+            svg = soup.find()
+            if svg.name != 'svg':
+                return match.group(0)
         except Exception as e:
             LOGGER.error(f"错误解析SVG内容: {e}")
             return match.group(0)
@@ -65,7 +67,7 @@ def process_svg_content(content):
         return match.group(0)
     
     # 修改正则表达式以匹配 Markdown 处理后的内容
-    pattern = r'```(svg)\n(.*?)```'
+    pattern = r'(?:^|\r?\n)\s*```(svg|xml)\r?\n(.*?)\r?\n\s*```'
     return re.sub(pattern, replace_svg_block, content, flags=re.MULTILINE|re.DOTALL|re.IGNORECASE)
 
 def get_chat_container_style():
@@ -77,6 +79,84 @@ def get_chat_container_style():
         .message img{{
             max-width: 100%;
             height: auto;
+            background-color: #fff;
+        }}
+        .message .codehilite {{
+            width: 100%;
+            overflow-x: auto;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+            margin: 10px 0;
+        }}
+        .message .codehilite pre {{
+            margin: 0;
+            padding: 10px;
+        }}
+        .message .codehilite .hll {{ background-color: #ffffcc }}
+        .message .codehilite .c {{ color: #408080; font-style: italic }} /* Comment */
+        .message .codehilite .k {{ color: #008000; font-weight: bold }} /* Keyword */
+        .message .codehilite .o {{ color: #666666 }} /* Operator */
+        .message .codehilite .cm {{ color: #408080; font-style: italic }} /* Comment.Multiline */
+        .message .codehilite .cp {{ color: #BC7A00 }} /* Comment.Preproc */
+        .message .codehilite .c1 {{ color: #408080; font-style: italic }} /* Comment.Single */
+        .message .codehilite .cs {{ color: #408080; font-style: italic }} /* Comment.Special */
+        .message .codehilite .gd {{ color: #A00000 }} /* Generic.Deleted */
+        .message .codehilite .ge {{ font-style: italic }} /* Generic.Emph */
+        .message .codehilite .gr {{ color: #FF0000 }} /* Generic.Error */
+        .message .codehilite .gh {{ color: #000080; font-weight: bold }} /* Generic.Heading */
+        .message .codehilite .gi {{ color: #00A000 }} /* Generic.Inserted */
+        .message .codehilite .go {{ color: #888888 }} /* Generic.Output */
+        .message .codehilite .gp {{ color: #000080; font-weight: bold }} /* Generic.Prompt */
+        .message .codehilite .gs {{ font-weight: bold }} /* Generic.Strong */
+        .message .codehilite .gu {{ color: #800080; font-weight: bold }} /* Generic.Subheading */
+        .message .codehilite .gt {{ color: #0044DD }} /* Generic.Traceback */
+        .message .codehilite .kc {{ color: #008000; font-weight: bold }} /* Keyword.Constant */
+        .message .codehilite .kd {{ color: #008000; font-weight: bold }} /* Keyword.Declaration */
+        .message .codehilite .kn {{ color: #008000; font-weight: bold }} /* Keyword.Namespace */
+        .message .codehilite .kp {{ color: #008000 }} /* Keyword.Pseudo */
+        .message .codehilite .kr {{ color: #008000; font-weight: bold }} /* Keyword.Reserved */
+        .message .codehilite .kt {{ color: #B00040 }} /* Keyword.Type */
+        .message .codehilite .m {{ color: #666666 }} /* Literal.Number */
+        .message .codehilite .s {{ color: #BA2121 }} /* Literal.String */
+        .message .codehilite .na {{ color: #7D9029 }} /* Name.Attribute */
+        .message .codehilite .nb {{ color: #008000 }} /* Name.Builtin */
+        .message .codehilite .nc {{ color: #0000FF; font-weight: bold }} /* Name.Class */
+        .message .codehilite .no {{ color: #880000 }} /* Name.Constant */
+        .message .codehilite .nd {{ color: #AA22FF }} /* Name.Decorator */
+        .message .codehilite .ni {{ color: #999999; font-weight: bold }} /* Name.Entity */
+        .message .codehilite .ne {{ color: #D2413A; font-weight: bold }} /* Name.Exception */
+        .message .codehilite .nf {{ color: #0000FF }} /* Name.Function */
+        .message .codehilite .nl {{ color: #A0A000 }} /* Name.Label */
+        .message .codehilite .nn {{ color: #0000FF; font-weight: bold }} /* Name.Namespace */
+        .message .codehilite .nt {{ color: #008000; font-weight: bold }} /* Name.Tag */
+        .message .codehilite .nv {{ color: #19177C }} /* Name.Variable */
+        .message .codehilite .ow {{ color: #AA22FF; font-weight: bold }} /* Operator.Word */
+        .message .codehilite .w {{ color: #bbbbbb }} /* Text.Whitespace */
+        .message .codehilite .mf {{ color: #666666 }} /* Literal.Number.Float */
+        .message .codehilite .mh {{ color: #666666 }} /* Literal.Number.Hex */
+        .message .codehilite .mi {{ color: #666666 }} /* Literal.Number.Integer */
+        .message .codehilite .mo {{ color: #666666 }} /* Literal.Number.Oct */
+        .message .codehilite .sb {{ color: #BA2121 }} /* Literal.String.Backtick */
+        .message .codehilite .sc {{ color: #BA2121 }} /* Literal.String.Char */
+        .message .codehilite .sd {{ color: #BA2121; font-style: italic }} /* Literal.String.Doc */
+        .message .codehilite .s2 {{ color: #BA2121 }} /* Literal.String.Double */
+        .message .codehilite .se {{ color: #BB6622; font-weight: bold }} /* Literal.String.Escape */
+        .message .codehilite .sh {{ color: #BA2121 }} /* Literal.String.Heredoc */
+        .message .codehilite .si {{ color: #BB6688; font-weight: bold }} /* Literal.String.Interpol */
+        .message .codehilite .sx {{ color: #008000 }} /* Literal.String.Other */
+        .message .codehilite .sr {{ color: #BB6688 }} /* Literal.String.Regex */
+        .message .codehilite .s1 {{ color: #BA2121 }} /* Literal.String.Single */
+        .message .codehilite .ss {{ color: #19177C }} /* Literal.String.Symbol */
+        .message .codehilite .bp {{ color: #008000 }} /* Name.Builtin.Pseudo */
+        .message .codehilite .vc {{ color: #19177C }} /* Name.Variable.Class */
+        .message .codehilite .vg {{ color: #19177C }} /* Name.Variable.Global */
+        .message .codehilite .vi {{ color: #19177C }} /* Name.Variable.Instance */
+        .message .codehilite .il {{ color: #666666 }} /* Literal.Number.Integer.Long */
+        .message-assistant-content, .message-user-content {{
+            max-width: 100%;
+            overflow-wrap: break-word;
+            word-break: break-all;
+            overflow-x: auto;
         }}
         .copy-button {{
             visibility: hidden;
@@ -117,8 +197,6 @@ def get_chat_container_style():
             background-color: #e0ffe0;
             border-radius: 10px;
             padding: 0 15px;
-            overflow-wrap: break-word;
-            word-break: break-all;
         }}
         .user-avatar {{
             background-color: #eee;
@@ -150,8 +228,6 @@ def get_chat_container_style():
             background-color: #f0f0f0;
             border-radius: 10px;
             padding: 0 15px;
-            overflow-wrap: break-word;
-            word-break: break-all;
         }}
         .bot-name {{
             margin-top: 5px;
@@ -273,8 +349,7 @@ def display_group_chat(bots, history):
             ]
         )
         
-        
-        LOGGER.info(f'替换后：{str(content_markdown)}')
+        # LOGGER.info(f'替换后：{str(content_markdown)}')
         content_markdown_repr = repr(content_markdown)
         random_id = str(random.randint(100000000000, 999999999999))
 
