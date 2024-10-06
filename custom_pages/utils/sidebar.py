@@ -4,6 +4,7 @@ from config import EMOJI_OPTIONS, SHOW_SECRET_INFO, GUEST_USERNAMES
 from utils.user_manager import user_manager
 from custom_pages.utils.dialogs import edit_bot, add_new_bot, edit_bot_config
 import logging
+import re
 
 LOGGER = logging.getLogger(__name__)
 
@@ -117,7 +118,9 @@ def render_sidebar():
             with st.container():
                 for i, bot in enumerate(st.session_state.bots):
                     bot_name_display = f"{bot.get('avatar', '') or '🤖'} **{bot['name']}**" if bot['enable'] else f"{bot.get('avatar', '🤖')} ~~{bot['name']}~~"
-                    if st.button(bot_name_display, key=f"__edit_bot_{i}", help=bot.get('system_prompt','')[0:100], use_container_width=True):
+                    system_prompt = bot.get('system_prompt','')
+                    system_prompt_warp = re.sub(r'((?:[\u0100-\u9fff]|[^\u0000-\u00ff]{1,2}){1,20})', r'\1\n\n', system_prompt[0:100])
+                    if st.button(bot_name_display, key=f"__edit_bot_{i}", help=f"{system_prompt_warp}\n\n***【点击按钮可编辑】***".strip(), use_container_width=True):
                         edit_bot(bot)
     
             if st.button("新增Bot", type="primary", use_container_width=True):
