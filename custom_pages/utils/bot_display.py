@@ -26,7 +26,7 @@ def display_active_bots(bot_manager, prompt, show_bots):
                 response_content = get_response_from_bot(prompt, bot, bot_manager.get_current_history_by_bot(bot))
                 bot_manager.add_message_to_history(bot['id'], {"role": "user", "content": prompt})
                 bot_manager.add_message_to_history(bot['id'], {"role": "assistant", "content": response_content})
-                bot_manager.fix_history_names(bot_manager.current_history_version)
+                bot_manager.fix_history_names(bot_manager.current_history_version_idx)
                 current_history = bot_manager.get_current_history_by_bot(bot)
 
             if current_history:

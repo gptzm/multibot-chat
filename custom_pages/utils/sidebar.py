@@ -61,7 +61,7 @@ def render_sidebar():
             with st.expander("群聊历史话题", expanded=True):
                 group_history_options = [f"{v['name']}" for v in bot_manager.group_history_versions]
                 
-                current_index = min(bot_manager.current_group_history_version, len(group_history_options) - 1)
+                current_index = min(bot_manager.current_group_history_version_idx, len(group_history_options) - 1)
                 
                 new_index = st.selectbox(
                     "可以回到旧话题继续聊天",
@@ -70,8 +70,8 @@ def render_sidebar():
                     index=current_index
                 )
 
-                if new_index != bot_manager.current_group_history_version:
-                    bot_manager.current_group_history_version = new_index
+                if new_index != bot_manager.current_group_history_version_idx:
+                    bot_manager.current_group_history_version_idx = new_index
                     bot_manager.save_data_to_file()
                     st.rerun()
 
@@ -84,15 +84,15 @@ def render_sidebar():
                     history_versions = bot_manager.history_versions
                     history_options = [f"{v['name']}" for v in history_versions]
                     
-                    # 确保 current_history_version 在有效范围内
-                    current_history_version = min(bot_manager.current_history_version, len(history_options) - 1)
+                    # 确保 current_history_version_idx 在有效范围内
+                    current_history_version_idx = min(bot_manager.current_history_version_idx, len(history_options) - 1)
                     
                     def on_history_change():
                         new_version_index = st.session_state.history_version_selector
                         participating_bots = bot_manager.get_participating_bots(new_version_index)
                         
-                        # 更新 bot_manager 的 current_history_version
-                        bot_manager.current_history_version = new_version_index
+                        # 更新 bot_manager 的 current_history_version_idx
+                        bot_manager.current_history_version_idx = new_version_index
                         
                         # 更新机器人状态：启用所有参与聊天的机器人
                         for bot in bot_manager.bots:
@@ -105,7 +105,7 @@ def render_sidebar():
                         "可以回到旧话题继续聊天",
                         options=range(len(history_options)),
                         format_func=lambda i: history_options[i],
-                        index=current_history_version,
+                        index=current_history_version_idx,
                         key="history_version_selector",
                         on_change=on_history_change
                     )

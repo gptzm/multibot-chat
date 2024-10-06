@@ -21,8 +21,8 @@ class BotSessionManager:
         self.bots = []
         self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}, 'name': '新话题'}]
         self.group_history_versions = [{'timestamp': datetime.now().isoformat(), 'group_history': [], 'name': '新群聊话题'}]
-        self.current_history_version = 0
-        self.current_group_history_version = 0
+        self.current_history_version_idx = 0
+        self.current_group_history_version_idx = 0
         self.bot_id_map = {}
         self.auto_speak = True
         self.chat_config = {
@@ -88,8 +88,8 @@ class BotSessionManager:
             'bots': bots_without_history,
             'history_versions': self.history_versions,
             'group_history_versions': self.group_history_versions,
-            'current_history_version': self.current_history_version,
-            'current_group_history_version': self.current_group_history_version,
+            'current_history_version_idx': self.current_history_version_idx,
+            'current_group_history_version_idx': self.current_group_history_version_idx,
             'bot_id_map': self.bot_id_map,
             'chat_config': self.chat_config,
             'auto_speak': self.auto_speak,
@@ -98,21 +98,33 @@ class BotSessionManager:
         encrypted_data = encrypt_data(json.dumps(data))
         with open(f"{USER_CONFIG_BASEDIR}/{self._filename}.encrypt", 'w') as f:
             f.write(encrypted_data)
-
+    
     def ensure_valid_history_version(self):
         if not self.history_versions:
             self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}, 'name': '新话题'}]
-            self.current_history_version = 0
-        elif self.current_history_version >= len(self.history_versions):
-            self.current_history_version = len(self.history_versions) - 1
+            self.current_history_version_idx = 0
+        elif self.current_history_version_idx >= len(self.history_versions):
+            self.current_history_version_idx = len(self.history_versions) - 1
 
     def ensure_valid_group_history_version(self):
         if not self.group_history_versions:
             self.group_history_versions = [{'timestamp': datetime.now().isoformat(), 'group_history': [], 'name': '新群聊话题'}]
-            self.current_group_history_version = 0
-        elif self.current_group_history_version >= len(self.group_history_versions):
-            self.current_group_history_version = len(self.group_history_versions) - 1
+            self.current_group_history_version_idx = 0
+        elif self.current_group_history_version_idx >= len(self.group_history_versions):
+            self.current_group_history_version_idx = len(self.group_history_versions) - 1
 
+    def remove_empty_new_history_version(self):
+        self.history_versions = [
+            version for version in self.history_versions
+            if not (version['name'] == '新话题' and all(len(h) == 0 for h in version['histories'].values()))
+        ]
+
+    def remove_empty_new_group_history_version(self):
+        self.group_history_versions = [
+            version for version in self.group_history_versions
+            if not (version['name'] == '新群聊话题' and len(version['group_history']) == 0)
+        ]
+    
     def fix_history_names(self, specific_index=None):
         versions_to_update = [self.history_versions[specific_index]] if specific_index is not None else self.history_versions
         for idx, version in enumerate(versions_to_update):
@@ -249,13 +261,18 @@ class BotSessionManager:
     def create_new_history_version(self):
         if self.is_current_history_empty():
             return False
+        
+        self.remove_empty_new_history_version()
+
         new_version = {
             'timestamp': datetime.now().isoformat(),
             'histories': {bot['id']: [] for bot in self.bots if bot['enable']},
             'name': '新话题'
         }
+
         self.history_versions.append(new_version)
-        self.current_history_version = len(self.history_versions) - 1
+        self.current_history_version_idx = len(self.history_versions) - 1
+            
         self.fix_history_names()
         self.save_data_to_file()
         return True
@@ -263,26 +280,31 @@ class BotSessionManager:
     def create_new_group_history_version(self):
         if self.is_current_group_history_empty():
             return False
+        
+        self.remove_empty_new_group_history_version()
+
         new_version = {
             'timestamp': datetime.now().isoformat(),
             'group_history': [],
             'name': '新群聊话题'
         }
+
         self.group_history_versions.append(new_version)
-        self.current_group_history_version = len(self.group_history_versions) - 1
+        self.current_group_history_version_idx = len(self.group_history_versions) - 1
+            
         self.fix_group_history_names()
         self.save_data_to_file()
         return True
 
     def is_current_history_empty(self):
-        if self.current_history_version < len(self.history_versions):
-            current_history = self.history_versions[self.current_history_version]['histories']
+        if self.current_history_version_idx < len(self.history_versions):
+            current_history = self.history_versions[self.current_history_version_idx]['histories']
             return all(len(history) == 0 for history in current_history.values())
         return True
 
     def is_current_group_history_empty(self):
-        if self.current_group_history_version < len(self.group_history_versions):
-            current_group_history = self.group_history_versions[self.current_group_history_version]['group_history']
+        if self.current_group_history_version_idx < len(self.group_history_versions):
+            current_group_history = self.group_history_versions[self.current_group_history_version_idx]['group_history']
             return len(current_group_history) == 0
         return True
 
@@ -292,8 +314,8 @@ class BotSessionManager:
         return set()
 
     def add_message_to_history(self, bot_id, message):
-        if bot_id and self.current_history_version < len(self.history_versions):
-            current_version = self.history_versions[self.current_history_version]
+        if bot_id and self.current_history_version_idx < len(self.history_versions):
+            current_version = self.history_versions[self.current_history_version_idx]
             current_version['histories'].setdefault(bot_id, []).append(message)
         self.save_data_to_file()
 
@@ -345,13 +367,13 @@ class BotSessionManager:
 
     def clear_all_histories(self):
         self.history_versions = [{'timestamp': datetime.now().isoformat(), 'histories': {}, 'name': '新话题'}]
-        self.current_history_version = 0
+        self.current_history_version_idx = 0
         self.fix_history_names()
         self.save_data_to_file()
 
     def clear_all_group_histories(self):
         self.group_history_versions = [{'timestamp': datetime.now().isoformat(), 'group_history': [], 'name': '新群聊话题'}]
-        self.current_group_history_version = 0
+        self.current_group_history_version_idx = 0
         
         # 清理所有机器人的群聊历史
         for bot in self.bots:
@@ -363,8 +385,8 @@ class BotSessionManager:
 
     def get_current_history_by_bot(self, bot):
         bot_id = bot['id']
-        if bot_id and self.current_history_version < len(self.history_versions):
-            current_version = self.history_versions[self.current_history_version]
+        if bot_id and self.current_history_version_idx < len(self.history_versions):
+            current_version = self.history_versions[self.current_history_version_idx]
             return current_version['histories'].get(bot_id, [])
         return []
 
@@ -385,18 +407,18 @@ class BotSessionManager:
             message["bot_name"] = bot["name"]
         if tool:
             message["tool_name"] = tool["name"]
-        self.group_history_versions[self.current_group_history_version]['group_history'].append(message)
+        self.group_history_versions[self.current_group_history_version_idx]['group_history'].append(message)
         self.save_data_to_file()
 
     def get_current_group_history(self):
-        if self.current_group_history_version < len(self.group_history_versions):
-            current_version = self.group_history_versions[self.current_group_history_version]
+        if self.current_group_history_version_idx < len(self.group_history_versions):
+            current_version = self.group_history_versions[self.current_group_history_version_idx]
             return current_version.get('group_history', [])
         return []
 
     def get_participating_bots_in_current_group_history(self):
-        if self.current_group_history_version < len(self.group_history_versions):
-            current_version = self.group_history_versions[self.current_group_history_version]
+        if self.current_group_history_version_idx < len(self.group_history_versions):
+            current_version = self.group_history_versions[self.current_group_history_version_idx]
             bot_ids = set(message['bot_id'] for message in current_version['group_history'] if message['role'] == 'assistant' and 'bot_id' in message)
             return [bot for bot in self.bots if bot['id'] in bot_ids]
         return []
@@ -406,23 +428,23 @@ class BotSessionManager:
             'bots': self.bots,
             'history_versions': self.history_versions,
             'group_history_versions': self.group_history_versions,
-            'current_history_version': self.current_history_version,
-            'current_group_history_version': self.current_group_history_version,
+            'current_history_version_idx': self.current_history_version_idx,
+            'current_group_history_version_idx': self.current_group_history_version_idx,
             'bot_id_map': self.bot_id_map,
             'chat_config': self.chat_config
         }
 
     def validate_bot_config(self, config):
         required_keys = ['bots', 'history_versions', 'group_history_versions', 
-                         'current_history_version', 'current_group_history_version', 'bot_id_map', 'chat_config']
+                         'current_history_version_idx', 'current_group_history_version_idx', 'bot_id_map', 'chat_config']
         return all(key in config for key in required_keys)
 
     def update_bot_config(self, new_config):
         self.bots = new_config['bots']
         self.history_versions = new_config['history_versions']
         self.group_history_versions = new_config['group_history_versions']
-        self.current_history_version = new_config['current_history_version']
-        self.current_group_history_version = new_config['current_group_history_version']
+        self.current_history_version_idx = new_config['current_history_version_idx']
+        self.current_group_history_version_idx = new_config['current_group_history_version_idx']
         self.bot_id_map = new_config['bot_id_map']
         self.chat_config = new_config['chat_config']
         self.save_data_to_file()
@@ -464,8 +486,8 @@ class BotSessionManager:
         self.save_data_to_file()
 
     def remove_last_group_message(self):
-        if self.current_group_history_version < len(self.group_history_versions):
-            current_version = self.group_history_versions[self.current_group_history_version]
+        if self.current_group_history_version_idx < len(self.group_history_versions):
+            current_version = self.group_history_versions[self.current_group_history_version_idx]
             if current_version['group_history']:
                 current_version['group_history'].pop()
                 self.save_data_to_file()

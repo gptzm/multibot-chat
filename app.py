@@ -36,11 +36,11 @@ if __name__ == "__main__":
             st.session_state.bot_manager = bot_manager
             st.session_state.bots = bot_manager.bots
             st.session_state.group_history_versions = bot_manager.group_history_versions
-            st.session_state.current_group_history_version = bot_manager.current_group_history_version
+            st.session_state.current_group_history_version_idx = bot_manager.current_group_history_version_idx
             if 'page' not in st.session_state:
                 st.session_state.page = bot_manager.get_last_visited_page()
             st.session_state.chat_config = bot_manager.get_chat_config()
-            st.session_state.current_history_version = bot_manager.current_history_version
+            st.session_state.current_history_version_idx = bot_manager.current_history_version_idx
             LOGGER.info(f"使用token登录成功. Username: {st.session_state.username}")
         else:
             LOGGER.warning("无效的token")

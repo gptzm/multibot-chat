@@ -5,7 +5,6 @@ from bot.config import ENGINE_CONFIG
 from config import EMOJI_OPTIONS, ENGINE_OPTIONS, LOGGER, SHOW_SECRET_INFO, GUEST_USERNAMES, DEVELOPER_USERNAME
 import json
 
-
 @st.dialog('编辑Bot', width='large')
 def edit_bot(bot):
     bot_manager = st.session_state.bot_manager
@@ -50,7 +49,7 @@ def edit_bot(bot):
             )
 
         with st.container():
-            col1, col2, col_empty, col3 = st.columns(4, gap="small")
+            col1, col2, col3 = st.columns(3, gap="small")
 
             with col1:
                 if st.form_submit_button("保存", use_container_width=True, type="primary"):
@@ -59,7 +58,8 @@ def edit_bot(bot):
 
             with col2:
                 if st.form_submit_button("创建副本", use_container_width=True):
-                    bot_manager.create_bot_copy(bot)
+                    new_bot = bot_manager.create_bot_copy(bot)
+                    st.success(f"已创建 {new_bot['name']}")
                     st.rerun()
 
             with col3:
