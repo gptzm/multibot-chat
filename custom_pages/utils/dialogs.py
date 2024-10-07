@@ -31,7 +31,7 @@ def edit_bot(bot):
             # 根据配置动态生成输字段
             for field in ENGINE_CONFIG['engines'][bot['engine']]['fields']:
                 if st.session_state.username != DEVELOPER_USERNAME and field.get('is_secret', False):
-                    if st.session_state.username or not SHOW_SECRET_INFO or st.session_state.username in GUEST_USERNAMES:
+                    if not st.session_state.username or not SHOW_SECRET_INFO or st.session_state.username in GUEST_USERNAMES:
                         continue
                 
                 if field['type'] == 'text':
