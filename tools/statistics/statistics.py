@@ -27,9 +27,10 @@ def run(parameter, content, group_prompt, group_history):
                 numbers.append(float(stripped_line))
         
         if numbers:
+            numbers_sorted = sorted(numbers)
             total = round(sum(numbers), 10)
             average = round(total / len(numbers), 10)
-            median = round(sorted(numbers)[len(numbers) // 2] if len(numbers) % 2 != 0 else (sorted(numbers)[len(numbers) // 2 - 1] + sorted(numbers)[len(numbers) // 2]) / 2, 10)
+            median = round(numbers_sorted[len(numbers) // 2] if len(numbers) % 2 != 0 else (numbers_sorted[len(numbers) // 2 - 1] + numbers_sorted[len(numbers) // 2]) / 2, 10)
             variance = round(sum((x - average) ** 2 for x in numbers) / len(numbers), 10)
             std_dev = round(sum((x - average) ** 2 for x in numbers) / len(numbers) ** 0.5, 10)
             min_value = round(min(numbers), 10)

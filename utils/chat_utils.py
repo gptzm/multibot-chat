@@ -253,14 +253,21 @@ def display_group_chat(bots, history):
                             </div>"""
         
         bot_html += f"""<script>
-                            function copy_{random_id}(element){{
-                                navigator.clipboard.writeText({content_markdown_repr}).then(() => {{
-                                    const lastInnerHTML = element.innerHTML;
-                                    element.innerHTML = '✅';
-                                    setTimeout(() => {{
-                                        element.innerHTML = lastInnerHTML;
-                                    }}, 500);
-                                }});
+                            function copy_{random_id}(element) {{
+                                const textToCopy = {content_markdown_repr};
+
+                                if (navigator.clipboard && navigator.clipboard.writeText) {{
+                                    // 使用 Clipboard API 复制
+                                    navigator.clipboard.writeText(textToCopy).then(() => {{
+                                        showCopySuccess(element);
+                                    }}).catch(err => {{
+                                        console.error('Clipboard API 复制失败: ', err);
+                                        fallbackCopyText(textToCopy, element);
+                                    }});
+                                }} else {{
+                                    // 使用备用方法复制
+                                    fallbackCopyText(textToCopy, element);
+                                }}
                             }}
                         </script>"""
     
@@ -279,17 +286,45 @@ def display_group_chat(bots, history):
             chatContainer.scrollTop = chatContainer.scrollHeight;
         </script>
         <script>
-        function copyCode(button) {
-            const codeBlock = button.closest('.code-block').querySelector('pre');
-            const code = codeBlock.innerHTML;
-            navigator.clipboard.writeText(code).then(() => {
-                const original_innerHTML = button.innerHTML;
-                button.innerHTML = '<span>已复制</span>';
+            function fallbackCopyText(text, element) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';  // 避免影响页面布局
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                try {
+                    if (document.execCommand('copy')) {
+                        showCopySuccess(element);
+                    } else {
+                        console.error('execCommand 复制失败');
+                    }
+                } catch (err) {
+                    console.error('execCommand 复制出错: ', err);
+                }
+                document.body.removeChild(textarea);
+            }
+
+            function showCopySuccess(element) {
+                const lastInnerHTML = element.innerHTML;
+                element.innerHTML = '✅';
                 setTimeout(() => {
-                    button.innerHTML = original_innerHTML;
+                    element.innerHTML = lastInnerHTML;
                 }, 500);
-            });
-        }
+            }
+        </script>
+        <script>
+            function copyCode(button) {
+                const codeBlock = button.closest('.code-block').querySelector('pre');
+                const code = codeBlock.innerHTML;
+                navigator.clipboard.writeText(code).then(() => {
+                    const original_innerHTML = button.innerHTML;
+                    button.innerHTML = '<span>已复制</span>';
+                    setTimeout(() => {
+                        button.innerHTML = original_innerHTML;
+                    }, 500);
+                });
+            }
         </script>
     """
     components.html(bot_html, height=600)
