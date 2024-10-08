@@ -259,15 +259,13 @@ def display_group_chat(bots, history):
                                 if (navigator.clipboard && navigator.clipboard.writeText) {{
                                     // 使用 Clipboard API 复制
                                     navigator.clipboard.writeText(textToCopy).then(() => {{
-                                        showCopySuccess(element);
-                                    }}).catch(err => {{
-                                        console.error('Clipboard API 复制失败: ', err);
-                                        fallbackCopyText(textToCopy, element);
+                                        showCopySuccess('✅', element);
+                                        return;
                                     }});
-                                }} else {{
-                                    // 使用备用方法复制
-                                    fallbackCopyText(textToCopy, element);
                                 }}
+                                
+                                // 使用备用方法复制
+                                if(fallbackCopyText(textToCopy, element)) showCopySuccess('✅', element);
                             }}
                         </script>"""
     
@@ -295,19 +293,23 @@ def display_group_chat(bots, history):
                 textarea.select();
                 try {
                     if (document.execCommand('copy')) {
-                        showCopySuccess(element);
+                        document.body.removeChild(textarea);
+                        return true;
                     } else {
                         console.error('execCommand 复制失败');
+                        document.body.removeChild(textarea);
+                        return false;
                     }
                 } catch (err) {
                     console.error('execCommand 复制出错: ', err);
+                    document.body.removeChild(textarea);
+                    return false;
                 }
-                document.body.removeChild(textarea);
             }
 
-            function showCopySuccess(element) {
+            function showCopySuccess(text, element) {
                 const lastInnerHTML = element.innerHTML;
-                element.innerHTML = '✅';
+                element.innerHTML = text;
                 setTimeout(() => {
                     element.innerHTML = lastInnerHTML;
                 }, 500);
@@ -317,13 +319,16 @@ def display_group_chat(bots, history):
             function copyCode(button) {
                 const codeBlock = button.closest('.code-block').querySelector('pre');
                 const code = codeBlock.innerHTML;
-                navigator.clipboard.writeText(code).then(() => {
-                    const original_innerHTML = button.innerHTML;
-                    button.innerHTML = '<span>已复制</span>';
-                    setTimeout(() => {
-                        button.innerHTML = original_innerHTML;
-                    }, 500);
-                });
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    // 使用 Clipboard API 复制
+                    navigator.clipboard.writeText(code).then(() => {
+                        showCopySuccess("已复制", button);
+                        return;
+                    });
+                }
+
+                // 使用备用方法复制
+                if(fallbackCopyText(code, button)) showCopySuccess("已复制", button);
             }
         </script>
     """
