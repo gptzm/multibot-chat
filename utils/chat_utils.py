@@ -318,7 +318,7 @@ def display_group_chat(bots, history):
         <script>
             function copyCode(button) {
                 const codeBlock = button.closest('.code-block').querySelector('pre');
-                const code = codeBlock.innerHTML;
+                const code = codeBlock.innerText;
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     // 使用 Clipboard API 复制
                     navigator.clipboard.writeText(code).then(() => {
