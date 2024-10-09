@@ -6,7 +6,11 @@ from utils.user_manager import user_manager  # 确保这行导入存在
 from config import LOGGER
 from bot.bot_session_manager import BotSessionManager
 from tools.tool_manager import ToolManager
+import sys
 
+LOGGER.info(sys.executable)
+
+# 打印 Python 可执行文件的路径
 st.set_page_config(page_title="多Bot聊天", page_icon="🤖", layout="wide")
 
 def load_page(page_name):
