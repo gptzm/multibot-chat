@@ -25,12 +25,16 @@ def run(parameter, content, group_prompt, group_history):
                 system_prompt="你是一个搜索高手，擅长解读用户的真实意图，并拟定最适合搜索的关键短语，你永远只提炼关键短语，不要做其他的事情，你的输出不超过50个字",
                 history=group_history,
             )
+        except Exception as e:
+            return f'[ERROR] 调用本地模型时发生错误: {str(e)}'
+        try:
             query = completion.choices[0].message.content
             results = ddgs.text(query[0:100], region='cn-zh', max_results=3)
-            if not results:
-                LOGGER.error("No results found")
-                return '没有找到结果'
-            markdown_results = format_to_markdown(query,results)
-            return markdown_results
         except Exception as e:
-            return f'[ERROR] 发生错误{str(e)}'
+            return f'[ERROR] 通过DuckDuckGo搜索时发生错误: {str(e)}'
+        
+        if not results:
+            LOGGER.error("No results found")
+            return '没有找到结果'
+        markdown_results = format_to_markdown(query,results)
+        return markdown_results

@@ -34,16 +34,23 @@ def plan_task_with_openai(prompt, group_history, bots, tools):
                 }
                 function_calls.append(function_call)
                 function_call_names.append(f" - {bot['id']}：{bot['name']}")
+    except Exception as e:
+        return f"[ERROR] 获取角色信息时发生错误: {str(e)}"
         
-        group_history = fix_messages(group_history)
+    group_history = fix_messages(group_history)
+    
+    try:
         completion = base_llm_completion(
             '仔细理解user最新对话的关注点，结合上下文仔细斟酌最适合参与讨论这个话题的1~3个角色，并按顺序调用',
             system_prompt='你是一个角色调用路由，能够拆分逐层深入的思考路径，并深入理解每个角色的定位和用途，规划不同的角色如何按顺序参与讨论，并分步骤调用',
             history=group_history,
             tools=function_calls,
         )
-
         LOGGER.info(f'\n\ncompletion=\n{completion}\n\n')
+    except Exception as e:
+        return f"[ERROR] 调用本地模型时发生错误: {str(e)}"
+
+    try:
         results = []
         if completion.choices[0].message.content:
             results.append(completion.choices[0].message.content)

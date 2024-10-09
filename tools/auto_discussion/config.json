@@ -1,6 +1,6 @@
 {
     "name": "一键讨论",
-    "description": "由AI来自动规划接下来1~3轮需要由哪些角色参与发言",
+    "description": "由AI来自动规划接下来1~3轮需要由哪些角色的幕僚参与发言",
     "main_file": "auto_discussion.py",
     "parameter": {}
 }
