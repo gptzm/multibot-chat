@@ -65,10 +65,10 @@ MultiBot Chat 提供了方便的批量管理功能，让用户可以轻松控制
    ![提取网页示例](demo_images/demo_group_page_tool_web_extractor.png)
 
 4. **一键讨论**：由AI来自动规划接下来1~3轮需要由哪些角色参与发言。
-   ![一键讨论示例](demo_images/demo_group_page_tool_discussion.png)
+   ![一键讨论示例](demo_images/demo_group_page_tool_auto_discussion.png)
 
 5. **AI搜索**：提取消息中的链接，用AI重新组织语言后返回最多3条搜索结果，包括标题、链接和摘要。
-   ![AI搜索示例](demo_images/demo_group_page_tool_ai_search.png)
+   ![AI搜索示例](demo_images/demo_group_page_tool_web_search.png)
 
 6. **MD转纯文本**：将Markdown格式的内容转换为纯文本，方便用户获取干净的文本信息。
 
