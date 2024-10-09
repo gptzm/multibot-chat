@@ -39,10 +39,11 @@ def plan_task_with_openai(prompt, group_history, bots, tools):
         
     group_history = fix_messages(group_history)
     
+    # function_call_names_string = "、".join(function_call_names)
     try:
         completion = base_llm_completion(
-            '仔细理解user最新对话的关注点，结合上下文仔细斟酌最适合参与讨论这个话题的1~3个角色，并按顺序调用',
-            system_prompt='你是一个角色调用路由，能够拆分逐层深入的思考路径，并深入理解每个角色的定位和用途，规划不同的角色如何按顺序参与讨论，并分步骤调用',
+            '仔细理解user最新对话的关注点，结合上下文仔细斟酌最适合讨论这个话题的1~3个角色，并按顺序调用',
+            system_prompt=f'你是一个角色调用路由，能够拆分逐层深入的思考路径，并深入理解每个角色的定位和分工，规划不同的角色如何按顺序参与讨论，你需要分步骤调用这些角色，但不要直接回复用户',
             history=group_history,
             tools=function_calls,
         )
@@ -62,9 +63,12 @@ def plan_task_with_openai(prompt, group_history, bots, tools):
                     if tool_call.function.name.startswith("call_bot_"):
                         bot_id = tool_call.function.name.replace("call_bot_", "")
                         results.append({"type": "call_bot", "id": bot_id, "prompt": arguments.get("prompt")})
-                    elif tool_call.function.name.startswith("call_tool_"):
-                        tool_id = tool_call.function.name.replace("call_tool_", "")
-                        results.append({"type": "call_tool", "id": tool_id})
+                    # elif tool_call.function.name.startswith("call_tool_"):
+                    #     tool_id = tool_call.function.name.replace("call_tool_", "")
+                    #     results.append({"type": "call_tool", "id": tool_id})
+                    elif st.session_state.bot_manager.get_bot_by_name(tool_call.function.name):
+                        bot = st.session_state.bot_manager.get_bot_by_name(tool_call.function.name)
+                        results.append({"type": "call_bot", "id": bot['id']})
         if results:
             return results
         else:

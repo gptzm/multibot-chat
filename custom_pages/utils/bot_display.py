@@ -254,7 +254,8 @@ def use_tool(tool_folder):
                 LOGGER.info(f"\n\n即将调用的Bot为:\n{bot} {bot_id}\n\n")
                 if bot:
                     prompt = function_call.get("prompt","")
-                    response = get_response_from_bot_group(f'我对你的要求是：{prompt}\n\n请你尽量言简意赅，快速表达最核心的信息和观点，尽量控制在200字以内', bot, st.session_state.bot_manager.get_current_group_history())
+                    response = get_response_from_bot_group(f'下一步从【{bot["name"]}】的视角思考的重点是：{prompt}\n\n请你尽量言简意赅，快速表达最核心的信息和观点，尽量控制在200字以内', bot, st.session_state.bot_manager.get_current_group_history())
+                    bot_manager.add_message_to_group_history("assistant", f'下一步从【{bot["name"]}】的视角思考的重点是：{prompt}', tool=tool_info)
                     bot_manager.add_message_to_group_history("assistant", response, bot=bot)
             elif type(result) == dict and result and result.get("type") == 'call_tool':
                 function_call = result

@@ -259,13 +259,13 @@ def display_group_chat(bots, history):
                                 if (navigator.clipboard && navigator.clipboard.writeText) {{
                                     // 使用 Clipboard API 复制
                                     navigator.clipboard.writeText(textToCopy).then(() => {{
-                                        showCopySuccess('✅', element);
+                                        showCopyTextSuccess(element);
                                         return;
                                     }});
+                                }} else if(fallbackCopyText(textToCopy, element)) {{
+                                    // 使用备用方法复制
+                                    showCopyTextSuccess(element);
                                 }}
-                                
-                                // 使用备用方法复制
-                                if(fallbackCopyText(textToCopy, element)) showCopySuccess('✅', element);
                             }}
                         </script>"""
     
@@ -307,11 +307,17 @@ def display_group_chat(bots, history):
                 }
             }
 
-            function showCopySuccess(text, element) {
-                const lastInnerHTML = element.innerHTML;
-                element.innerHTML = text;
+            function showCopyTextSuccess(element) {
+                element.innerHTML = '✅';
                 setTimeout(() => {
-                    element.innerHTML = lastInnerHTML;
+                    element.innerHTML = '📋';
+                }, 500);
+            }
+
+            function showCopyCodeSuccess(element) {
+                element.innerHTML = '已复制';
+                setTimeout(() => {
+                    element.innerHTML = '复制';
                 }, 500);
             }
         </script>
@@ -322,13 +328,13 @@ def display_group_chat(bots, history):
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     // 使用 Clipboard API 复制
                     navigator.clipboard.writeText(code).then(() => {
-                        showCopySuccess("已复制", button);
+                        showCopyCodeSuccess(button);
                         return;
                     });
+                } else if(fallbackCopyText(code, button)) {
+                    // 使用备用方法复制
+                    showCopyCodeSuccess(button);
                 }
-
-                // 使用备用方法复制
-                if(fallbackCopyText(code, button)) showCopySuccess("已复制", button);
             }
         </script>
     """

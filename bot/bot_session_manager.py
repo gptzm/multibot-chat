@@ -393,12 +393,6 @@ class BotSessionManager:
             return current_version['histories'].get(bot_id, [])
         return []
 
-    def get_currently_enabled_bots(self):
-        return set(bot['name'] for bot in self.bots if bot.get('enable', False))
-
-    def is_all_current_histories_empty(self):
-        return all(not self.get_current_history_by_bot(bot) for bot in st.session_state.bots)
-
     def add_message_to_group_history(self, role, content, bot=None, tool=None):
         if not content:
             return
@@ -514,3 +508,6 @@ class BotSessionManager:
     
     def get_bot_by_id(self, bot_id):
         return next((bot for bot in self.bots if bot['id'] == bot_id), None)
+    
+    def get_bot_by_name(self, bot_name):
+        return next((bot for bot in self.bots if bot['name'] == bot_name), None)
