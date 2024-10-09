@@ -59,12 +59,18 @@ MultiBot Chat 提供了方便的批量管理功能，让用户可以轻松控制
    ![计算器示例](demo_images/demo_group_page_tool_calculator.png)
 
 2. **统计分析**：可以计算上一条消息的行数字数，并对数字行进行求和、求均值、求中位数等统计操作。
-   ![提取网页示例](demo_images/demo_group_page_tool_statistics.png)
+   ![统计分析示例](demo_images/demo_group_page_tool_statistics.png)
 
 3. **提取网页**：可以自动提取网页中的标题和正文部分，最多可以返回3个页面。
    ![提取网页示例](demo_images/demo_group_page_tool_web_extractor.png)
 
-4. **MD转纯文本**：将Markdown格式的内容转换为纯文本，方便用户获取干净的文本信息。
+4. **一键讨论**：由AI来自动规划接下来1~3轮需要由哪些角色参与发言。
+   ![一键讨论示例](demo_images/demo_group_page_tool_discussion.png)
+
+5. **AI搜索**：提取消息中的链接，用AI重新组织语言后返回最多3条搜索结果，包括标题、链接和摘要。
+   ![AI搜索示例](demo_images/demo_group_page_tool_ai_search.png)
+
+6. **MD转纯文本**：将Markdown格式的内容转换为纯文本，方便用户获取干净的文本信息。
 
 通过以上步骤，您可以轻松扩展 MultiBot Chat 的功能满足您的特定需求，若需要添加新的工具，请阅读下文`自定义工具扩展`部分。
 
@@ -161,6 +167,9 @@ streamlit run app.py
 | `MULTIBOT_USER_DATA_FILE` | 指定用户数据文件的路径 | "users.json" |
 | `MULTIBOT_GUEST_USERNAMES` | 访客用户的账号，多个账号用,号连接 | "guest" |
 | `MULTIBOT_DEVELOPER_USERNAME` | 开发者调试的账号 | "" |
+| `MULTIBOT_BASS_LLM_MODEL` | 工具中所用的模型名称 | "qwen2.5:3b" |
+| `MULTIBOT_BASS_LLM_BASE_URL` | 工具中所用的模型地址 | "http://127.0.0.1:11434/v1" |
+| `MULTIBOT_LLM_API_KEY` | 工具中所用的模型API-KEY | "ollama" |
 
 您可以将这些环境变量添加到您的 shell 配置文件（如 `.bashrc` 或 `.zshrc`）中，以便在每次启动 shell 时自动加载这些变量。
 

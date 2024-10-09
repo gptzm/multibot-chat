@@ -5,6 +5,7 @@ import importlib
 from utils.user_manager import user_manager  # 确保这行导入存在
 from config import LOGGER
 from bot.bot_session_manager import BotSessionManager
+from tools.tool_manager import ToolManager
 
 st.set_page_config(page_title="多Bot聊天", page_icon="🤖", layout="wide")
 
@@ -14,6 +15,8 @@ def load_page(page_name):
 
 if __name__ == "__main__":
     bot_manager = None
+    tool_manager = ToolManager()
+    st.session_state.tool_manager = tool_manager
     
     if not os.path.exists("user_config"):
         os.makedirs("user_config")

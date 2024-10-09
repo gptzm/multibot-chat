@@ -5,17 +5,19 @@ import requests
 from config import LOGGER
 
 def get_html_text(html_content, options):
+    try:
+        # 创建Document对象
+        doc = Document(html_content, **options)
 
-    # 创建Document对象
-    doc = Document(html_content, **options)
+        # 获取文章标题
+        title = doc.title()
 
-    # 获取文章标题
-    title = doc.title()
+        # 获取文章正文
+        extracted_text = doc.summary()
 
-    # 获取文章正文
-    extracted_text = doc.summary()
-
-    return f"# {title}\n\n{extracted_text}"
+        return f"# {title}\n\n{extracted_text}"
+    except Exception as e:
+        return f"[ERROR] 提取URL时发生错误: {str(e)}"
 
 def run(parameter, content, group_prompt, group_history):
     try:

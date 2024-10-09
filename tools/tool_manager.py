@@ -1,10 +1,12 @@
 import os
 import json
 from config import LOGGER
+import streamlit as st
 
 class ToolManager:
     def __init__(self):
-        self.tools = {}
+        self.tools = []
+        self.tool_map = {}
         self.load_tools()
 
     def load_tools(self):
@@ -16,7 +18,8 @@ class ToolManager:
                 if os.path.exists(config_path):
                     with open(config_path, 'r', encoding='utf-8') as f:
                         config = json.load(f)
-                    self.tools[folder] = {
+                    tool = {
+                        'id': folder,
                         'path': folder_path,
                         'config': config,
                         'name': config.get('name', folder),
@@ -24,18 +27,12 @@ class ToolManager:
                         'main_file': config.get('main_file', ''),
                         'parameter': config.get('parameter', {})
                     }
-                    LOGGER.info(f'tools:\n{self.tools}\n\n')
+                    self.tool_map[folder] = tool
+                    self.tools.append(tool)
 
     def get_tools(self):
         return self.tools
 
     def get_tool(self, tool_name):
-        return self.tools.get(tool_name)
+        return self.tool_map.get(tool_name)
 
-tool_manager = ToolManager()
-
-def get_tools():
-    return tool_manager.get_tools()
-
-def get_tool(tool_name):
-    return tool_manager.get_tool(tool_name)

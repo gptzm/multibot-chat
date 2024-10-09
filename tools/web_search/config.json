@@ -1,0 +1,8 @@
+{
+    "name": "AI搜索",
+    "description": "提取消息中的链接，用AI重新组织语言后返回最多3条搜索结果，包括标题、链接和摘要",
+    "main_file": "web_search.py",
+    "parameter": {
+        "engine": "duckduckgo"
+    }
+}

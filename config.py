@@ -61,3 +61,8 @@ ENABLED_REGISTER = os.getenv('MULTIBOT_ENABLED_REGISTER', 'True').lower() == 'tr
 LOG_LEVEL = os.getenv('MULTIBOT_LOG_LEVEL', 'INFO')
 logging.basicConfig(level=LOG_LEVEL)
 LOGGER = logging.getLogger(__name__)
+
+# 规划引擎所用模型，支持所有兼容OpenAI接口格式的引擎
+BASS_LLM_MODEL = os.getenv('MULTIBOT_BASS_LLM_MODEL', 'qwen2.5:3b')
+BASS_LLM_BASE_URL = os.getenv('MULTIBOT_BASS_LLM_BASE_URL', 'http://127.0.0.1:11434/v1')
+BASS_LLM_API_KEY = os.getenv('MULTIBOT_LLM_API_KEY', 'ollama')

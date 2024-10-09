@@ -314,6 +314,9 @@ class BotSessionManager:
         return set()
 
     def add_message_to_history(self, bot_id, message):
+        if not message:
+            return
+        
         if bot_id and self.current_history_version_idx < len(self.history_versions):
             current_version = self.history_versions[self.current_history_version_idx]
             current_version['histories'].setdefault(bot_id, []).append(message)
@@ -397,6 +400,9 @@ class BotSessionManager:
         return all(not self.get_current_history_by_bot(bot) for bot in st.session_state.bots)
 
     def add_message_to_group_history(self, role, content, bot=None, tool=None):
+        if not content:
+            return
+        
         message = {
             "role": role,
             "content": content,
@@ -505,3 +511,6 @@ class BotSessionManager:
     
     def get_last_visited_page(self):
         return self.last_visited_page
+    
+    def get_bot_by_id(self, bot_id):
+        return next((bot for bot in self.bots if bot['id'] == bot_id), None)

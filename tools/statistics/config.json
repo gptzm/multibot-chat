@@ -1,6 +1,6 @@
 {
     "name": "统计分析",
-    "description": "进行文本分析和数据统计和对数字行求和",
+    "description": "统计文本的行数字数，并提取所有数字行进行求和、求均值、求中位数等统计操作",
     "main_file": "statistics.py",
     "parameter": {
         "text_statistics_mode": true,

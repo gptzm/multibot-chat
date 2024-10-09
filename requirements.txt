@@ -12,3 +12,4 @@ zhipuai==2.1.5.20230904
 cryptography==43.0.1
 newspaper3k==0.2.8
 lxml_html_clean==0.2.2
+duckduckgo_search==6.3.0

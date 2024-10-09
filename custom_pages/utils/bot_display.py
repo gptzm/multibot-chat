@@ -3,9 +3,9 @@ from utils.chat_utils import get_response_from_bot, get_response_from_bot_group,
 from custom_pages.utils.dialogs import edit_bot, add_new_bot
 from datetime import datetime, date
 import random
-from config import EMOJI_OPTIONS, ENGINE_OPTIONS
+from config import EMOJI_OPTIONS, ENGINE_OPTIONS, LOGGER
 import importlib
-from tools.tool import get_tools, get_tool
+import os
 
 def display_active_bots(bot_manager, prompt, show_bots):
     num_bots = len(show_bots)
@@ -110,18 +110,18 @@ def display_group_chat_area(bot_manager, show_bots, histories):
                     bot_manager.remove_last_group_message()
                     st.rerun()
     with col2:
-        if get_tools():
+        if st.session_state.tool_manager.tools:
             # 添加工具箱
             st.markdown("### 工具箱")
             tool_cols = st.columns(4)
-            
+            LOGGER.info("ToolManager.tools: %s", st.session_state.tool_manager.tools)
             # 对工具进行排序
-            sorted_tools = dict(sorted(get_tools().items(), key=lambda x: x[1]["name"]))
+            sorted_tools = sorted(st.session_state.tool_manager.tools, key=lambda x: x["name"])
             
-            for i, (tool_folder, tool_info) in enumerate(sorted_tools.items()):  
+            for i, tool in enumerate(sorted_tools):  
                 with tool_cols[i % 4]:
-                    if st.button(tool_info["name"], use_container_width=True, key=f"use_tool_{i}", help=f"{tool_info['description'][0:100]}\n\n***【点击按钮可调用】***".strip()):
-                        use_tool(tool_folder)
+                    if st.button(tool["name"], use_container_width=True, key=f"use_tool_{i}", help=f"{tool['description'][0:100]}\n\n***【点击按钮可调用】***".strip()):
+                        use_tool(tool['id'])
 
         enabled_bots = [bot for bot in show_bots if bot['enable']]
         disabled_bots = [bot for bot in show_bots if not bot['enable']]
@@ -188,34 +188,90 @@ def show_toggle_bot_enable(bot):
 
     st.toggle("启用 / 禁用", value=bot['enable'], key=f"toggle_{bot['id']}", on_change=make_update_bot_enable(bot['id']))
 
-
-def use_tool(tool_folder):
+def use_tool_once(tool_folder):
     bot_manager = st.session_state.bot_manager
-    tool_info = get_tool(tool_folder)
+    tool_info = st.session_state.tool_manager.tool_map.get(tool_folder)
 
     if not tool_info:
         st.error(f"找不到工具: {tool_folder}")
         return
 
-    try:
-        # 动态导入工具模块
-        tool_module = importlib.import_module(f"tools.{tool_folder}.{tool_info['main_file'][:-3]}")
-        
-        # 获取最后一条消息内容
-        group_history = bot_manager.get_current_group_history()
-        last_message = group_history[-1]['content'] if group_history else ""
-        
-        # 调用工具
-        result = tool_module.run(tool_info.get('config',{}), last_message, st.session_state.chat_config.get('group_user_prompt', ''), group_history)
-        
-        if type(result) == list:
-            for message in result:
-                bot_manager.add_message_to_group_history("assistant", message, tool=tool_info)
-        else:
-            bot_manager.add_message_to_group_history("assistant", result, tool=tool_info)
+    # try:
+    # 动态导入工具模块
+    tool_module = importlib.import_module(f"tools.{tool_folder}.{tool_info['main_file'][:-3]}")
     
-    except Exception as e:
-        st.error(f"执行工具时出错: {e}")
+    # 获取最后一条消息内容
+    group_history = bot_manager.get_current_group_history()
+    last_message = group_history[-1]['content'] if group_history else ""
+    # 调用工具
+    results = tool_module.run(tool_info.get('config',{}), last_message, st.session_state.chat_config.get('group_user_prompt', ''), group_history)
+    
+    if type(results) == list:
+        for result in results:
+            if result:
+                bot_manager.add_message_to_group_history("assistant", result, tool=tool_info)
+    else:
+        if results:
+            bot_manager.add_message_to_group_history("assistant", results, tool=tool_info)
+
+    # except Exception as e:
+    #     st.error(f"执行工具时出错: {e}")
+
+def use_tool(tool_folder):
+    bot_manager = st.session_state.bot_manager
+    tool_manager = st.session_state.tool_manager
+    tool_info = st.session_state.tool_manager.tool_map.get(tool_folder)
+
+    if not tool_info:
+        st.error(f"找不到工具: {tool_folder}")
+        return
+
+    # try:
+    # 动态导入工具模块
+    tool_path = f"tools/{tool_folder}/{tool_info['main_file']}"
+    if not os.path.exists(tool_path):
+        return
+    
+    tool_module = importlib.import_module(f"tools.{tool_folder}.{tool_info['main_file'][:-3]}")
+    
+    # 获取最后一条消息内容
+    group_history = bot_manager.get_current_group_history()
+    last_message = group_history[-1]['content'] if group_history else ""
+    # 调用工具
+    results = tool_module.run(tool_info.get('config',{}), last_message, st.session_state.chat_config.get('group_user_prompt', ''), group_history)
+    
+    LOGGER.info(f" --------------------------------------- ")
+    LOGGER.info(f" results = {results}")
+    if type(results) == list:
+        for result in results:
+            LOGGER.info(f"\n\n{type(result)}\n{result}\n\n")
+            if type(result) == str and result:
+                bot_manager.add_message_to_group_history("assistant", result, tool=tool_info)
+            elif type(result) == dict and result and result.get("type") == 'call_bot':
+                function_call = result
+                bot_id = function_call.get("id")
+                bot = bot_manager.get_bot_by_id(bot_id)
+                LOGGER.info(f"\n\n即将调用的Bot为:\n{bot} {bot_id}\n\n")
+                if bot:
+                    prompt = function_call.get("prompt","")
+                    response = get_response_from_bot_group(f'我对你的要求是：{prompt}\n\n请你尽量言简意赅，快速表达最核心的信息和观点，尽量控制在200字以内', bot, st.session_state.bot_manager.get_current_group_history())
+                    bot_manager.add_message_to_group_history("assistant", response, bot=bot)
+            elif type(result) == dict and result and result.get("type") == 'call_tool':
+                function_call = result
+                tool_id = function_call.get("id")
+                tool = tool_manager.tool_map.get(tool_id)
+                LOGGER.info(f"\n\n即将调用的Tool为:\n{tool} {tool_id}\n\n")
+                if tool:
+                    response = use_tool_once(tool_id)
+                    LOGGER.info(f"\n\ntool输出为：\n{response}\n\n")
+    elif type(results) == str:
+        response = results
+        bot_manager.add_message_to_group_history("assistant", response, tool=tool_info)
+    else:
+        bot_manager.add_message_to_group_history("assistant", '(奇怪，没有得到结果)', tool=tool_info)
+
+    # except Exception as e:
+    #     st.error(f"执行工具时出错: {e}")
 
     st.rerun()
     

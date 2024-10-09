@@ -1,6 +1,6 @@
 {
     "name": "计算器",
-    "description": "进行简单的数学计算",
+    "description": "提取聊天内容中的数学算式，返回其计算结果",
     "main_file": "calculator.py",
     "parameter": {
         "calculate_mode": true
