@@ -504,5 +504,5 @@ class ChatRouter:
         messages = [{"role": msg.get("role"), "content": str(msg.get("content",""))} for msg in messages if msg['content']]
         if messages and messages[-1]['role'] != 'user':
             messages[-1]['role'] = 'user'
-
+        LOGGER.info(messages)
         return messages

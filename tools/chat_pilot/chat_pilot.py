@@ -26,7 +26,7 @@ def plan_task_with_openai(prompt, group_prompt, group_history, bots, tools):
                         "parameters": {
                             "type": "object",
                             "properties": {
-                                "prompt": {"type": "string", "description": "这里提示该角色应该如何在上一个角色输出的基础上做进一步行动，明确告知思考的重点是什么"},
+                                "prompt": {"type": "string", "description": "这里提示该角色应该在上一个角色输出的基础上做进一步行动，明确告知本步骤中的主要任务是什么，但此处不要提示任何具体的信息"},
                             },
                             "additionalProperties": False
                         }
@@ -40,7 +40,7 @@ def plan_task_with_openai(prompt, group_prompt, group_history, bots, tools):
     
     # function_call_names_string = "、".join(function_call_names)
     try:
-        prompt = '仔细理解近几轮的对话，结合上下文揣测用户当前的意图，思考需要如何围绕用户的意图分步骤继续讨论，根据角色定位仔细挑选最最适合对应步骤的1~3个角色，并按顺序依次调用这些角色。如果有涉及多个步骤，则每个角色都应该在上一个角色的基础上继续思考并讨论自己的步骤。'
+        prompt = '仔细理解近几轮的对话，结合上下文揣测用户当前的意图，思考需要如何围绕用户的意图分步骤继续讨论，根据角色定位仔细挑选最最适合对应步骤的1~3个角色，并按顺序依次调用这些角色。如果有涉及多个步骤，后续每个角色不要给太具体的信息，都应该在上一个角色的基础上讨论自己的步骤。'
         if group_prompt:
             prompt = f'{prompt}\n用户对每个参与讨论的角色的要求是：{group_prompt}'
         completion = base_llm_completion(

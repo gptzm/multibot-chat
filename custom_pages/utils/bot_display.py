@@ -263,17 +263,17 @@ def use_tool(tool_folder, show_planning=False):
                 bot = bot_manager.get_bot_by_id(bot_id)
                 LOGGER.info(f"\n\n即将调用的Bot为:\n{bot} {bot_id}\n\n")
                 if bot:
-                    prompt = f'请你专注于你的角色设定，继续讨论前面的话题，尽量言简意赅地表达最核心的信息和观点，格式清晰易读，尽量控制在200字以内。'
-
+                    group_history = st.session_state.bot_manager.get_current_group_history()
                     if show_planning:
-                        bot_manager.add_message_to_group_history("assistant", f'下一步从【{bot["name"]}】的视角思考：{function_call.get("prompt","")}', tool=tool_info)
+                        prompt = f'下一步从【{bot["name"]}】的视角思考：{function_call.get("prompt","")}'
+                        bot_manager.add_message_to_group_history("assistant", prompt, tool=tool_info)
+
+                        prompt = f'请你专注于你的角色设定，结合上下文继续讨论前面的话题，尽量言简意赅地表达最核心的信息和观点，格式清晰易读，尽量控制在200字以内。{prompt}'
+                        if group_user_prompt:
+                            prompt = f'{prompt}\n\n回复时的要求是：\n{group_user_prompt}'
+                        response = get_response_from_bot_group(prompt, bot, group_history)
                     else:
-                        prompt = f'{prompt}\n\n你可以从【{bot["name"]}】的视角思考：\n{function_call.get("prompt","")}'
-
-                    if len(group_history)>0 and group_history[-1]["role"] != "user":
-                        prompt = f'{prompt}\n\n回复时的要求是：\n{group_user_prompt}'
-
-                    response = get_response_from_bot_group(prompt, bot, st.session_state.bot_manager.get_current_group_history())
+                        response = get_response_from_bot_group(group_user_prompt, bot, group_history)
                     bot_manager.add_message_to_group_history("assistant", response, bot=bot)
             elif type(result) == dict and result and result.get("type") == 'call_tool':
                 function_call = result
