@@ -266,7 +266,7 @@ def use_tool(tool_folder, show_planning=False):
                     prompt = f'请你专注于你的角色设定，继续讨论前面的话题，尽量言简意赅地表达最核心的信息和观点，格式清晰易读，尽量控制在200字以内。'
 
                     if show_planning:
-                        bot_manager.add_message_to_group_history("assistant", f'下一步从【{bot["name"]}】的视角思考：\n{function_call.get("prompt","")}', tool=tool_info)
+                        bot_manager.add_message_to_group_history("assistant", f'下一步从【{bot["name"]}】的视角思考：{function_call.get("prompt","")}', tool=tool_info)
                     else:
                         prompt = f'{prompt}\n\n你可以从【{bot["name"]}】的视角思考：\n{function_call.get("prompt","")}'
 
