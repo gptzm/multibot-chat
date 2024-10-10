@@ -22,11 +22,11 @@ def plan_task_with_openai(prompt, group_history, bots, tools):
                     "type": "function",
                     "function": {
                         "name": f"call_bot_{bot['id']}",
-                        "description": f"如果话题非常符合该角色的特长，请让该角色参与讨论！这个角色的定位是【{bot['name']}】\n作用是：\n{bot.get('system_prompt','')[0:100]}",
+                        "description": f"这个角色是【{bot['name']}】\n角色的定位和作用是：\n{bot.get('system_prompt','')[0:100]}",
                         "parameters": {
                             "type": "object",
                             "properties": {
-                                "prompt": {"type": "string", "description": "这里是需要该角色执行的指示"},
+                                "prompt": {"type": "string", "description": "这里提示该角色应该如何在上一步的基础上做进一步行动，明确告知思考的重点是什么"},
                             },
                             "additionalProperties": False
                         }
@@ -36,15 +36,14 @@ def plan_task_with_openai(prompt, group_history, bots, tools):
                 function_call_names.append(f" - {bot['id']}：{bot['name']}")
     except Exception as e:
         return f"[ERROR] 获取角色信息时发生错误: {str(e)}"
-        
     group_history = fix_messages(group_history)
     
     # function_call_names_string = "、".join(function_call_names)
     try:
         completion = base_llm_completion(
-            '仔细理解user最新对话的关注点，结合上下文仔细斟酌最适合讨论这个话题的1~3个角色，并按顺序调用',
+            '仔细理解近几轮的对话，结合上下文揣测用户当前的意图，思考需要如何围绕用户的意图分步骤继续讨论，根据角色定位仔细挑选最最适合对应步骤的1~3个角色，并按顺序依次调用这些角色',
             system_prompt=f'你是一个角色调用路由，能够拆分逐层深入的思考路径，并深入理解每个角色的定位和分工，规划不同的角色如何按顺序参与讨论，你需要分步骤调用这些角色，但不要直接回复用户',
-            history=group_history,
+            history=group_history[-10:],
             tools=function_calls,
         )
         LOGGER.info(f'\n\ncompletion=\n{completion}\n\n')

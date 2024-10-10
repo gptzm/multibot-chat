@@ -3,7 +3,7 @@ from utils.user_manager import user_manager
 from custom_pages.utils.sidebar import render_sidebar
 from config import LOGGER
 from custom_pages.utils.welcome_message import display_welcome_message
-from custom_pages.utils.bot_display import display_group_chat_area, display_inactive_bots
+from custom_pages.utils.bot_display import display_group_chat_area, display_inactive_bots, use_tool
 from utils.chat_utils import get_response_from_bot_group
 from config import GROUP_CHAT_EMOJI
 
@@ -48,16 +48,22 @@ def group_page():
             bot_manager.add_message_to_group_history("user", prompt)
             group_history = bot_manager.get_current_group_history()  # 更新群聊历史
             if bot_manager.get_auto_speak():
-                for bot in enabled_bots:
+                try:
+                    if len(enabled_bots)>1:
+                        use_tool('chat_pilot',False)
+                    else:
+                        raise ValueError("Bot数量太少，没有必要规划分工")
+                except Exception as e:
+                    for bot in enabled_bots:
 
-                    group_user_prompt = bot_manager.get_chat_config().get('group_user_prompt')
-                    if group_history[-1].get('role') == 'user':
-                        group_user_prompt = ''
+                        group_user_prompt = bot_manager.get_chat_config().get('group_user_prompt')
+                        if group_history[-1].get('role') == 'user':
+                            group_user_prompt = ''
 
-                    response_content = get_response_from_bot_group(group_user_prompt, bot, group_history)
-                    
-                    bot_manager.add_message_to_group_history("assistant", response_content, bot=bot)
-                    group_history = bot_manager.get_current_group_history()  # 再次更新群聊历史
+                        response_content = get_response_from_bot_group(group_user_prompt, bot, group_history)
+                        
+                        bot_manager.add_message_to_group_history("assistant", response_content, bot=bot)
+                        group_history = bot_manager.get_current_group_history()  # 再次更新群聊历史
 
             bot_manager.fix_group_history_names()
 

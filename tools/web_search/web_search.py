@@ -23,7 +23,7 @@ def run(parameter, content, group_prompt, group_history):
             completion = base_llm_completion(
                 '请结合上下文深入理解我当前的关注点，将我当下最可能检索的1~5个关键问题短语用空格分开，输出成一行',
                 system_prompt="你是一个搜索高手，擅长解读用户的真实意图，并拟定最适合搜索的关键短语，你永远只提炼关键短语，不要做其他的事情，你的输出不超过50个字",
-                history=group_history,
+                history=group_history[-10:],
             )
         except Exception as e:
             return f'[ERROR] 调用本地模型时发生错误: {str(e)}'

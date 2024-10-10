@@ -121,7 +121,7 @@ def display_group_chat_area(bot_manager, show_bots, histories):
             for i, tool in enumerate(sorted_tools):  
                 with tool_cols[i % 4]:
                     if st.button(tool["name"], use_container_width=True, key=f"use_tool_{i}", help=f"{tool['description'][0:100]}\n\n***【点击按钮可调用】***".strip()):
-                        use_tool(tool['id'])
+                        use_tool(tool['id'], True)
 
         enabled_bots = [bot for bot in show_bots if bot['enable']]
         disabled_bots = [bot for bot in show_bots if not bot['enable']]
@@ -217,7 +217,7 @@ def use_tool_once(tool_folder):
     # except Exception as e:
     #     st.error(f"执行工具时出错: {e}")
 
-def use_tool(tool_folder):
+def use_tool(tool_folder, show_planning=False):
     bot_manager = st.session_state.bot_manager
     tool_manager = st.session_state.tool_manager
     tool_info = st.session_state.tool_manager.tool_map.get(tool_folder)
@@ -254,8 +254,9 @@ def use_tool(tool_folder):
                 LOGGER.info(f"\n\n即将调用的Bot为:\n{bot} {bot_id}\n\n")
                 if bot:
                     prompt = function_call.get("prompt","")
-                    response = get_response_from_bot_group(f'下一步从【{bot["name"]}】的视角思考的重点是：{prompt}\n\n请你尽量言简意赅，快速表达最核心的信息和观点，尽量控制在200字以内', bot, st.session_state.bot_manager.get_current_group_history())
-                    bot_manager.add_message_to_group_history("assistant", f'下一步从【{bot["name"]}】的视角思考的重点是：{prompt}', tool=tool_info)
+                    response = get_response_from_bot_group(f'请你专注于你的角色设定，继续讨论前面的话题，尽量言简意赅地表达最核心的信息和观点，尽量控制在200字以内。你可以从【{bot["name"]}】的视角思考：{prompt}', bot, st.session_state.bot_manager.get_current_group_history())
+                    if show_planning:
+                        bot_manager.add_message_to_group_history("assistant", f'下一步从【{bot["name"]}】的视角思考：{prompt}', tool=tool_info)
                     bot_manager.add_message_to_group_history("assistant", response, bot=bot)
             elif type(result) == dict and result and result.get("type") == 'call_tool':
                 function_call = result

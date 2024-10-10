@@ -74,9 +74,9 @@ if __name__ == "__main__":
             main_page = load_page("main_page")
             main_page()
         else:
-            st.session_state.page = "main_page"
-            main_page = load_page("main_page")
-            main_page()
+            st.session_state.page = "group_page"
+            group_page = load_page("group_page")
+            group_page()
         
         # 更新最后访问的页面
         bot_manager.set_last_visited_page(st.session_state.page)

@@ -124,14 +124,15 @@ class ChatRouter:
             url = f"{self.api_endpoint}/openai/deployments/{self.model}/chat/completions?api-version=2024-02-01"
             response = requests.post(url, headers=headers, data=json.dumps(data))
 
-            LOGGER.info('  response.json():\n', response.json())
+            LOGGER.warning(f'  response.json():\n{response.json()}')
             response_json = response.json()
             if response_json.get('choices') and len(response_json['choices']) > 0:
+                LOGGER.info(f'  response:\n\n\n {response_json}')
                 return str(response_json['choices'][0]['message']['content'])
             else:
-                return f"[Azure] Error: {response_json['error']['message']}"
+                return f"[AzureOpenAI] Error: {response_json['error']['message']}"
         except Exception as e:
-            return "AzureOpenAI API 调用出错: " + str(e)
+            return "[AzureOpenAI] API 调用出错: " + str(e)
     
     def _chatglm_chat(self, prompt, history):
         try:
@@ -160,7 +161,7 @@ class ChatRouter:
                 return f'[ChatGLM] Error:{json_response["error"]["message"]}'
 
         except Exception as e:
-            LOGGER.error(f"ChatGLM API 调用出错: {str(e)}")
+            LOGGER.error(f"[ChatGLM] API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
     def _coze_chat(self, prompt, history):
@@ -231,7 +232,7 @@ class ChatRouter:
             else:
                 return f"[Qwen] Error:{completion.error.message}"
         except Exception as e:
-            LOGGER.error(f"Qwen API 调用出错: {str(e)}")
+            LOGGER.error(f"[Qwen] API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
     
     def _xinghuo_chat(self, prompt, history):
@@ -263,7 +264,7 @@ class ChatRouter:
             else:
                 return f"[Xinghuo] Error:{completion.error.message}"
         except Exception as e:
-            LOGGER.error(f"Xinghuo API 调用出错: {str(e)}")
+            LOGGER.error(f"[Xinghuo] API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
     def _deepseek_chat(self, prompt, history):
@@ -295,7 +296,7 @@ class ChatRouter:
             else:
                 return f"[DeepSeek] Error:{completion.error.message}"
         except Exception as e:
-            LOGGER.error(f"DeepSeek API 调用出错: {str(e)}")
+            LOGGER.error(f"[DeepSeek] API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
     def _moonshot_chat(self, prompt, history):
@@ -327,7 +328,7 @@ class ChatRouter:
             else:
                 return f"[Moonshot] Error:{completion.error.message}"
         except Exception as e:
-            LOGGER.error(f"Moonshot API 调用出错: {str(e)}")
+            LOGGER.error(f"[Moonshot] API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
     def _yi_chat(self, prompt, history):
@@ -359,7 +360,7 @@ class ChatRouter:
             else:
                 return f"[Yi] Error:{completion.error.message}"
         except Exception as e:
-            LOGGER.error(f"Yi API 调用出错: {str(e)}")
+            LOGGER.error(f"[Yi] API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
     def _groq_chat(self, prompt, history):
@@ -424,7 +425,7 @@ class ChatRouter:
             else:
                 return f"[Ollama] Error:{completion.error.message}"
         except Exception as e:
-            LOGGER.error(f"Ollama API 调用出错: {str(e)}")
+            LOGGER.error(f"[Ollama] API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
     def _openai_chat(self, prompt, history):
@@ -456,7 +457,7 @@ class ChatRouter:
             else:
                 return f"[OpenAI] Error:{completion.error.message}"
         except Exception as e:
-            LOGGER.error(f"OpenAI API 调用出错: {str(e)}")
+            LOGGER.error(f"[OpenAI] API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
 
     def add_to_history(self, user_message, bot_response):

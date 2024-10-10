@@ -1,6 +1,6 @@
 {
     "name": "一键讨论",
     "description": "由AI来自动规划接下来1~3轮需要由哪些角色的幕僚发言",
-    "main_file": "auto_discussion.py",
+    "main_file": "chat_pilot.py",
     "parameter": {}
 }
