@@ -40,12 +40,12 @@ def plan_task_with_openai(prompt, group_prompt, group_history, bots, tools):
     
     # function_call_names_string = "、".join(function_call_names)
     try:
-        prompt = '仔细理解近几轮的对话，结合上下文揣测用户当前的意图，思考需要如何围绕用户的意图分步骤继续讨论，根据角色定位仔细挑选最最适合对应步骤的1~3个角色，并按顺序依次调用这些角色。'
+        prompt = '仔细理解近几轮的对话，结合上下文揣测用户当前的意图，思考需要如何围绕用户的意图分步骤继续讨论，根据角色定位仔细挑选最最适合对应步骤的1~3个角色，并按顺序依次调用这些角色。如果有涉及多个步骤，则每个角色都应该结合上一个角色的输出继续讨论自己的步骤。'
         if group_prompt:
             prompt = f'{prompt}\n用户对每个参与讨论的角色的要求是：{group_prompt}'
         completion = base_llm_completion(
             prompt,
-            system_prompt=f'你是一个角色调用路由，能够拆分逐层深入的思考路径，并深入理解每个角色的定位和分工，规划不同的角色如何按顺序参与讨论，你需要分步骤调用这些角色，但注意你不要直接提供参考答案或者回复用户。',
+            system_prompt=f'你是一个角色调用路由，能够拆分逐层深入的思考路径，并深入理解每个角色的定位和分工，规划不同的角色如何按顺序参与讨论，你需要分步骤调用这些角色，可以给角色一些大方向的提示，但注意你不要直接提供过于具体的信息或者直接回复用户。',
             history=group_history[-10:],
             tools=function_calls,
         )
