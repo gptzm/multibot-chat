@@ -4,7 +4,7 @@ from config import LOGGER
 from utils.base_llm import base_llm_completion
 
 
-def plan_task_with_openai(prompt, group_history, bots, tools):
+def plan_task_with_openai(prompt, group_prompt, group_history, bots, tools):
     """
     使用 OpenAI 的功能来生成任务计划。
 
@@ -40,9 +40,12 @@ def plan_task_with_openai(prompt, group_history, bots, tools):
     
     # function_call_names_string = "、".join(function_call_names)
     try:
+        prompt = '仔细理解近几轮的对话，结合上下文揣测用户当前的意图，思考需要如何围绕用户的意图分步骤继续讨论，根据角色定位仔细挑选最最适合对应步骤的1~3个角色，并按顺序依次调用这些角色。'
+        if group_prompt:
+            prompt = f'{prompt}\n用户对每个参与讨论的角色的要求是：{group_prompt}'
         completion = base_llm_completion(
-            '仔细理解近几轮的对话，结合上下文揣测用户当前的意图，思考需要如何围绕用户的意图分步骤继续讨论，根据角色定位仔细挑选最最适合对应步骤的1~3个角色，并按顺序依次调用这些角色',
-            system_prompt=f'你是一个角色调用路由，能够拆分逐层深入的思考路径，并深入理解每个角色的定位和分工，规划不同的角色如何按顺序参与讨论，你需要分步骤调用这些角色，但不要直接回复用户',
+            prompt,
+            system_prompt=f'你是一个角色调用路由，能够拆分逐层深入的思考路径，并深入理解每个角色的定位和分工，规划不同的角色如何按顺序参与讨论，你需要分步骤调用这些角色，但不要直接回复用户。',
             history=group_history[-10:],
             tools=function_calls,
         )
@@ -82,4 +85,4 @@ def fix_messages(messages):
     return messages
 
 def run(parameter, content, group_prompt, group_history):
-    return plan_task_with_openai(content, group_history, st.session_state.bot_manager.bots, st.session_state.tool_manager.tools)
+    return plan_task_with_openai(content, group_prompt, group_history, st.session_state.bot_manager.bots, st.session_state.tool_manager.tools)

@@ -128,7 +128,10 @@ class ChatRouter:
             response_json = response.json()
             if response_json.get('choices') and len(response_json['choices']) > 0:
                 LOGGER.info(f'  response:\n\n\n {response_json}')
-                return str(response_json['choices'][0]['message']['content'])
+                if 'content' in response_json['choices'][0]['message']:
+                    return str(response_json['choices'][0]['message']['content'])
+                else:
+                    return [str(response_json['choices'][0]),str(response_json['error']['message'])]
             else:
                 return f"[AzureOpenAI] Error: {response_json['error']['message']}"
         except Exception as e:

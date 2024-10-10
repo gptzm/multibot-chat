@@ -104,17 +104,27 @@ def display_group_chat_area(bot_manager, show_bots, histories):
             participating_bots = bot_manager.get_participating_bots_in_current_group_history()
             display_group_chat(participating_bots, histories)
             
+            col_left, col_right = st.columns([1,1], gap="small")
+
             # 添加删除最近回复的按钮
-            if histories:
-                if st.button(f"删除最后一条的回复", key="delete_last_reply"):
-                    bot_manager.remove_last_group_message()
-                    st.rerun()
+            with col_left:
+                if histories:
+                    if st.button(f"删除最后一条回复", key="delete_last_reply", use_container_width=True):
+                        bot_manager.remove_last_group_message()
+                        st.rerun()
+            
+            # 添加删除最近几条Bot回复的按钮
+            with col_right:
+                if histories:
+                    if st.button(f"删除最后几条Bot回复", key="delete_recently_bot_reply", use_container_width=True):
+                        bot_manager.remove_recently_bot_group_message()
+                        st.rerun()
     with col2:
         if st.session_state.tool_manager.tools:
             # 添加工具箱
             st.markdown("### 工具箱")
             tool_cols = st.columns(4)
-            LOGGER.info("ToolManager.tools: %s", st.session_state.tool_manager.tools)
+            
             # 对工具进行排序
             sorted_tools = sorted(st.session_state.tool_manager.tools, key=lambda x: x["name"])
             
@@ -238,10 +248,10 @@ def use_tool(tool_folder, show_planning=False):
     group_history = bot_manager.get_current_group_history()
     last_message = group_history[-1]['content'] if group_history else ""
     # 调用工具
-    results = tool_module.run(tool_info.get('config',{}), last_message, st.session_state.chat_config.get('group_user_prompt', ''), group_history)
+    group_user_prompt = st.session_state.chat_config.get("group_user_prompt", "")
+    results = tool_module.run(tool_info.get('config',{}), last_message, group_user_prompt, group_history)
     
-    LOGGER.info(f" --------------------------------------- ")
-    LOGGER.info(f" results = {results}")
+    LOGGER.info(f" user_tool_results = {results}")
     if type(results) == list:
         for result in results:
             LOGGER.info(f"\n\n{type(result)}\n{result}\n\n")
@@ -253,10 +263,17 @@ def use_tool(tool_folder, show_planning=False):
                 bot = bot_manager.get_bot_by_id(bot_id)
                 LOGGER.info(f"\n\n即将调用的Bot为:\n{bot} {bot_id}\n\n")
                 if bot:
-                    prompt = function_call.get("prompt","")
-                    response = get_response_from_bot_group(f'请你专注于你的角色设定，继续讨论前面的话题，尽量言简意赅地表达最核心的信息和观点，尽量控制在200字以内。你可以从【{bot["name"]}】的视角思考：{prompt}', bot, st.session_state.bot_manager.get_current_group_history())
+                    prompt = f'请你专注于你的角色设定，继续讨论前面的话题，尽量言简意赅地表达最核心的信息和观点，格式清晰易读，尽量控制在200字以内。'
+
                     if show_planning:
-                        bot_manager.add_message_to_group_history("assistant", f'下一步从【{bot["name"]}】的视角思考：{prompt}', tool=tool_info)
+                        bot_manager.add_message_to_group_history("assistant", f'下一步从【{bot["name"]}】的视角思考：\n{function_call.get("prompt","")}', tool=tool_info)
+                    else:
+                        prompt = f'{prompt}\n\n你可以从【{bot["name"]}】的视角思考：\n{function_call.get("prompt","")}'
+
+                    if len(group_history)>0 and group_history[-1]["role"] != "user":
+                        prompt = f'{prompt}\n\n回复时的要求是：\n{group_user_prompt}'
+
+                    response = get_response_from_bot_group(prompt, bot, st.session_state.bot_manager.get_current_group_history())
                     bot_manager.add_message_to_group_history("assistant", response, bot=bot)
             elif type(result) == dict and result and result.get("type") == 'call_tool':
                 function_call = result

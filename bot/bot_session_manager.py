@@ -492,6 +492,14 @@ class BotSessionManager:
                 current_version['group_history'].pop()
                 self.save_data_to_file()
 
+    # 移除最后几条bot的回复，特点是role不是user
+    def remove_recently_bot_group_message(self):
+        if self.current_group_history_version_idx < len(self.group_history_versions):
+            current_version = self.group_history_versions[self.current_group_history_version_idx]
+            while len(current_version['group_history']) > 0 and current_version['group_history'][-1]['role'] != 'user':
+                current_version['group_history'].pop()
+                self.save_data_to_file()
+
     def get_auto_speak(self):
         return self.auto_speak
 
