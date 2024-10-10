@@ -45,7 +45,7 @@ def plan_task_with_openai(prompt, group_prompt, group_history, bots, tools):
             prompt = f'{prompt}\n用户对每个参与讨论的角色的要求是：{group_prompt}'
         completion = base_llm_completion(
             prompt,
-            system_prompt=f'你是一个角色调用路由，能够拆分逐层深入的思考路径，并深入理解每个角色的定位和分工，规划不同的角色如何按顺序参与讨论，你需要分步骤调用这些角色，但不要直接回复用户。',
+            system_prompt=f'你是一个角色调用路由，能够拆分逐层深入的思考路径，并深入理解每个角色的定位和分工，规划不同的角色如何按顺序参与讨论，你需要分步骤调用这些角色，但注意你不要直接提供参考答案或者回复用户。',
             history=group_history[-10:],
             tools=function_calls,
         )
