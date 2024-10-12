@@ -64,7 +64,7 @@ MultiBot Chat 提供了方便的批量管理功能，让用户可以轻松控制
 3. **提取网页**：可以自动提取网页中的标题和正文部分，最多可以返回3个页面。
    ![提取网页示例](demo_images/demo_group_page_tool_web_extractor.png)
 
-4. **一键讨论**：由AI来自动规划接下来1~3轮需要由哪些角色参与发言。
+4. **一键讨论**：由AI来自动规划接下来1~3轮需要由哪些角色参与发言。**注意，一键讨论默认使用本地Ollama的qwen2.5:3b模型，如不具备本地条件，请在环境变量`MULTIBOT_BASS_LLM_MODEL`、`MULTIBOT_BASS_LLM_BASE_URL`、`MULTIBOT_BASS_LLM_API_KEY`中设置可引用的模型，目前支持所有兼容OpenAI接口的模型，推荐使用Qwen替代。**
    ![一键讨论示例](demo_images/demo_group_page_tool_chat_pilot.png)
 
 5. **AI搜索**：提取消息中的链接，用AI重新组织语言后返回最多3条搜索结果，包括标题、链接和摘要。**注意，AI搜索依赖DuckDuckGo接口，使用时需要魔法。**
@@ -169,7 +169,7 @@ streamlit run app.py
 | `MULTIBOT_DEVELOPER_USERNAME` | 开发者调试的账号 | "" |
 | `MULTIBOT_BASS_LLM_MODEL` | 工具中所用的模型名称 | "qwen2.5:3b" |
 | `MULTIBOT_BASS_LLM_BASE_URL` | 工具中所用的模型地址 | "http://127.0.0.1:11434/v1" |
-| `MULTIBOT_LLM_API_KEY` | 工具中所用的模型API-KEY | "ollama" |
+| `MULTIBOT_BASS_LLM_API_KEY` | 工具中所用的模型API-KEY | "ollama" |
 
 您可以将这些环境变量添加到您的 shell 配置文件（如 `.bashrc` 或 `.zshrc`）中，以便在每次启动 shell 时自动加载这些变量。
 

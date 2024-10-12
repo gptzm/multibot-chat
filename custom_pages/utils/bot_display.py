@@ -109,14 +109,14 @@ def display_group_chat_area(bot_manager, show_bots, histories):
             # 添加删除最近回复的按钮
             with col_left:
                 if histories:
-                    if st.button(f"删除最后一条回复", key="delete_last_reply", use_container_width=True):
+                    if st.button(f"删除上一条", key="delete_last_reply", use_container_width=True, help="删除聊天记录中的最后一条消息"):
                         bot_manager.remove_last_group_message()
                         st.rerun()
             
             # 添加删除最近几条Bot回复的按钮
             with col_right:
                 if histories:
-                    if st.button(f"删除最后几条Bot回复", key="delete_recently_bot_reply", use_container_width=True):
+                    if st.button(f"删除Bot近期回复", key="delete_recently_bot_reply", use_container_width=True, help="删除最后几条由Bot发布的消息"):
                         bot_manager.remove_recently_bot_group_message()
                         st.rerun()
     with col2:
@@ -137,7 +137,7 @@ def display_group_chat_area(bot_manager, show_bots, histories):
         disabled_bots = [bot for bot in show_bots if not bot['enable']]
 
         st.markdown("### 幕僚")
-        auto_speak = st.toggle("幕僚自动发言", value=bot_manager.get_auto_speak())
+        auto_speak = st.toggle("幕僚自动发言", value=bot_manager.get_auto_speak(), help="优先由预设大模型挑选要发言的幕僚，如果规划失败，则按顺序让所有幕僚依次发言")
         if auto_speak != bot_manager.get_auto_speak():
             bot_manager.set_auto_speak(auto_speak)
             st.rerun()
