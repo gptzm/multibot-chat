@@ -335,7 +335,7 @@ class ChatRouter:
             return f"错误: {str(e)}"
         
     def _yi_chat(self, prompt, history):
-        # 实现与Qwen的交互
+        # 实现与Yi的交互
         try:
             client = OpenAI(
                 api_key=self.api_key,
@@ -367,7 +367,7 @@ class ChatRouter:
             return f"错误: {str(e)}"
         
     def _groq_chat(self, prompt, history):
-        # 实现与Qwen的交互
+        # 实现与Groq的交互
         try:
             client = OpenAI(
                 api_key=self.api_key,
@@ -432,7 +432,7 @@ class ChatRouter:
             return f"错误: {str(e)}"
         
     def _openai_chat(self, prompt, history):
-        # 实现与Ollama的交互
+        # 实现与OpenAI的交互
         try:
             client = OpenAI(
                 api_key= self.api_key,

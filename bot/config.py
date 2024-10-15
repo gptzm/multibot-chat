@@ -14,7 +14,7 @@ ENGINE_CONFIG = {
           "label": "Base URL",
           "type": "text",
           "required": True,
-          "default": "https://**请更新成你的base_url信息**/v1/chat/completions",
+          "default": "https://**请更新成你的base_url信息**/v1",
           "is_secret": True,
         },
         {
@@ -157,6 +157,7 @@ ENGINE_CONFIG = {
           "type": "text",
           "required": True,
           "default": "http://127.0.0.1:11434/v1",
+          "is_secret": True,
         }
       ]
     },
