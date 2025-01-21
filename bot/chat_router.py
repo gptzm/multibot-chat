@@ -98,6 +98,8 @@ class ChatRouter:
             return self._yi_chat(prompt, history)
         elif self.engine == 'Groq':
             return self._groq_chat(prompt, history)
+        elif self.engine == 'MiniMax':
+            return self._minimax_chat(prompt, history)
         elif self.engine == 'OpenAI':
             return self._openai_chat(prompt, history)
         else:
@@ -396,6 +398,38 @@ class ChatRouter:
                 return f"[Yi] Error:{completion.error.message}"
         except Exception as e:
             LOGGER.error(f"Yi API 调用出错: {str(e)}")
+            return f"错误: {str(e)}"
+        
+    def _minimax_chat(self, prompt, history):
+        # 实现与MiniMax的交互
+        try:
+            client = OpenAI(
+                api_key=self.api_key,
+                base_url="https://api.minimax.chat/v1",
+            )
+
+            messages = self._join_messages(prompt, history)
+            messages = self._fix_messages(messages)
+
+            if not messages:
+                return
+
+            LOGGER.info(f'  messages:\n\n\n {messages}')
+
+            completion = client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+            )
+
+            LOGGER.info(f'  response:\n\n\n {completion.model_dump_json()}')
+
+            if completion.choices and len(completion.choices) > 0:
+                return completion.choices[0].message.content
+            else:
+                return f"[MiniMax] Error:{completion.error.message}"
+        except Exception as e:
+            LOGGER.error(f"MiniMax API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
     def _ollama_chat(self, prompt, history):

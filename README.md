@@ -1,6 +1,6 @@
 # MultiBot Chat
 
-MultiBot Chat 是一个基于 Streamlit 的多机器人聊天应用，支持多种大语言模型（LLM）API，包括 OpenAI、AzureOpenAI、ChatGLM、CoZe、Qwen、Ollama、XingHuo、DeepSeek、Moonshot、Yi 和 Groq。这个应用允许用户同时与多个 AI 聊天机器人进行对话，比较不同模型的回答，并进行群聊式的讨论。
+MultiBot Chat 是一个基于 Streamlit 的多机器人聊天应用，支持多种大语言模型（LLM）API，包括 OpenAI、AzureOpenAI、ChatGLM、CoZe、Qwen、Ollama、XingHuo、DeepSeek、MiniMax、Moonshot、Yi 和 Groq。这个应用允许用户同时与多个 AI 聊天机器人进行对话，比较不同模型的回答，并进行群聊式的讨论。
 
 ## 主要特点
 

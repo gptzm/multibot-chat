@@ -215,6 +215,33 @@ ENGINE_CONFIG = {
         }
       ]
     },
+    "MiniMax": {
+      "fields": [
+        {
+          "name": "model",
+          "label": "Model",
+          "type": "text",
+          "required": True,
+          "default": "MiniMax-Text-01",
+        },
+        {
+          "name": "api_key",
+          "label": "API Key",
+          "type": "password",
+          "required": True,
+          "is_secret": True,
+        },
+        {
+          "name": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 0.0,
+          "max": 1.0,
+          "step": 0.1,
+          "required": True,
+        }
+      ]
+    },
     "Moonshot": {
       "fields": [
         {
