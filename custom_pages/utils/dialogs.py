@@ -71,15 +71,18 @@ def edit_bot(bot):
 def add_new_bot():
     bot_manager = st.session_state.bot_manager
     
-    selected_engine = st.radio(
+    selected_engine_name = st.radio(
         "选择引擎",
-        options=ENGINE_OPTIONS,
+        options=[ENGINE_CONFIG['engines'][name]['name'] for name in ENGINE_OPTIONS],
         horizontal=True,
         label_visibility="collapsed",
         key="engine_radio"
     )
+
+    selected_engine = next(name for name in ENGINE_OPTIONS if ENGINE_CONFIG['engines'][name]['name'] == selected_engine_name)
     
     st.session_state.engine = selected_engine
+
     LOGGER.info(f"Selected engine: {selected_engine}")
     new_bot = {
         'id': str(random.randint(10000000000000000,99999999999999999)),

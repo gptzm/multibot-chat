@@ -1,6 +1,7 @@
 ENGINE_CONFIG = {
   "engines": {
     "OpenAI": {
+      "name": "OpenAI(需翻墙)",
       "fields": [
         {
           "name": "model",
@@ -36,6 +37,7 @@ ENGINE_CONFIG = {
       ]
     },
     "AzureOpenAI": {
+      "name": "微软OpenAI",
       "fields": [
         {
           "name": "model",
@@ -71,6 +73,7 @@ ENGINE_CONFIG = {
       ]
     },
     "ChatGLM": {
+      "name": "智谱清言",
       "fields": [
         {
           "name": "model",
@@ -98,6 +101,7 @@ ENGINE_CONFIG = {
       ]
     },
     "CoZe": {
+      "name": "Coze智能体",
       "fields": [
         {
           "name": "bot_id",
@@ -116,6 +120,7 @@ ENGINE_CONFIG = {
       ]
     },
     "Qwen": {
+      "name": "通义千问",
       "fields": [
         {
           "name": "model",
@@ -143,6 +148,7 @@ ENGINE_CONFIG = {
       ]
     },
     "Ollama": {
+      "name": "Ollama",
       "fields": [
         {
           "name": "model",
@@ -162,6 +168,7 @@ ENGINE_CONFIG = {
       ]
     },
     "XingHuo": {
+      "name": "讯飞星火",
       "fields": [
         {
           "name": "model",
@@ -189,6 +196,7 @@ ENGINE_CONFIG = {
       ]
     },
     "Qianfan": {
+      "name": "百度文心",
       "fields": [
         {
           "name": "model",
@@ -216,6 +224,7 @@ ENGINE_CONFIG = {
       ]
     },
     "DeepSeek": {
+      "name": "DeepSeek",
       "fields": [
         {
           "name": "model",
@@ -243,6 +252,7 @@ ENGINE_CONFIG = {
       ]
     },
     "MiniMax": {
+      "name": "MiniMax",
       "fields": [
         {
           "name": "model",
@@ -270,6 +280,7 @@ ENGINE_CONFIG = {
       ]
     },
     "Moonshot": {
+      "name": "KIMI",
       "fields": [
         {
           "name": "model",
@@ -297,6 +308,7 @@ ENGINE_CONFIG = {
       ]
     },
     "Stepfun": {
+      "name": "阶跃星辰",
       "fields": [
         {
           "name": "model",
@@ -324,6 +336,7 @@ ENGINE_CONFIG = {
       ]
     },
     "Yi": {
+      "name": "零一万物",
       "fields": [
         {
           "name": "model",
@@ -351,6 +364,7 @@ ENGINE_CONFIG = {
       ]
     },
     "Groq": {
+      "name": "Groq(需翻墙)",
       "fields": [
         {
           "name": "model",
