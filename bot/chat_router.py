@@ -88,6 +88,8 @@ class ChatRouter:
             return self._qwen_chat(prompt, history)
         elif self.engine == 'Ollama':
             return self._ollama_chat(prompt, history)
+        elif self.engine == 'Qianfan':
+            return self._qianfan_chat(prompt, history)
         elif self.engine == 'XingHuo':
             return self._xinghuo_chat(prompt, history)
         elif self.engine == 'DeepSeek':
@@ -100,6 +102,8 @@ class ChatRouter:
             return self._groq_chat(prompt, history)
         elif self.engine == 'MiniMax':
             return self._minimax_chat(prompt, history)
+        elif self.engine == 'Stepfun':
+            return self._stepfun_chat(prompt, history)
         elif self.engine == 'OpenAI':
             return self._openai_chat(prompt, history)
         else:
@@ -238,6 +242,42 @@ class ChatRouter:
                 return f"[Qwen] Error:{completion.error.message}"
         except Exception as e:
             LOGGER.error(f"[Qwen] API 调用出错: {str(e)}")
+            return f"错误: {str(e)}"
+    
+    def _qianfan_chat(self, prompt, history):
+        # 实现与Qianfan的交互
+        try:
+            url = "https://qianfan.baidubce.com/v2/chat/completions"
+
+            messages = self._join_messages(prompt, history)
+            messages = self._fix_messages(messages)
+
+            if not messages:
+                return
+
+            LOGGER.info(f'  messages:\n\n\n {messages}')
+            
+            payload = json.dumps({
+                "model": self.model,
+                "messages": messages,
+                "temperature": self.temperature,
+            })
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {self.api_key}',
+            }
+            
+            response = requests.request("POST", url, headers=headers, data=payload)
+            LOGGER.info(f'  response:\n\n\n {response.text}')
+
+            completion = json.loads(response.text)
+            
+            if 'choices' in completion and len(completion['choices']) > 0:
+                return completion['choices'][0]['message']['content']
+            else:
+                return f"[QianFan] Error:{completion['error']['message']}"
+        except Exception as e:
+            LOGGER.error(f"[QianFan] API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
     
     def _xinghuo_chat(self, prompt, history):
@@ -430,6 +470,38 @@ class ChatRouter:
                 return f"[MiniMax] Error:{completion.error.message}"
         except Exception as e:
             LOGGER.error(f"MiniMax API 调用出错: {str(e)}")
+            return f"错误: {str(e)}"
+        
+    def _stepfun_chat(self, prompt, history):
+        # 实现与Stepfun的交互
+        try:
+            client = OpenAI(
+                api_key=self.api_key,
+                base_url="https://api.stepfun.com/v1",
+            )
+
+            messages = self._join_messages(prompt, history)
+            messages = self._fix_messages(messages)
+
+            if not messages:
+                return
+
+            LOGGER.info(f'  messages:\n\n\n {messages}')
+
+            completion = client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+            )
+
+            LOGGER.info(f'  response:\n\n\n {completion.model_dump_json()}')
+
+            if completion.choices and len(completion.choices) > 0:
+                return completion.choices[0].message.content
+            else:
+                return f"[Stepfun] Error:{completion.error.message}"
+        except Exception as e:
+            LOGGER.error(f"Stepfun API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
     def _ollama_chat(self, prompt, history):

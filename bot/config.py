@@ -188,6 +188,33 @@ ENGINE_CONFIG = {
         }
       ]
     },
+    "Qianfan": {
+      "fields": [
+        {
+          "name": "model",
+          "label": "Model",
+          "type": "text",
+          "required": True,
+          "default": "ernie-4.0-turbo-8k",
+        },
+        {
+          "name": "api_key",
+          "label": "API Key",
+          "type": "password",
+          "required": True,
+          "is_secret": True,
+        },
+        {
+          "name": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 0.01,
+          "max": 1.00,
+          "step": 0.01,
+          "required": True,
+        }
+      ]
+    },
     "DeepSeek": {
       "fields": [
         {
@@ -264,6 +291,33 @@ ENGINE_CONFIG = {
           "type": "slider",
           "min": 0.0,
           "max": 2.0,
+          "step": 0.1,
+          "required": True,
+        }
+      ]
+    },
+    "Stepfun": {
+      "fields": [
+        {
+          "name": "model",
+          "label": "Model",
+          "type": "text",
+          "required": True,
+          "default": "step-1-8k",
+        },
+        {
+          "name": "api_key",
+          "label": "API Key",
+          "type": "password",
+          "required": True,
+          "is_secret": True,
+        },
+        {
+          "name": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 0.0,
+          "max": 1.0,
           "step": 0.1,
           "required": True,
         }
