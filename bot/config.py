@@ -390,6 +390,34 @@ ENGINE_CONFIG = {
           "required": True,
         }
       ]
-    }
+    },
+    "302AI": {
+      "name": "302.AI",
+      "fields": [
+        {
+          "name": "model",
+          "label": "Model",
+          "type": "text",
+          "required": True,
+          "default": "claude-3-5-sonnet-latest",
+        },
+        {
+          "name": "api_key",
+          "label": "API Key",
+          "type": "password",
+          "required": True,
+          "is_secret": True,
+        },
+        {
+          "name": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 0.0,
+          "max": 2.0,
+          "step": 0.1,
+          "required": True,
+        }
+      ]
+    },
   }
 }

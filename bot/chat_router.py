@@ -104,6 +104,8 @@ class ChatRouter:
             return self._minimax_chat(prompt, history)
         elif self.engine == 'Stepfun':
             return self._stepfun_chat(prompt, history)
+        elif self.engine == '302AI':
+            return self._302ai_chat(prompt, history)
         elif self.engine == 'OpenAI':
             return self._openai_chat(prompt, history)
         else:
@@ -535,6 +537,43 @@ class ChatRouter:
                 return f"[Ollama] Error:{completion.error.message}"
         except Exception as e:
             LOGGER.error(f"[Ollama] API 调用出错: {str(e)}")
+            return f"错误: {str(e)}"
+        
+    def _302ai_chat(self, prompt, history):
+        # 实现与302AI的交互
+        try:
+            client = OpenAI(
+                api_key=self.api_key,
+                base_url="https://api.302.ai/v1/chat/completions",
+            )
+
+            client = OpenAI(
+                api_key= self.api_key,
+                base_url= self.base_url,
+            )
+
+            messages = self._join_messages(prompt, history)
+            messages = self._fix_messages(messages)
+
+            if not messages:
+                return
+
+            LOGGER.info(f'  messages:\n\n\n {messages}')
+
+            completion = client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+            )
+
+            LOGGER.info(f'  response:\n\n\n {completion.model_dump_json()}')
+
+            if completion.choices and len(completion.choices) > 0:
+                return completion.choices[0].message.content
+            else:
+                return f"[302AI] Error:{completion.error.message}"
+        except Exception as e:
+            LOGGER.error(f"[302AI] API 调用出错: {str(e)}")
             return f"错误: {str(e)}"
         
     def _openai_chat(self, prompt, history):
