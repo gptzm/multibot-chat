@@ -3,7 +3,7 @@ from utils.chat_utils import get_response_from_bot, get_response_from_bot_group,
 from custom_pages.utils.dialogs import edit_bot, add_new_bot
 from datetime import datetime, date
 import random
-from config import EMOJI_OPTIONS, ENGINE_OPTIONS, LOGGER
+from config import EMOJI_OPTIONS, ENGINE_OPTIONS, ENGINE_NAMES, LOGGER
 import importlib
 import os
 
@@ -153,7 +153,7 @@ def display_group_chat_area(bot_manager, show_bots, histories):
                 with col:
                     chat_config = bot_manager.get_chat_config()
                     group_user_prompt = chat_config.get('group_user_prompt')
-                    if st.button(f"{bot.get('avatar', '🤖')} {bot['name']}\n\n{ENGINE_OPTIONS.get(bot['engine'],{}).get('name',bot['engine'])} {bot.get('model','')}", key=f"group_bot_{bot['id']}", help=f"{bot.get('system_prompt','')[0:100]}\n\n***【点击按钮可手动发言】***".strip(), use_container_width=True):
+                    if st.button(f"{bot.get('avatar', '🤖')} {bot['name']}\n\n{ENGINE_NAMES.get(bot['engine'],bot['engine'])} {bot.get('model','')}", key=f"group_bot_{bot['id']}", help=f"{bot.get('system_prompt','')[0:100]}\n\n***【点击按钮可手动发言】***".strip(), use_container_width=True):
                         response_content = get_response_from_bot_group(group_user_prompt, bot, histories)
                         bot_manager.add_message_to_group_history("assistant", response_content, bot=bot)
                         bot_manager.save_data_to_file()
@@ -172,7 +172,7 @@ def display_group_chat_area(bot_manager, show_bots, histories):
                 with col:
                     chat_config = bot_manager.get_chat_config()
                     group_user_prompt = chat_config.get('group_user_prompt')
-                    if st.button(f"{bot.get('avatar', '🤖')} {bot['name']}\n\n{ENGINE_OPTIONS.get(bot['engine'],{}).get('name',bot['engine'])} {bot.get('model','')}", key=f"group_bot_{bot['id']}", help=f"{bot.get('system_prompt','')[0:100]}\n\n***【点击按钮可手动发言】***".strip(), use_container_width=True):
+                    if st.button(f"{bot.get('avatar', '🤖')} {bot['name']}\n\n{ENGINE_NAMES.get(bot['engine'],bot['engine'])} {bot.get('model','')}", key=f"group_bot_{bot['id']}", help=f"{bot.get('system_prompt','')[0:100]}\n\n***【点击按钮可手动发言】***".strip(), use_container_width=True):
                         response_content = get_response_from_bot_group(group_user_prompt, bot, histories)
                         bot_manager.add_message_to_group_history("assistant", response_content, bot=bot)
                         bot_manager.save_data_to_file()
@@ -185,7 +185,7 @@ def show_bot_avatar(bot):
         edit_bot(bot)
 
 def show_bot_title(bot):
-   st.markdown(f"<h3 style='padding:0;'>{bot['name']}</h3> {ENGINE_OPTIONS.get(bot['engine'],{}).get('name',bot['engine'])} {bot.get('model', '')}", unsafe_allow_html=True)
+   st.markdown(f"<h3 style='padding:0;'>{bot['name']}</h3> {ENGINE_NAMES.get(bot['engine'],bot['engine'])} {bot.get('model', '')}", unsafe_allow_html=True)
 
 def show_toggle_bot_enable(bot):
     def make_update_bot_enable(bot_id):

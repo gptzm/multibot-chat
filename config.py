@@ -41,6 +41,10 @@ EMOJI_OPTIONS = ["🤖", "🦾", "🧠", "💡", "✏️", "🔭", "🔮", "🎭
 # 引擎选项
 ENGINE_OPTIONS = list(ENGINE_CONFIG.get('engines', {}).keys())
 
+# 引擎名称映射字典，key为引擎标识符，value为引擎显示名称
+ENGINE_NAMES = {k: v.get('name',k) for k, v in ENGINE_CONFIG.get('engines', {}).items()}
+
+
 # 定义群聊和私聊的emoji表情
 GROUP_CHAT_EMOJI = "👥"
 PRIVATE_CHAT_EMOJI = "👤"
