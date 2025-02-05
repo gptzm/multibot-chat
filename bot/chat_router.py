@@ -511,6 +511,7 @@ class ChatRouter:
     def _ollama_chat(self, prompt, history):
         # 实现与Ollama的交互
         try:
+            
             LOGGER.info([self.api_key, self.base_url])
             client = OpenAI(
                 api_key= self.api_key,
@@ -546,12 +547,7 @@ class ChatRouter:
         try:
             client = OpenAI(
                 api_key=self.api_key,
-                base_url="https://api.302.ai/v1/chat/completions",
-            )
-
-            client = OpenAI(
-                api_key= self.api_key,
-                base_url= self.base_url,
+                base_url="https://api.302.ai/v1",
             )
 
             messages = self._join_messages(prompt, history)
@@ -583,17 +579,12 @@ class ChatRouter:
         try:
             client = OpenAI(
                 api_key=self.api_key,
-                base_url="https://api.siliconflow.cn/v1/chat/completions",
-            )
-
-            client = OpenAI(
-                api_key= self.api_key,
-                base_url= self.base_url,
+                base_url="https://api.siliconflow.cn/v1",
             )
 
             messages = self._join_messages(prompt, history)
             messages = self._fix_messages(messages)
-
+            
             if not messages:
                 return
 
