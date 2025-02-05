@@ -68,7 +68,7 @@ def register_page():
         with col2:
             # 显示验证码图像
             st.text('')
-            st.image(st.session_state.captcha_image, use_column_width=True)
+            st.image(st.session_state.captcha_image, use_container_width=True)
         
     
     if st.button("我已有账号", use_container_width=True):

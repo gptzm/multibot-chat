@@ -419,5 +419,33 @@ ENGINE_CONFIG = {
         }
       ]
     },
+    "siliconflow": {
+      "name": "硅基流动",
+      "fields": [
+        {
+          "name": "model",
+          "label": "Model",
+          "type": "text",
+          "required": True,
+          "default": "deepseek-ai/DeepSeek-R1",
+        },
+        {
+          "name": "api_key",
+          "label": "API Key",
+          "type": "password",
+          "required": True,
+          "is_secret": True,
+        },
+        {
+          "name": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 0.0,
+          "max": 2.0,
+          "step": 0.1,
+          "required": True,
+        }
+      ]
+    },
   }
 }
